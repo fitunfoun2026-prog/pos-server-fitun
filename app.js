@@ -7,14 +7,14 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('public')); 
 
-// Koneksi ke MongoDB Atlas kamu
+// Koneksi ke MongoDB Atlas
 const mongoURI = "mongodb+srv://fitunfoun2026:Fitun2026@cluster0.p404al7.mongodb.net/supermarket_db?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(mongoURI)
     .then(() => console.log("✅ DATABASE PUSAT AKTIF"))
     .catch(err => console.log("❌ KONEKSI GAGAL:", err));
 
-// Skema Produk (Ada Barcode)
+// Skema Produk
 const Product = mongoose.model('Product', new mongoose.Schema({
     name: String, price: Number, stock: Number, barcode: String
 }));
@@ -24,29 +24,63 @@ const Transaction = mongoose.model('Transaction', new mongoose.Schema({
     kasir: String, total: Number, items: Array, waktu: { type: Date, default: Date.now }
 }));
 
+// --- API LOGIN (TAMBAHAN BARU) ---
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    // Daftar user sesuai script.js kamu
+    const users = { admin: "1234", ani: "1111" };
+
+    if (users[username] && users[username] === password) {
+        res.json({ success: true, username: username });
+    } else {
+        res.status(401).json({ success: false, message: "Username atau Password salah" });
+    }
+});
+
 // API Ambil Produk
 app.get('/api/products', async (req, res) => {
-    const products = await Product.find().sort({ name: 1 });
-    res.json(products);
-});
-
-// API Simpan Barang Baru
-app.post('/api/products', async (req, res) => {
-    const baru = new Product(req.body);
-    await baru.save();
-    res.json({ message: "Barang Berhasil Disimpan" });
-});
-
-// API Sinkronisasi Transaksi (Ini yang bikin kayak Indomaret)
-app.post('/api/transactions/sync', async (req, res) => {
     try {
-        const data = req.body;
-        if (Array.isArray(data)) {
-            await Transaction.insertMany(data);
+        const products = await Product.find().sort({ name: 1 });
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// API Update Stok (Dibutuhkan oleh script.js saat transaksi)
+app.post('/api/products/update-stock', async (req, res) => {
+    try {
+        const { name, qty } = req.body;
+        const product = await Product.findOne({ name: name });
+        if (product) {
+            product.stock -= qty;
+            await product.save();
+            res.json({ message: "Stok berhasil dikurangi" });
         } else {
-            await new Transaction(data).save();
+            res.status(404).json({ message: "Produk tidak ditemukan" });
         }
-        res.status(201).json({ status: "Terarsip di Pusat" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// API Simpan Transaksi (Dicocokkan dengan script.js)
+app.post('/api/transactions', async (req, res) => {
+    try {
+        const baru = new Transaction(req.body);
+        await baru.save();
+        res.status(201).json({ status: "Transaksi Terarsip di Pusat" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// API Simpan Barang Baru (Untuk di Web/Supervisor)
+app.post('/api/products/add', async (req, res) => {
+    try {
+        const baru = new Product(req.body);
+        await baru.save();
+        res.json({ message: "Barang Berhasil Disimpan" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
