@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Supervisor - POS System</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #121212; color: white; text-align: center; }
+        .container { max-width: 950px; margin: auto; }
+        
+        /* Dashboard Card */
+        .card-utama { background: #1e1e1e; padding: 40px; border-radius: 15px; border-bottom: 5px solid #7dff9a; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .omzet-angka { font-size: 60px; color: #7dff9a; font-weight: bold; margin: 20px 0; }
+        
+        /* Tombol Navigasi */
+        .btn-menu { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #1f6b2e; color: white; border: none; border-radius: 8px; margin: 10px; transition: 0.3s; }
+        .btn-menu:hover { background: #2e7d32; transform: scale(1.05); }
+        .btn-kembali { padding: 8px 15px; background: #444; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        
+        .hidden { display: none; }
+        
+        /* Styling Tabel */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; background: #1e1e1e; font-size: 14px; }
+        th, td { border: 1px solid #333; padding: 12px; }
+        th { background: #1f6b2e; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        tr:nth-child(even) { background: #252525; }
+        
+        .text-hijau { color: #7dff9a; font-weight: bold; }
+        .text-abu { color: #bbb; font-size: 0.9em; }
+        .text-kanan { text-align: right; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="halamanUtama">
+            <h1>Panel Supervisor</h1>
+            <div class="card-utama">
+                <p>TOTAL PENDAPATAN HARI INI</p>
+                <div id="totalOmzet" class="omzet-angka">$0.00</div>
+                <p id="jumlahTransaksi">0 Transaksi Berhasil</p>
+            </div>
+            
+            <button class="btn-menu" onclick="tampilkanHalaman('halamanStok')">📦 Cek Stok Barang</button>
+            <button class="btn-menu" onclick="tampilkanHalaman('halamanRiwayat')">📜 Riwayat Transaksi</button>
+            <br>
+            <button onclick="loadData()" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px;">🔄 Segarkan Data (Refresh)</button>
+        </div>
+
+        <div id="halamanStok" class="hidden">
+            <div style="text-align: left;">
+                <button class="btn-kembali" onclick="tampilkanHalaman('halamanUtama')">⬅️ Kembali</button>
+            </div>
+            <h2>Status Stok Barang</h2>
+            <table id="tabelStok">
+                <thead>
+                    <tr>
+                        <th>Nama Produk</th>
+                        <th>Harga Satuan</th>
+                        <th>Sisa Stok</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="halamanRiwayat" class="hidden">
+            <div style="text-align: left;">
+                <button class="btn-kembali" onclick="tampilkanHalaman('halamanUtama')">⬅️ Kembali</button>
+            </div>
+            <h2>Detail Riwayat Transaksi</h2>
+            <table id="tabelTransaksi">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Waktu</th>
+                        <th style="width: 15%;">Kasir</th>
+                        <th>Item Terjual (Qty)</th>
+                        <th style="width: 20%;" class="text-kanan">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 1. SISTEM KEAMANAN SEDERHANA
+        const passwordBenar = "admin123"; 
+        let passInput = prompt("Masukkan Password Supervisor:");
+
+        if (passInput !== passwordBenar) {
+            alert("Akses Ditolak! Password salah.");
+            document.body.innerHTML = "<h1 style='margin-top:100px;'>❌ Anda tidak memiliki akses ke halaman ini.</h1>";
+        }
+
+        // 2. NAVIGASI ANTAR HALAMAN
+        function tampilkanHalaman(id) {
+            document.getElementById('halamanUtama').classList.add('hidden');
+            document.getElementById('halamanStok').classList.add('hidden');
+            document.getElementById('halamanRiwayat').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            
+            // Setiap pindah halaman, data akan diperbarui otomatis
+            loadData();
+        }
+
+        // 3. FUNGSI UTAMA LOAD DATA & PENJUMLAHAN
+        async function loadData() {
+            try {
+                // --- BAGIAN STOK ---
+                const resStok = await fetch("http://localhost:3000/api/products");
+                const products = await resStok.json();
+                const tbodyStok = document.querySelector("#tabelStok tbody");
+                tbodyStok.innerHTML = "";
+                
+                products.forEach(p => {
+                    // Warna merah jika stok < 10
+                    const warnaStok = p.stock < 10 ? '#ff5555' : '#7dff9a';
+                    tbodyStok.innerHTML += `
+                        <tr>
+                            <td>${p.name}</td>
+                            <td>$${Number(p.price).toFixed(2)}</td>
+                            <td style="color:${warnaStok}; font-weight:bold;">${p.stock}</td>
+                        </tr>`;
+                });
+
+                // --- BAGIAN TRANSAKSI & PENJUMLAHAN ---
+                const resTrans = await fetch("http://localhost:3000/api/transactions");
+                const transactions = await resTrans.json();
+                const tbodyTrans = document.querySelector("#tabelTransaksi tbody");
+                
+                let totalPendapatanKumulatif = 0; // Variabel untuk menjumlahkan semua total
+                tbodyTrans.innerHTML = "";
+
+                // Urutkan transaksi terbaru di paling atas
+                const dataTerbaru = [...transactions].reverse();
+
+                dataTerbaru.forEach(t => {
+                    // Logika Penjumlahan Total Omzet
+                    totalPendapatanKumulatif += Number(t.total); 
+                    
+                    // Parsing Waktu agar rapi (HH:mm)
+                    const waktu = t.createdAt ? new Date(t.createdAt).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) : "--:--";
+                    
+                    // Membedah daftar barang belanjaan
+                    let teksBarang = "";
+                    if (t.items && t.items.length > 0) {
+                        teksBarang = t.items.map(i => `${i.nama} <span class="text-abu">(${i.qty})</span>`).join(", ");
+                    } else {
+                        teksBarang = "<i style='color:gray'>Detail tidak tersedia</i>";
+                    }
+
+                    tbodyTrans.innerHTML += `
+                        <tr>
+                            <td>${waktu}</td>
+                            <td class="text-hijau">${t.kasir || 'Kasir'}</td>
+                            <td>${teksBarang}</td>
+                            <td class="text-kanan" style="font-weight: bold;">$${Number(t.total).toFixed(2)}</td>
+                        </tr>`;
+                });
+
+                // 4. UPDATE TAMPILAN DASHBOARD UTAMA
+                document.getElementById("totalOmzet").innerText = "$" + totalPendapatanKumulatif.toFixed(2);
+                document.getElementById("jumlahTransaksi").innerText = `${transactions.length} Transaksi Berhasil Hari Ini`;
+
+            } catch (error) {
+                console.error("Gagal sinkronisasi data dengan server:", error);
+            }
+        }
+
+        // Panggil data saat pertama kali halaman dimuat
+        loadData();
+    </script>
+</body>
+</html>
