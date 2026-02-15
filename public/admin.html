@@ -4,67 +4,196 @@
     <title>Admin - Input Barang Fitun Foun</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background: #333; color: white; }
+        /* Tema Dark Mode Mengikuti Supervisor */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            background: #121212; 
+            color: white; 
+            text-align: center; 
+        }
+        
+        .container { max-width: 900px; margin: auto; }
+
+        .card { 
+            background: #1e1e1e; 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            margin-bottom: 20px; 
+            border-bottom: 4px solid #7dff9a; 
+            text-align: left;
+        }
+
+        h2 { color: #7dff9a; text-transform: uppercase; letter-spacing: 2px; }
+        h3 { color: #bbb; margin-top: 0; }
+
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            box-sizing: border-box; 
+            background: #252525; 
+            border: 1px solid #333; 
+            color: white; 
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #7dff9a;
+        }
+
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background: #1f6b2e; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover { 
+            background: #2e7d32; 
+            transform: scale(1.02); 
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background: #1e1e1e; 
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td { 
+            border: 1px solid #333; 
+            padding: 12px; 
+            text-align: left; 
+        }
+
+        th { 
+            background: #1f6b2e; 
+            color: white; 
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) { background: #252525; }
+
+        .text-hijau { color: #7dff9a; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h2>🚀 Admin Panel - Input Barang</h2>
-    
-    <div class="card">
-        <h3>Tambah / Update Barang</h3>
-        <input type="text" id="barcode" placeholder="Scan Barcode / Kode Barang">
-        <input type="text" id="nama" placeholder="Nama Barang">
-        <input type="number" id="harga" placeholder="Harga (Contoh: 0.50)" step="0.01">
-        <input type="number" id="stok" placeholder="Jumlah Stok">
-        <button onclick="simpanBarang()">SIMPAN KE CLOUD</button>
-    </div>
+    <div class="container">
+        <h2>🚀 Admin Panel - Fitun Foun</h2>
+        
+        <div class="card">
+            <h3>Tambah / Update Barang ke Cloud</h3>
+            <input type="text" id="barcode" placeholder="Scan Barcode / Kode Barang">
+            <input type="text" id="nama" placeholder="Nama Barang (Contoh: Baterai ABC)">
+            <input type="number" id="harga" placeholder="Harga Satuan (USD)" step="0.01">
+            <input type="number" id="stok" placeholder="Jumlah Stok Awal">
+            <button onclick="simpanBarang()">💾 SIMPAN KE DATABASE PUSAT</button>
+        </div>
 
-    <div class="card">
-        <h3>Daftar Stok di Cloud</h3>
-        <table id="tabelProduk">
-            <thead>
-                <tr><th>Barcode</th><th>Nama</th><th>Harga</th><th>Stok</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="card">
+            <h3>Daftar Stok Saat Ini (Cloud)</h3>
+            <table id="tabelProduk">
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Nama</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
+        // PASTIKAN URL INI BENAR SESUAI RENDER KAMU
         const BASE_URL = "https://pos-server-fitun.onrender.com";
 
         async function simpanBarang() {
+            const btn = document.querySelector("button");
+            const barcodeVal = document.getElementById('barcode').value;
+            const namaVal = document.getElementById('nama').value;
+            const hargaVal = document.getElementById('harga').value;
+            const stokVal = document.getElementById('stok').value;
+
+            // Validasi: Nama, Harga, dan Stok wajib diisi
+            if(!namaVal || !hargaVal || !stokVal) {
+                return alert("Mohon isi Nama, Harga, dan Stok!");
+            }
+
+            // Membungkus data ke dalam objek (Perbaikan dari yang merah tadi)
             const data = {
-                barcode: document.getElementById('barcode').value,
-                name: document.getElementById('nama').value,
-                price: parseFloat(document.getElementById('harga').value),
-                stock: parseInt(document.getElementById('stok').value),
+                barcode: barcodeVal,
+                name: namaVal,
+                price: parseFloat(hargaVal),
+                qty: parseInt(stokVal), 
                 isFullUpdate: true 
             };
-            if(!data.name) return alert("Isi nama barang!");
 
-            const res = await fetch(`${BASE_URL}/api/products/update-stock`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if(res.ok) { alert("Berhasil!"); location.reload(); }
+            btn.disabled = true;
+            btn.innerText = "⏳ SEDANG MENYIMPAN...";
+
+            try {
+                const res = await fetch(`${BASE_URL}/api/products/update-stock`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if(res.ok) { 
+                    alert("Berhasil! Barang telah tersimpan di Cloud."); 
+                    location.reload(); 
+                } else {
+                    const errData = await res.json();
+                    alert("Gagal: " + (errData.message || "Terjadi kesalahan server"));
+                }
+            } catch (error) {
+                alert("Koneksi Error: Pastikan internet aktif dan URL Render benar.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "💾 SIMPAN KE DATABASE PUSAT";
+            }
         }
 
+        // Fungsi untuk mengambil daftar barang dari server
         async function loadStok() {
-            const res = await fetch(`${BASE_URL}/api/products`);
-            const produk = await res.json();
-            const body = document.querySelector('#tabelProduk tbody');
-            body.innerHTML = "";
-            produk.forEach(p => {
-                body.innerHTML += `<tr><td>${p.barcode || '-'}</td><td>${p.name}</td><td>$${p.price}</td><td>${p.stock}</td></tr>`;
-            });
+            try {
+                const res = await fetch(`${BASE_URL}/api/products`);
+                const produk = await res.json();
+                const body = document.querySelector('#tabelProduk tbody');
+                body.innerHTML = "";
+                
+                produk.forEach(p => {
+                    const warnaStok = p.stock < 10 ? '#ff5555' : '#7dff9a';
+                    body.innerHTML += `
+                        <tr>
+                            <td>${p.barcode || '-'}</td>
+                            <td class="text-hijau">${p.name}</td>
+                            <td>$${Number(p.price).toFixed(2)}</td>
+                            <td style="color:${warnaStok}; font-weight:bold;">${p.stock}</td>
+                        </tr>`;
+                });
+            } catch (e) {
+                console.error("Gagal memuat data dari Cloud.");
+            }
         }
+        
+        // Panggil data saat halaman dibuka
         loadStok();
     </script>
 </body>
