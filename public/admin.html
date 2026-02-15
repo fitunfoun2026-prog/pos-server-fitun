@@ -17,8 +17,9 @@
     <h2>🚀 Admin Panel - Input Barang</h2>
     
     <div class="card">
-        <h3>Tambah Barang Baru</h3>
-        <input type="text" id="nama" placeholder="Nama Barang (Contoh: Baterai ABC)">
+        <h3>Tambah / Update Barang</h3>
+        <input type="text" id="barcode" placeholder="Scan Barcode / Kode Barang">
+        <input type="text" id="nama" placeholder="Nama Barang">
         <input type="number" id="harga" placeholder="Harga (Contoh: 0.50)" step="0.01">
         <input type="number" id="stok" placeholder="Jumlah Stok">
         <button onclick="simpanBarang()">SIMPAN KE CLOUD</button>
@@ -28,45 +29,40 @@
         <h3>Daftar Stok di Cloud</h3>
         <table id="tabelProduk">
             <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Harga</th>
-                    <th>Stok</th>
-                </tr>
+                <tr><th>Barcode</th><th>Nama</th><th>Harga</th><th>Stok</th></tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 
     <script>
-        // Gunakan path relatif agar bisa diakses via tunnel maupun lokal
-        const API_URL = "/api/products";
+        const BASE_URL = "https://pos-server-fitun.onrender.com";
 
         async function simpanBarang() {
             const data = {
+                barcode: document.getElementById('barcode').value,
                 name: document.getElementById('nama').value,
                 price: parseFloat(document.getElementById('harga').value),
-                stock: parseInt(document.getElementById('stok').value)
+                stock: parseInt(document.getElementById('stok').value),
+                isFullUpdate: true 
             };
+            if(!data.name) return alert("Isi nama barang!");
 
-            const res = await fetch(API_URL, {
+            const res = await fetch(`${BASE_URL}/api/products/update-stock`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
-            if(res.ok) {
-                alert("Berhasil disimpan!");
-                location.reload(); // Refresh daftar
-            }
+            if(res.ok) { alert("Berhasil!"); location.reload(); }
         }
 
         async function loadStok() {
-            const res = await fetch(API_URL);
+            const res = await fetch(`${BASE_URL}/api/products`);
             const produk = await res.json();
             const body = document.querySelector('#tabelProduk tbody');
+            body.innerHTML = "";
             produk.forEach(p => {
-                body.innerHTML += `<tr><td>${p.name}</td><td>$${p.price}</td><td>${p.stock}</td></tr>`;
+                body.innerHTML += `<tr><td>${p.barcode || '-'}</td><td>${p.name}</td><td>$${p.price}</td><td>${p.stock}</td></tr>`;
             });
         }
         loadStok();
