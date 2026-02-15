@@ -24,12 +24,10 @@ const Transaction = mongoose.model('Transaction', new mongoose.Schema({
     kasir: String, total: Number, items: Array, waktu: { type: Date, default: Date.now }
 }));
 
-// --- API LOGIN (TAMBAHAN BARU) ---
+// API LOGIN
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    // Daftar user sesuai script.js kamu
     const users = { admin: "1234", ani: "1111" };
-
     if (users[username] && users[username] === password) {
         res.json({ success: true, username: username });
     } else {
@@ -37,7 +35,7 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// API Ambil Produk
+// API Ambil Produk (Untuk Kasir)
 app.get('/api/products', async (req, res) => {
     try {
         const products = await Product.find().sort({ name: 1 });
@@ -47,7 +45,7 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// API Update Stok (Dibutuhkan oleh script.js saat transaksi)
+// API Update Stok
 app.post('/api/products/update-stock', async (req, res) => {
     try {
         const { name, qty } = req.body;
@@ -64,18 +62,31 @@ app.post('/api/products/update-stock', async (req, res) => {
     }
 });
 
-// API Simpan Transaksi (Dicocokkan dengan script.js)
+// --- PERBAIKAN: API UNTUK WEB ADMIN/SUPERVISOR ---
+
+// 1. Simpan Transaksi (Dari Kasir)
 app.post('/api/transactions', async (req, res) => {
     try {
         const baru = new Transaction(req.body);
         await baru.save();
-        res.status(201).json({ status: "Transaksi Terarsip di Pusat" });
+        res.status(201).json({ status: "Transaksi Terarsip di Pusat", data: baru });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// API Simpan Barang Baru (Untuk di Web/Supervisor)
+// 2. Ambil Semua Transaksi (Untuk Web Admin/Supervisor)
+app.get('/api/transactions', async (req, res) => {
+    try {
+        // Mengambil data terbaru agar muncul di paling atas dashboard
+        const transactions = await Transaction.find().sort({ waktu: -1 });
+        res.json(transactions);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// API Simpan Barang Baru
 app.post('/api/products/add', async (req, res) => {
     try {
         const baru = new Product(req.body);
