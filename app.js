@@ -9,17 +9,24 @@ const app = express();
 app.use(express.json());
 app.use(cors()); 
 
-// SOLUSI RENDER: Memastikan folder public terbaca dari luar folder src
+// Arahkan ke folder public (keluar dari src dulu)
 app.use(express.static(path.join(__dirname, '../public'))); 
 
-// --- KONEKSI MONGODB ---
+// --- KONEKSI MONGODB ATLAS ---
 const mongoURI = "mongodb+srv://fitunfoun2026:Fitun2026@cluster0.p404al7.mongodb.net/supermarket_db?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(mongoURI)
     .then(() => console.log("✅ DATABASE PUSAT AKTIF"))
-    .catch(err => console.error("❌ KONEKSI GAGAL:", err));
+    .catch(err => console.error("❌ KONEKSI GAGAL:", err.message));
 
 // --- MODELS ---
+const Product = mongoose.models.Product || mongoose.model('Product', new mongoose.Schema({
+    barcode: String,
+    name: { type: String, required: true, unique: true },
+    price: Number,
+    stock: Number
+}));
+
 const Transaction = mongoose.model('Transaction', new mongoose.Schema({
     kasir: String, 
     total: Number, 
@@ -29,11 +36,7 @@ const Transaction = mongoose.model('Transaction', new mongoose.Schema({
 
 // --- API ROUTES ---
 
-// Import route produk
-const productRoutes = require('./routes/products');
-app.use('/api/products', productRoutes);
-
-// API Login
+// LOGIN
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const users = { admin: "1234", ani: "1111" };
@@ -44,7 +47,11 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// API Transaksi
+// PRODUK (Pastikan file src/routes/products.js ada!)
+const productRoutes = require('./routes/products'); 
+app.use('/api/products', productRoutes);
+
+// TRANSAKSI
 app.post('/api/transactions', async (req, res) => {
     try {
         const baru = new Transaction(req.body);
@@ -60,8 +67,8 @@ app.get('/api/transactions', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Jalankan Server (Port Render otomatis)
+// --- SERVER START ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server Fitun Foun Online di Port ${PORT}`);
+    console.log(`🚀 Server Online di Port ${PORT}`);
 });
