@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - Fitun Mart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #121212; color: white; }
+        .container { max-width: 1000px; margin: auto; }
+        .card { background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 20px; border-bottom: 4px solid #7dff9a; }
+        h2 { color: #7dff9a; text-align: center; text-transform: uppercase; }
+        .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; box-sizing: border-box; background: #252525; border: 1px solid #333; color: white; border-radius: 8px; }
+        button { padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; border: none; }
+        .btn-simpan { background: #1f6b2e; color: white; width: 100%; margin-top: 15px; font-size: 16px; }
+        .btn-simpan:hover { background: #2e7d32; transform: scale(1.01); }
+        .btn-edit { background: #ffc107; color: black; padding: 5px 10px; margin-right: 5px; }
+        .btn-hapus { background: #dc3545; color: white; padding: 5px 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e1e1e; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #1f6b2e; color: white; }
+        .badge { background: #444; padding: 3px 8px; border-radius: 5px; font-size: 11px; color: #7dff9a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🚀 Admin Master Data - Fitun Foun</h2>
+        
+        <div class="card">
+            <h3>Manajemen Produk</h3>
+            <div class="grid-input">
+                <div>
+                    <label>Barcode / Kode</label>
+                    <input type="text" id="barcode" placeholder="Scan Barcode">
+                </div>
+                <div>
+                    <label>Nama Barang</label>
+                    <input type="text" id="nama" placeholder="Contoh: Aqua 600ml">
+                </div>
+                <div>
+                    <label>Kategori</label>
+                    <select id="kategori">
+                        <option value="Makanan">Makanan</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Kebutuhan Rumah">Kebutuhan Rumah</option>
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Stok Barang</label>
+                    <input type="number" id="stok" placeholder="0">
+                </div>
+                <div>
+                    <label>Harga Modal ($)</label>
+                    <input type="number" id="hargaModal" placeholder="0.00" step="0.01">
+                </div>
+                <div>
+                    <label>Harga Jual ($)</label>
+                    <input type="number" id="hargaJual" placeholder="0.00" step="0.01">
+                </div>
+            </div>
+            <button class="btn-simpan" id="btnSimpan" onclick="simpanBarang()">💾 SIMPAN KE DATABASE PUSAT</button>
+        </div>
+
+        <div class="card">
+            <h3>Daftar Inventaris Gudang</h3>
+            <table id="tabelProduk">
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Barang</th>
+                        <th>Modal</th>
+                        <th>Jual</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "https://pos-server-fitun.onrender.com";
+
+        async function simpanBarang() {
+            const btn = document.getElementById("btnSimpan");
+            const data = {
+                barcode: document.getElementById('barcode').value,
+                name: document.getElementById('nama').value,
+                category: document.getElementById('kategori').value,
+                qty: parseInt(document.getElementById('stok').value),
+                costPrice: parseFloat(document.getElementById('hargaModal').value),
+                price: parseFloat(document.getElementById('hargaJual').value),
+                isFullUpdate: true
+            };
+
+            if(!data.name || !data.barcode) return alert("Barcode dan Nama wajib diisi!");
+
+            btn.disabled = true;
+            btn.innerText = "⏳ MENYIMPAN...";
+
+            try {
+                const res = await fetch(`${BASE_URL}/api/products/update-stock`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    alert("✅ Data Berhasil Diupdate!");
+                    loadStok();
+                    bersihForm();
+                }
+            } catch (e) { alert("Kesalahan Koneksi"); }
+            finally { btn.disabled = false; btn.innerText = "💾 SIMPAN KE DATABASE PUSAT"; }
+        }
+
+        async function loadStok() {
+            try {
+                const res = await fetch(`${BASE_URL}/api/products`);
+                const produk = await res.json();
+                const body = document.querySelector('#tabelProduk tbody');
+                body.innerHTML = "";
+                produk.forEach(p => {
+                    body.innerHTML += `
+                        <tr>
+                            <td>${p.barcode || '-'}</td>
+                            <td><b>${p.name}</b><br><span class="badge">${p.category || 'Umum'}</span></td>
+                            <td>$${Number(p.costPrice || 0).toFixed(2)}</td>
+                            <td style="color:#7dff9a">$${Number(p.price).toFixed(2)}</td>
+                            <td style="color:${p.stock < 10 ? '#ff5555' : 'white'}">${p.stock}</td>
+                            <td>
+                                <button class="btn-edit" onclick="isiForm('${p.barcode}','${p.name}',${p.price},${p.stock},${p.costPrice || 0},'${p.category}')">📝</button>
+                                <button class="btn-hapus" onclick="hapusBarang('${p.barcode}')">🗑️</button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (e) { console.error("Gagal load"); }
+        }
+
+        function isiForm(bc, nm, pr, st, cp, kt) {
+            document.getElementById('barcode').value = bc;
+            document.getElementById('nama').value = nm;
+            document.getElementById('hargaJual').value = pr;
+            document.getElementById('stok').value = st;
+            document.getElementById('hargaModal').value = cp;
+            document.getElementById('kategori').value = kt;
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        async function hapusBarang(bc) {
+            if(!confirm("Hapus barang ini secara permanen?")) return;
+            try {
+                await fetch(`${BASE_URL}/api/products/${bc}`, { method: 'DELETE' });
+                loadStok();
+            } catch (e) { alert("Gagal menghapus"); }
+        }
+
+        function bersihForm() {
+            document.querySelectorAll('input').forEach(i => i.value = "");
+            document.getElementById('kategori').selectedIndex = 0;
+        }
+
+        loadStok();
+    </script>
+</body>
+</html>

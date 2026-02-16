@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Supervisor Dashboard - Fitun Mart</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #121212; color: white; }
+        .container { max-width: 1100px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .card-stat { background: #1e1e1e; padding: 25px; border-radius: 15px; text-align: center; border-bottom: 5px solid #7dff9a; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .val-omzet { color: #7dff9a; font-size: 45px; font-weight: bold; }
+        .val-profit { color: #00e5ff; font-size: 45px; font-weight: bold; }
+        .val-alert { color: #ff5555; font-size: 45px; font-weight: bold; }
+        .nav-tabs { margin-bottom: 20px; text-align: left; }
+        .btn-tab { padding: 12px 25px; background: #333; color: white; border: none; cursor: pointer; border-radius: 8px; margin-right: 10px; font-weight: bold; }
+        .btn-tab.active { background: #1f6b2e; border-bottom: 3px solid #7dff9a; }
+        table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 10px; overflow: hidden; }
+        th, td { border: 1px solid #333; padding: 15px; text-align: left; }
+        th { background: #1f6b2e; }
+        .low-stock { background: #3a1c1c !important; color: #ff8888; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Central Supervisor Dashboard</h1>
+            <button onclick="loadData()" style="background:#444; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">🔄 REFRESH DATA</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="card-stat">
+                <p>💰 TOTAL OMZET (PENDAPATAN)</p>
+                <div id="totalOmzet" class="val-omzet">$0.00</div>
+            </div>
+            <div class="card-stat">
+                <p>📈 ESTIMASI KEUNTUNGAN (PROFIT)</p>
+                <div id="totalProfit" class="val-profit">$0.00</div>
+            </div>
+            <div class="card-stat">
+                <p>⚠️ STOK MENIPIS (< 10)</p>
+                <div id="alertStok" class="val-alert">0</div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button id="btnT1" class="btn-tab active" onclick="gantiTab(1)">📜 RIWAYAT TRANSAKSI</button>
+            <button id="btnT2" class="btn-tab" onclick="gantiTab(2)">📦 MONITOR STOK GUDANG</button>
+        </div>
+
+        <div id="tab1">
+            <table id="tabelTransaksi">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Kasir</th>
+                        <th>Daftar Belanja</th>
+                        <th>Total Bayar</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="tab2" class="hidden">
+            <table id="tabelStok">
+                <thead>
+                    <tr>
+                        <th>Nama Barang</th>
+                        <th>Kategori</th>
+                        <th>Sisa Stok</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "https://pos-server-fitun.onrender.com";
+
+        function gantiTab(n) {
+            document.getElementById('tab1').classList.toggle('hidden', n !== 1);
+            document.getElementById('tab2').classList.toggle('hidden', n !== 2);
+            document.getElementById('btnT1').classList.toggle('active', n === 1);
+            document.getElementById('btnT2').classList.toggle('active', n === 2);
+        }
+
+        async function loadData() {
+            try {
+                // 1. Ambil Data Produk untuk Stok & Perhitungan Profit
+                const resP = await fetch(`${BASE_URL}/api/products`);
+                const products = await resP.json();
+                
+                let stokKritis = 0;
+                const bodyStok = document.querySelector("#tabelStok tbody");
+                bodyStok.innerHTML = "";
+                
+                products.forEach(p => {
+                    const low = p.stock < 10;
+                    if(low) stokKritis++;
+                    bodyStok.innerHTML += `
+                        <tr class="${low ? 'low-stock' : ''}">
+                            <td><b>${p.name}</b></td>
+                            <td>${p.category || 'Umum'}</td>
+                            <td>${p.stock}</td>
+                            <td>${low ? '🚨 SEGERA BELI' : '✅ TERSEDIA'}</td>
+                        </tr>`;
+                });
+                document.getElementById("alertStok").innerText = stokKritis;
+
+                // 2. Ambil Riwayat Transaksi
+                const resT = await fetch(`${BASE_URL}/api/transactions`);
+                const transactions = await resT.json();
+                const bodyTrans = document.querySelector("#tabelTransaksi tbody");
+                
+                let omzet = 0;
+                let profit = 0;
+                bodyTrans.innerHTML = "";
+
+                // Kita balik agar yang terbaru di atas
+                transactions.reverse().forEach(t => {
+                    omzet += Number(t.total);
+                    
+                    // Hitung profit tiap transaksi
+                    t.items.forEach(item => {
+                        const pAsli = products.find(p => p.name === item.nama || p.barcode === item.barcode);
+                        if(pAsli && pAsli.costPrice) {
+                            profit += (Number(item.harga) - Number(pAsli.costPrice)) * Number(item.qty || 1);
+                        }
+                    });
+
+                    const tgl = new Date(t.waktu).toLocaleString('id-ID');
+                    bodyTrans.innerHTML += `
+                        <tr>
+                            <td>${tgl}</td>
+                            <td>${t.kasir}</td>
+                            <td>${t.items.map(i => i.nama + " x" + i.qty).join(", ")}</td>
+                            <td>$${Number(t.total).toFixed(2)}</td>
+                        </tr>`;
+                });
+
+                document.getElementById("totalOmzet").innerText = "$" + omzet.toFixed(2);
+                document.getElementById("totalProfit").innerText = "$" + profit.toFixed(2);
+
+            } catch (e) { console.error("Gagal sinkron data"); }
+        }
+
+        loadData();
+        // Auto update data tiap 1 menit
+        setInterval(loadData, 60000);
+    </script>
+</body>
+</html>
