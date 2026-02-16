@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Supervisor Dashboard - POS</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #121212; color: white; }
+        .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .card-stat { background: #1e1e1e; padding: 20px; border-radius: 12px; border-bottom: 5px solid #7dff9a; text-align: center; }
+        .card-stat h2 { font-size: 35px; margin: 10px 0; color: #7dff9a; }
+        .profit { color: #00e5ff !important; }
+        .alert-stok { color: #ff5555 !important; }
+        table { width: 100%; border-collapse: collapse; background: #1e1e1e; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #1f6b2e; }
+        .low { color: #ff5555; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>📊 Supervisor Central Monitor</h1>
+    
+    <div class="grid-stats">
+        <div class="card-stat">
+            <p>OMZET HARI INI</p>
+            <h2 id="omzet">$0.00</h2>
+        </div>
+        <div class="card-stat">
+            <p>KEUNTUNGAN BERSIH</p>
+            <h2 id="profit" class="profit">$0.00</h2>
+        </div>
+        <div class="card-stat">
+            <p>STOK KRITIS (< 10)</p>
+            <h2 id="kritis" class="alert-stok">0</h2>
+        </div>
+    </div>
+
+    <div style="display:flex; gap: 20px;">
+        <div style="flex: 2;">
+            <h3>📜 Riwayat Transaksi Real-time</h3>
+            <table id="tabelTrans">
+                <thead><tr><th>Waktu</th><th>Kasir</th><th>Total</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div style="flex: 1;">
+            <h3>🚨 Daftar Re-Stock</h3>
+            <table id="tabelKritis">
+                <thead><tr><th>Barang</th><th>Sisa</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "https://pos-server-fitun.onrender.com";
+
+        async function loadSupervisor() {
+            const resP = await fetch(`${BASE_URL}/api/products`);
+            const products = await resP.json();
+            
+            const resT = await fetch(`${BASE_URL}/api/transactions`);
+            const transactions = await resT.json();
+
+            let totalOmzet = 0;
+            let totalProfit = 0;
+            let jmlKritis = 0;
+
+            // Hitung Omzet & Profit
+            transactions.forEach(t => {
+                totalOmzet += Number(t.total);
+                t.items.forEach(item => {
+                    const p = products.find(prod => prod.barcode === item.barcode || prod.name === item.nama);
+                    if(p && p.costPrice) {
+                        totalProfit += (Number(item.harga) - Number(p.costPrice)) * Number(item.qty);
+                    }
+                });
+            });
+
+            // Tabel Transaksi
+            const bTrans = document.querySelector("#tabelTrans tbody");
+            bTrans.innerHTML = "";
+            transactions.reverse().slice(0, 10).forEach(t => {
+                bTrans.innerHTML += `<tr><td>${new Date(t.waktu).toLocaleTimeString()}</td><td>${t.kasir}</td><td>$${t.total}</td></tr>`;
+            });
+
+            // Stok Kritis
+            const bKritis = document.querySelector("#tabelKritis tbody");
+            bKritis.innerHTML = "";
+            products.forEach(p => {
+                if(p.stock < 10) {
+                    jmlKritis++;
+                    bKritis.innerHTML += `<tr><td>${p.name}</td><td class="low">${p.stock}</td></tr>`;
+                }
+            });
+
+            document.getElementById('omzet').innerText = "$" + totalOmzet.toFixed(2);
+            document.getElementById('profit').innerText = "$" + totalProfit.toFixed(2);
+            document.getElementById('kritis').innerText = jmlKritis;
+        }
+
+        loadSupervisor();
+        setInterval(loadSupervisor, 30000);
+    </script>
+</body>
+</html>
