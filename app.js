@@ -9,22 +9,14 @@ const app = express();
 app.use(express.json());
 app.use(cors()); 
 
-// 1. Static Files - Menggunakan path.join agar aman di Render
+// 1. Static Files - Perbaikan jalur agar tidak ENOENT di Render
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath)); 
 
 // 2. Rute HTML (Admin & Supervisor)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(publicPath, 'admin.html'));
-});
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(publicPath, 'admin.html'));
-});
-
-app.get('/supervisor', (req, res) => {
-    res.sendFile(path.join(publicPath, 'supervisor.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(publicPath, 'admin.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(publicPath, 'admin.html')));
+app.get('/supervisor', (req, res) => res.sendFile(path.join(publicPath, 'supervisor.html')));
 
 // 3. Koneksi Database
 const mongoURI = "mongodb+srv://fitunfoun2026:Fitun2026@cluster0.p404al7.mongodb.net/supermarket_db?retryWrites=true&w=majority&appName=Cluster0";
@@ -33,7 +25,7 @@ mongoose.connect(mongoURI)
     .then(() => console.log("✅ DATABASE PUSAT AKTIF"))
     .catch(err => console.error("❌ KONEKSI GAGAL:", err.message));
 
-// 4. Definisi Schema Product
+// 4. Definisi Schema Product - Perbaikan Strict Mode & Field Name
 const productSchema = new mongoose.Schema({
     name: String,   
     nama: String,   
@@ -69,37 +61,34 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// 8. Transaksi Post Route - PERBAIKAN: Menambahkan Logika Pengurangan Stok
+// 8. Transaksi Post Route - PERBAIKAN: AUTO POTONG STOK
 app.post('/api/transactions', async (req, res) => {
     try {
         const { items, kasir, total } = req.body;
 
-        // Simpan data transaksi ke koleksi transaksi
+        // Simpan data transaksi
         const baru = new Transaction({ items, kasir, total });
         await baru.save();
 
-        // Loop untuk mengurangi stok setiap produk yang ada di dalam items
+        // Loop untuk mengurangi stok otomatis di MongoDB
         if (items && items.length > 0) {
             for (const item of items) {
-                // Mencari berdasarkan barcode dan mengurangi field 'stok'
-                // Pastikan Electron mengirim data 'barcode' dan 'jumlah' (qty)
+                // Mencari berdasarkan nama barang (sesuai pengiriman dari Electron)
                 await Product.findOneAndUpdate(
-                    { barcode: item.barcode },
-                    { $inc: { stok: -item.jumlah } } 
+                    { $or: [{ nama: item.nama }, { name: item.nama }, { barcode: item.barcode }] },
+                    { $inc: { stok: -item.qty } } 
                 );
             }
         }
 
-        res.status(201).json({ status: "Success", message: "Transaksi berhasil dan stok diperbarui" });
+        res.status(201).json({ status: "Success", message: "Transaksi & Stok Terupdate" });
     } catch (err) { 
         console.error("❌ ERROR TRANSAKSI:", err.message);
         res.status(500).json({ error: err.message }); 
     }
 });
 
-// Port Environment untuk Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server Online di Port ${PORT}`);
-    console.log(`📂 Folder statis di: ${publicPath}`);
 });
