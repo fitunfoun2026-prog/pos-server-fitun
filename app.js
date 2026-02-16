@@ -35,14 +35,17 @@ mongoose.connect(mongoURI)
     .then(() => console.log("✅ DATABASE PUSAT AKTIF"))
     .catch(err => console.error("❌ KONEKSI GAGAL:", err.message));
 
-// 4. Definisi Schema Product
+
+// 4. Definisi Schema Product - PERBAIKAN: Tambahkan 'name'
 const productSchema = new mongoose.Schema({
-    nama: String,
+    name: String,   // Tambahkan ini agar cocok dengan web admin
+    nama: String,   // Tetap simpan jika script lain pakai ini
     harga: Number,
     stok: Number,
     kategori: String,
     barcode: String
-});
+}, { strict: false }); // Tambahkan strict: false agar lebih fleksibel saat pengembangan
+
 // Pastikan model didaftarkan dengan benar
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 
