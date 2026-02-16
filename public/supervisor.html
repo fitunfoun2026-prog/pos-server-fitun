@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Supervisor - POS System</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #121212; color: white; text-align: center; }
+        .container { max-width: 950px; margin: auto; }
+        .card-utama { background: #1e1e1e; padding: 40px; border-radius: 15px; border-bottom: 5px solid #7dff9a; margin-bottom: 20px; }
+        .omzet-angka { font-size: 60px; color: #7dff9a; font-weight: bold; margin: 20px 0; }
+        .btn-menu { padding: 15px 30px; cursor: pointer; background: #1f6b2e; color: white; border: none; border-radius: 8px; margin: 10px; }
+        .hidden { display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; background: #1e1e1e; }
+        th, td { border: 1px solid #333; padding: 12px; }
+        th { background: #1f6b2e; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="halamanUtama">
+            <h1>Panel Supervisor</h1>
+            <div class="card-utama">
+                <p>TOTAL PENDAPATAN HARI INI</p>
+                <div id="totalOmzet" class="omzet-angka">$0.00</div>
+                <p id="jumlahTransaksi">0 Transaksi Berhasil</p>
+            </div>
+            <button class="btn-menu" onclick="tampilkanHalaman('halamanStok')">📦 Cek Stok Barang</button>
+            <button class="btn-menu" onclick="tampilkanHalaman('halamanRiwayat')">📜 Riwayat Transaksi</button>
+        </div>
+
+        <div id="halamanStok" class="hidden">
+            <button onclick="tampilkanHalaman('halamanUtama')">⬅️ Kembali</button>
+            <h2>Status Stok Barang</h2>
+            <table id="tabelStok"><thead><tr><th>Nama</th><th>Harga</th><th>Stok</th></tr></thead><tbody></tbody></table>
+        </div>
+
+        <div id="halamanRiwayat" class="hidden">
+            <button onclick="tampilkanHalaman('halamanUtama')">⬅️ Kembali</button>
+            <h2>Detail Riwayat Transaksi</h2>
+            <table id="tabelTransaksi"><thead><tr><th>Waktu</th><th>Kasir</th><th>Item</th><th>Total</th></tr></thead><tbody></tbody></table>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "https://pos-server-fitun.onrender.com";
+
+        function tampilkanHalaman(id) {
+            document.getElementById('halamanUtama').classList.add('hidden');
+            document.getElementById('halamanStok').classList.add('hidden');
+            document.getElementById('halamanRiwayat').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            loadData();
+        }
+
+        async function loadData() {
+            try {
+                const resStok = await fetch(`${BASE_URL}/api/products`);
+                const products = await resStok.json();
+                const tbodyStok = document.querySelector("#tabelStok tbody");
+                tbodyStok.innerHTML = "";
+                products.forEach(p => {
+                    tbodyStok.innerHTML += `<tr><td>${p.name}</td><td>$${p.price}</td><td>${p.stock}</td></tr>`;
+                });
+
+                const resTrans = await fetch(`${BASE_URL}/api/transactions`);
+                const transactions = await resTrans.json();
+                const tbodyTrans = document.querySelector("#tabelTransaksi tbody");
+                let totalOmzet = 0;
+                tbodyTrans.innerHTML = "";
+
+                transactions.reverse().forEach(t => {
+                    totalOmzet += Number(t.total);
+                    const waktu = new Date(t.waktu).toLocaleTimeString();
+                    tbodyTrans.innerHTML += `<tr><td>${waktu}</td><td>${t.kasir}</td><td>${t.items.map(i=>i.nama).join(", ")}</td><td>$${t.total}</td></tr>`;
+                });
+
+                document.getElementById("totalOmzet").innerText = "$" + totalOmzet.toFixed(2);
+                document.getElementById("jumlahTransaksi").innerText = transactions.length + " Transaksi";
+            } catch (e) { console.error(e); }
+        }
+        loadData();
+    </script>
+</body>
+</html>
