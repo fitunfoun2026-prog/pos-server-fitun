@@ -5,30 +5,12 @@ const path = require('path');
 
 const app = express();
 
-// Middleware
 app.use(express.json());
 app.use(cors()); 
 
-// 1. Agar Render bisa baca folder public yang ada di LUAR folder src
+// Agar Render bisa baca folder public
 app.use(express.static(path.join(__dirname, '../public'))); 
 
-// 2. RUTE OTOMATIS (Agar tidak perlu ketik .html di browser)
-// Jika buka alamat utama (/) langsung ke admin
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/admin.html'));
-});
-
-// Jika buka /admin
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/admin.html'));
-});
-
-// Jika buka /supervisor
-app.get('/supervisor', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/supervisor.html'));
-});
-
-// Koneksi Database
 const mongoURI = "mongodb+srv://fitunfoun2026:Fitun2026@cluster0.p404al7.mongodb.net/supermarket_db?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(mongoURI)
@@ -46,30 +28,23 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// Produk Route - Memanggil file di dalam folder src/routes/
+// Produk Route - Memanggil file di folder yang sama
 const productRoutes = require('./routes/products');
 app.use('/api/products', productRoutes);
 
 // Transaksi Route
-const transactionSchema = new mongoose.Schema({
-    kasir: String, 
-    total: Number, 
-    items: Array, 
-    waktu: { type: Date, default: Date.now }
-});
-const Transaction = mongoose.model('Transaction', transactionSchema);
+const Transaction = mongoose.model('Transaction', new mongoose.Schema({
+    kasir: String, total: Number, items: Array, waktu: { type: Date, default: Date.now }
+}));
 
 app.post('/api/transactions', async (req, res) => {
     try {
         const baru = new Transaction(req.body);
         await baru.save();
         res.status(201).json({ status: "Success" });
-    } catch (err) { 
-        res.status(500).json({ error: err.message }); 
-    }
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Menjalankan Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server Online di Port ${PORT}`);
