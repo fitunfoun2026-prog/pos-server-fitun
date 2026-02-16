@@ -9,13 +9,11 @@ const app = express();
 app.use(express.json());
 app.use(cors()); 
 
-// 1. Static Files - PERBAIKAN: Menggunakan path.join(__dirname, 'public')
-// Karena app.js dan folder public sejajar, kita tidak perlu '..'
+// 1. Static Files - Menggunakan path.join agar aman di Render
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath)); 
 
 // 2. Rute HTML (Admin & Supervisor)
-// Menggunakan path.join agar kompatibel dengan sistem operasi Linux di Render
 app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'admin.html'));
 });
@@ -35,18 +33,16 @@ mongoose.connect(mongoURI)
     .then(() => console.log("✅ DATABASE PUSAT AKTIF"))
     .catch(err => console.error("❌ KONEKSI GAGAL:", err.message));
 
-
-// 4. Definisi Schema Product - PERBAIKAN: Tambahkan 'name'
+// 4. Definisi Schema Product
 const productSchema = new mongoose.Schema({
-    name: String,   // Tambahkan ini agar cocok dengan web admin
-    nama: String,   // Tetap simpan jika script lain pakai ini
+    name: String,   
+    nama: String,   
     harga: Number,
     stok: Number,
     kategori: String,
     barcode: String
-}, { strict: false }); // Tambahkan strict: false agar lebih fleksibel saat pengembangan
+}, { strict: false }); 
 
-// Pastikan model didaftarkan dengan benar
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 
 // 5. Definisi Schema Transaksi
@@ -59,7 +55,6 @@ const transactionSchema = new mongoose.Schema({
 const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
 
 // 6. Produk Route
-// Pastikan file di ./routes/products.js sudah benar
 const productRoutes = require('./routes/products');
 app.use('/api/products', productRoutes);
 
@@ -74,13 +69,30 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// 8. Transaksi Post Route
+// 8. Transaksi Post Route - PERBAIKAN: Menambahkan Logika Pengurangan Stok
 app.post('/api/transactions', async (req, res) => {
     try {
-        const baru = new Transaction(req.body);
+        const { items, kasir, total } = req.body;
+
+        // Simpan data transaksi ke koleksi transaksi
+        const baru = new Transaction({ items, kasir, total });
         await baru.save();
-        res.status(201).json({ status: "Success" });
+
+        // Loop untuk mengurangi stok setiap produk yang ada di dalam items
+        if (items && items.length > 0) {
+            for (const item of items) {
+                // Mencari berdasarkan barcode dan mengurangi field 'stok'
+                // Pastikan Electron mengirim data 'barcode' dan 'jumlah' (qty)
+                await Product.findOneAndUpdate(
+                    { barcode: item.barcode },
+                    { $inc: { stok: -item.jumlah } } 
+                );
+            }
+        }
+
+        res.status(201).json({ status: "Success", message: "Transaksi berhasil dan stok diperbarui" });
     } catch (err) { 
+        console.error("❌ ERROR TRANSAKSI:", err.message);
         res.status(500).json({ error: err.message }); 
     }
 });
