@@ -2,94 +2,70 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Store Supervisor - Realtime Dashboard</title>
+    <title>Executive Monitoring - Supervisor</title>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
-        .stats-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .stat-card { background: #1e293b; padding: 20px; border-radius: 12px; border-left: 6px solid #10b981; }
-        .stat-card h1 { margin: 10px 0; color: #10b981; }
-        .flex-box { display: flex; gap: 20px; margin-top: 20px; }
-        .table-section { flex: 2; background: #1e293b; padding: 20px; border-radius: 12px; }
-        .action-section { flex: 1; background: #1e293b; padding: 20px; border-radius: 12px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; border-bottom: 1px solid #334155; padding: 10px; color: #94a3b8; }
-        td { padding: 10px; border-bottom: 1px solid #334155; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: none; }
-        .btn-add { background: #3b82f6; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; border-radius: 4px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; padding: 40px; margin: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+        .card { background: #1e293b; padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        .card small { color: #94a3b8; text-transform: uppercase; font-size: 12px; }
+        .card h1 { font-size: 42px; margin: 15px 0; color: #38bdf8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; background: #1e293b; }
+        th { text-align: left; background: #334155; padding: 15px; font-size: 12px; color: #94a3b8; }
+        td { padding: 15px; border-bottom: 1px solid #334155; }
+        .low { color: #f87171; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h2>📊 Store Supervisor Monitor</h2>
-
-    <div class="stats-container">
-        <div class="stat-card"><p>TOTAL OMZET HARI INI</p><h1 id="omzet">Rp 0</h1></div>
-        <div class="stat-card" style="border-left-color: #3b82f6;"><p>ESTIMASI PROFIT</p><h1 id="profit">Rp 0</h1></div>
-        <div class="stat-card" style="border-left-color: #f59e0b;"><p>STOK TIPIS</p><h1 id="kritis">0</h1></div>
+    <div class="header">
+        <div><h1>Executive Monitor</h1><p>Pantauan Real-time Performa Supermarket</p></div>
+        <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer; border-radius:8px;">Refresh Data</button>
     </div>
 
-    <div class="flex-box">
-        <div class="table-section">
-            <h3>Riwayat Transaksi Terkini</h3>
-            <table id="tableTrans">
-                <thead><tr><th>Waktu</th><th>Kasir</th><th>Total Belanja</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="action-section">
-            <h3>Terima Barang (Restok)</h3>
-            <p style="font-size: 12px; color: #94a3b8;">Gunakan saat barang datang dari supplier.</p>
-            <input type="text" id="bc_in" placeholder="Scan Barcode">
-            <input type="number" id="qty_in" placeholder="Jumlah Masuk">
-            <button class="btn-add" onclick="addStock()">KONFIRMASI BARANG MASUK</button>
-        </div>
+    <div class="grid">
+        <div class="card"><small>Omzet Hari Ini</small><h1 id="omzet">$0.00</h1></div>
+        <div class="card"><small>Net Profit</small><h1 id="profit" style="color:#10b981">$0.00</h1></div>
+        <div class="card"><small>Barang Stok Kritis</small><h1 id="kritis" style="color:#f87171">0</h1></div>
     </div>
+
+    <h3>Daftar Re-Order Barang (Stok < 10)</h3>
+    <table id="table-alert">
+        <thead><tr><th>Nama Barang</th><th>Kategori</th><th>Stok Sisa</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+    </table>
 
     <script>
-        const API_PROD = "https://pos-server-fitun.onrender.com/api/products";
-        const API_TRANS = "https://pos-server-fitun.onrender.com/api/transactions";
+        async function load() {
+            const [pRes, tRes] = await Promise.all([
+                fetch("https://pos-server-fitun.onrender.com/api/products"),
+                fetch("https://pos-server-fitun.onrender.com/api/transactions")
+            ]);
+            const products = await pRes.json();
+            const transactions = await tRes.json();
 
-        async function addStock() {
-            const bc = document.getElementById('bc_in').value;
-            const qty = document.getElementById('qty_in').value;
-            if(!bc || !qty) return alert("Isi barcode dan jumlah!");
+            let omzet = 0, profit = 0, kritis = 0;
+            const tAlert = document.querySelector("#table-alert tbody");
 
-            const res = await fetch(`${API_PROD}/add-stock`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ barcode: bc, qtyTambah: qty })
+            transactions.forEach(t => {
+                omzet += t.total;
+                t.items.forEach(i => {
+                    const p = products.find(prod => prod.name === i.nama);
+                    if(p) profit += (i.harga - p.costPrice) * i.qty;
+                });
             });
-            if(res.ok) {
-                alert("Stok berhasil ditambah!");
-                document.getElementById('bc_in').value = "";
-                document.getElementById('qty_in').value = "";
-            }
+
+            products.forEach(p => {
+                if(p.stock < 10) {
+                    kritis++;
+                    tAlert.innerHTML += `<tr class="low"><td>${p.name}</td><td>${p.category}</td><td>${p.stock}</td><td>🚨 KRITIS</td></tr>`;
+                }
+            });
+
+            document.getElementById('omzet').innerText = "$" + omzet.toFixed(2);
+            document.getElementById('profit').innerText = "$" + profit.toFixed(2);
+            document.getElementById('kritis').innerText = kritis;
         }
-
-        async function loadMonitor() {
-            // Ambil data transaksi & produk untuk hitung dashboard
-            const [resP, resT] = await Promise.all([fetch(API_PROD), fetch(API_TRANS)]);
-            const products = await resP.json();
-            const transactions = await resT.json();
-
-            let omzet = 0;
-            transactions.forEach(t => omzet += t.total);
-            
-            document.getElementById('omzet').innerText = "Rp " + omzet.toLocaleString();
-            document.getElementById('kritis').innerText = products.filter(p => p.stock < 10).length;
-
-            const tbody = document.querySelector("#tableTrans tbody");
-            tbody.innerHTML = transactions.slice(-10).reverse().map(t => `
-                <tr>
-                    <td>${new Date(t.waktu).toLocaleTimeString()}</td>
-                    <td>Kasir 1</td>
-                    <td>Rp ${t.total.toLocaleString()}</td>
-                </tr>
-            `).join('');
-        }
-
-        loadMonitor();
-        setInterval(loadMonitor, 10000); // Auto refresh tiap 10 detik
+        load();
     </script>
 </body>
 </html>
