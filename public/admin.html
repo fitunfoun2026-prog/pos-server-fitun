@@ -2,201 +2,173 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Enterprise POS Admin - Fitun Mart</title>
+    <title>HQ Admin System - Enterprise Retail</title>
     <style>
-        :root { --primary: #0056b3; --accent: #2ecc71; --dark: #1e293b; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; background: var(--bg); }
+        :root { --primary: #1e40af; --accent: #3b82f6; --bg: #f8fafc; --sidebar: #0f172a; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; background: var(--bg); color: #1e293b; }
         
-        /* SIDEBAR PRO */
-        .sidebar { width: 260px; background: var(--dark); height: 100vh; position: fixed; color: white; transition: 0.3s; }
-        .sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); }
-        .sidebar-header h2 { margin: 0; font-size: 20px; color: var(--accent); }
-        .nav-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; border-left: 4px solid transparent; transition: 0.2s; }
-        .nav-item:hover, .nav-item.active { background: #334155; border-left-color: var(--accent); color: var(--accent); }
+        /* SIDEBAR */
+        .sidebar { width: 280px; background: var(--sidebar); height: 100vh; position: fixed; color: white; overflow-y: auto; }
+        .sidebar-brand { padding: 30px 20px; font-size: 20px; font-weight: bold; color: #38bdf8; border-bottom: 1px solid #1e293b; }
+        .menu-section { padding: 20px 0; }
+        .menu-label { padding: 0 25px 10px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item { padding: 12px 25px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background: #1e293b; color: #38bdf8; border-right: 4px solid #38bdf8; }
 
-        /* CONTENT AREA */
-        .main { margin-left: 260px; padding: 40px; width: 100%; box-sizing: border-box; }
+        /* MAIN */
+        .main-content { margin-left: 280px; padding: 40px; width: 100%; box-sizing: border-box; }
         .kamar { display: none; }
-        .kamar.active { display: block; animation: fadeIn 0.4s ease; }
+        .kamar.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* DASHBOARD CARDS */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
-        .stat-card h3 { margin: 0; font-size: 13px; color: #64748b; text-transform: uppercase; }
-        .stat-card p { margin: 10px 0 0; font-size: 24px; font-weight: bold; color: var(--dark); }
-
-        /* FORM & TABLES */
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .input-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        input, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; }
+        /* COMPONENTS */
+        .card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); }
         
-        button.btn-save { background: var(--accent); color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
-        button.btn-print { background: var(--dark); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; float: right; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; background: #f8fafc; padding: 15px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; background: #f1f5f9; padding: 15px; font-size: 12px; color: #475569; }
         td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-        .badge-low { background: #fee2e2; color: #ef4444; }
-        .badge-ok { background: #dcfce7; color: #10b981; }
+        
+        input, select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; margin-bottom: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-blue { background: var(--primary); color: white; }
 
-        @media print { .sidebar, .no-print, .btn-save { display: none !important; } .main { margin: 0; padding: 0; width: 100%; } .card { box-shadow: none; border: 1px solid #eee; } }
+        @media print { .sidebar, .no-print { display: none !important; } .main-content { margin: 0; } }
     </style>
 </head>
 <body>
 
     <div class="sidebar no-print">
-        <div class="sidebar-header"><h2>FITUN ENTERPRISE</h2></div>
-        <div class="nav-item active" onclick="switchKamar('k-stok', this)">📦 Manajemen Inventaris</div>
-        <div class="nav-item" onclick="switchKamar('k-sales', this)">📊 Laporan & Profit</div>
-        <div class="nav-item" onclick="switchKamar('k-staff', this)">👥 Manajemen Kasir</div>
-        <div class="nav-item" onclick="switchKamar('k-store', this)">⚙️ Pengaturan Toko</div>
-    </div>
-
-    <div class="main">
-        <div id="k-stok" class="kamar active">
-            <h1>Master Data Produk</h1>
-            <div class="card no-print">
-                <div class="input-group">
-                    <input type="text" id="bc" placeholder="Scan Barcode">
-                    <input type="text" id="nm" placeholder="Nama Barang">
-                    <select id="cat">
-                        <option value="Makanan">Makanan</option>
-                        <option value="Minuman">Minuman</option>
-                        <option value="Sembako">Sembako</option>
-                        <option value="Personal Care">Personal Care</option>
-                    </select>
-                    <input type="number" id="qty" placeholder="Jumlah Stok">
-                    <input type="number" id="h-modal" placeholder="Harga Modal ($)">
-                    <input type="number" id="h-jual" placeholder="Harga Jual ($)">
-                </div>
-                <button class="btn-save" onclick="saveProduct()">💾 Sinkronisasi Data ke Server</button>
-            </div>
+        <div class="sidebar-brand">FITUN HQ SYSTEM</div>
+        <div class="menu-section">
+            <div class="menu-label">Main</div>
+            <div class="nav-item active" onclick="tab('k-dash', this)">🏠 Dashboard Utama</div>
             
-            <div class="card">
-                <button class="btn-print" onclick="window.print()">🖨️ Cetak Laporan Stok</button>
-                <h3>Daftar Produk Aktif</h3>
-                <table id="table-produk">
-                    <thead>
-                        <tr><th>Barcode</th><th>Produk</th><th>Kategori</th><th>Modal</th><th>Jual</th><th>Stok</th><th class="no-print">Aksi</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="k-sales" class="kamar">
-            <h1>Analisis Penjualan & Profitabilitas</h1>
-            <div class="dashboard-grid">
-                <div class="stat-card"><h3>Total Omzet</h3><p id="s-omzet">$0.00</p></div>
-                <div class="stat-card"><h3>Laba Bersih</h3><p id="s-laba" style="color:var(--accent)">$0.00</p></div>
-                <div class="stat-card"><h3>Produk Terlaris</h3><p id="s-best" style="font-size: 16px;">-</p></div>
-                <div class="stat-card"><h3>Total Trx</h3><p id="s-trx">0</p></div>
-            </div>
-            <div class="card">
-                <button class="btn-print" onclick="window.print()">🖨️ Cetak Laporan Laba</button>
-                <table id="table-sales">
-                    <thead>
-                        <tr><th>Waktu</th><th>Kasir</th><th>Detail</th><th>Total Trx</th><th>Laba</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="k-staff" class="kamar">
-            <h1>Manajemen User & Kasir</h1>
-            <div class="card">
-                <div class="input-group">
-                    <input type="text" placeholder="Username">
-                    <input type="password" placeholder="Password">
-                    <button class="btn-save" style="margin:0;">➕ Tambah Akun</button>
-                </div>
-            </div>
+            <div class="menu-label">Data Master</div>
+            <div class="nav-item" onclick="tab('k-katalog', this)">📦 Katalog Produk</div>
+            <div class="nav-item" onclick="tab('k-harga', this)">🏷️ Master Harga & PPN</div>
+            <div class="nav-item" onclick="tab('k-vendor', this)">🚚 Supplier & Vendor</div>
+            
+            <div class="menu-label">Management</div>
+            <div class="nav-item" onclick="tab('k-user', this)">👥 Manajemen User</div>
+            <div class="nav-item" onclick="tab('k-promo', this)">🎁 Pengaturan Promo</div>
+            
+            <div class="menu-label">Laporan</div>
+            <div class="nav-item" onclick="tab('k-fin', this)">💰 Laporan Finansial</div>
+            <div class="nav-item" onclick="tab('k-sys', this)">⚙️ Konfigurasi Sistem</div>
         </div>
     </div>
+
+    <main class="main-content">
+        <div id="k-dash" class="kamar active">
+            <h1>Global Performance</h1>
+            <div class="grid-4">
+                <div class="stat-card"><small>TOTAL PENDAPATAN</small><h2 id="d-omzet">$0.00</h2></div>
+                <div class="stat-card" style="border-left-color: #10b981"><small>TOTAL LABA</small><h2 id="d-laba">$0.00</h2></div>
+                <div class="stat-card" style="border-left-color: #f59e0b"><small>TOTAL PRODUK</small><h2 id="d-prod">0</h2></div>
+                <div class="stat-card" style="border-left-color: #ef4444"><small>OUTLET AKTIF</small><h2>1</h2></div>
+            </div>
+            <div class="card"><h3>Grafik Tren Penjualan</h3><p>(Integrasi Chart.js bisa diletakkan di sini)</p></div>
+        </div>
+
+        <div id="k-katalog" class="kamar">
+            <div style="display:flex; justify-content:space-between">
+                <h1>Katalog & Inventaris Pusat</h1>
+                <button class="btn btn-blue" onclick="window.print()">🖨️ Print Laporan</button>
+            </div>
+            <div class="card no-print">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px">
+                    <input type="text" id="bc" placeholder="Barcode SKU">
+                    <input type="text" id="nm" placeholder="Nama Produk">
+                    <select id="cat">
+                        <option>Food</option><option>Non-Food</option><option>Fresh</option>
+                    </select>
+                    <input type="number" id="hm" placeholder="Harga Modal">
+                    <input type="number" id="hj" placeholder="Harga Jual">
+                    <input type="text" id="sup" placeholder="Supplier">
+                </div>
+                <button class="btn btn-blue" style="width:100%" onclick="simpan()">💾 Simpan Master Data</button>
+            </div>
+            <div class="card">
+                <table id="t-prod">
+                    <thead><tr><th>SKU</th><th>Produk</th><th>Kategori</th><th>Modal</th><th>Jual</th><th>Supplier</th><th>Stok</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="k-fin" class="kamar">
+            <h1>Laporan Laba Rugi Global</h1>
+            <div class="card">
+                <table id="t-fin">
+                    <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Pendapatan</th><th>Laba Bersih</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="k-sys" class="kamar">
+            <h1>Konfigurasi Sistem HQ</h1>
+            <div class="card">
+                <label>Nama Perusahaan</label><input type="text" value="FITUN RETAIL GROUP">
+                <label>API Key Payment</label><input type="password" value="********">
+                <button class="btn btn-blue">Backup Database Cloud</button>
+            </div>
+        </div>
+    </main>
 
     <script>
         const API = "https://pos-server-fitun.onrender.com/api";
 
-        function switchKamar(id, el) {
+        function tab(id, el) {
             document.querySelectorAll('.kamar').forEach(k => k.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            refreshData();
+            muatData();
         }
 
-        async function saveProduct() {
-            const data = {
-                barcode: document.getElementById('bc').value,
-                name: document.getElementById('nm').value,
-                category: document.getElementById('cat').value,
-                qty: document.getElementById('qty').value,
-                costPrice: document.getElementById('h-modal').value,
-                price: document.getElementById('h-jual').value,
-                isFullUpdate: true
-            };
-            if(!data.barcode || !data.name) return alert("Lengkapi data!");
-            await fetch(`${API}/products/update-stock`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            alert("Berhasil!"); refreshData();
-        }
-
-        async function refreshData() {
+        async function muatData() {
             const [pRes, tRes] = await Promise.all([fetch(`${API}/products`), fetch(`${API}/transactions`)]);
             const products = await pRes.json();
             const transactions = await tRes.json();
 
-            // Render Stok
-            const bStok = document.querySelector("#table-produk tbody");
-            bStok.innerHTML = "";
+            // Render Dashboard & Katalog
+            let omzet = 0, laba = 0;
+            const bProd = document.querySelector("#t-prod tbody");
+            bProd.innerHTML = "";
             products.forEach(p => {
-                const status = p.stock < 10 ? 'badge-low' : 'badge-ok';
-                bStok.innerHTML += `<tr>
-                    <td><code>${p.barcode}</code></td>
-                    <td><b>${p.name}</b></td>
-                    <td>${p.category}</td>
-                    <td>$${p.costPrice.toFixed(2)}</td>
-                    <td>$${p.price.toFixed(2)}</td>
-                    <td><span class="badge ${status}">${p.stock}</span></td>
-                    <td class="no-print"><button onclick="deletePr('${p.barcode}')">🗑️</button></td>
-                </tr>`;
+                bProd.innerHTML += `<tr><td>${p.barcode}</td><td>${p.name}</td><td>${p.category}</td><td>$${p.costPrice}</td><td>$${p.price}</td><td>${p.supplier||'-'}</td><td>${p.stock}</td></tr>`;
             });
 
-            // Analisis Sales
-            let omzet = 0, laba = 0, counts = {};
-            const bSales = document.querySelector("#table-sales tbody");
-            bSales.innerHTML = "";
-            transactions.reverse().forEach(t => {
-                let tLaba = 0;
+            transactions.forEach(t => {
                 omzet += t.total;
                 t.items.forEach(i => {
-                    const p = products.find(prod => prod.barcode === i.barcode || prod.name === i.nama);
-                    if(p) tLaba += (i.harga - p.costPrice) * i.qty;
-                    counts[i.nama] = (counts[i.nama] || 0) + i.qty;
+                    const ref = products.find(p => p.barcode === i.barcode || p.name === i.nama);
+                    if(ref) laba += (i.harga - ref.costPrice) * i.qty;
                 });
-                laba += tLaba;
-                bSales.innerHTML += `<tr>
-                    <td>${new Date(t.waktu).toLocaleString()}</td>
-                    <td>${t.kasir}</td>
-                    <td>${t.items.length} Item</td>
-                    <td>$${t.total.toFixed(2)}</td>
-                    <td style="color:var(--accent)">+$${tLaba.toFixed(2)}</td>
-                </tr>`;
             });
-            document.getElementById('s-omzet').innerText = "$" + omzet.toFixed(2);
-            document.getElementById('s-laba').innerText = "$" + laba.toFixed(2);
-            document.getElementById('s-trx').innerText = transactions.length;
-            const best = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, "-");
-            document.getElementById('s-best').innerText = best;
+
+            document.getElementById('d-omzet').innerText = "$" + omzet.toFixed(2);
+            document.getElementById('d-laba').innerText = "$" + laba.toFixed(2);
+            document.getElementById('d-prod').innerText = products.length;
         }
 
-        async function deletePr(bc) { if(confirm("Hapus produk?")) { await fetch(`${API}/products/${bc}`, {method:'DELETE'}); refreshData(); } }
-        refreshData();
+        async function simpan() {
+            const d = { 
+                barcode: document.getElementById('bc').value, 
+                name: document.getElementById('nm').value, 
+                category: document.getElementById('cat').value,
+                costPrice: document.getElementById('hm').value,
+                price: document.getElementById('hj').value,
+                supplier: document.getElementById('sup').value,
+                qty: 0, isFullUpdate: true 
+            };
+            await fetch(`${API}/products/update-stock`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
+            alert("Master Data Updated!"); muatData();
+        }
+        muatData();
     </script>
 </body>
 </html>

@@ -2,9 +2,20 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const Product = mongoose.models.Product || mongoose.model('Product');
+const Product = mongoose.models.Product || mongoose.model('Product', new mongoose.Schema({
+    barcode: String,
+    name: String,
+    category: String,
+    stock: Number,
+    costPrice: Number,
+    price: Number,
+    supplier: String,
+    tax: Number, // PPN dalam %
+    wastage: { type: Number, default: 0 }, // Barang rusak
+    lastUpdated: { type: Date, default: Date.now }
+}));
 
-// [GET] Ambil Semua Data Produk
+// GET ALL
 router.get('/', async (req, res) => {
     try {
         const products = await Product.find().sort({ name: 1 });
@@ -12,45 +23,52 @@ router.get('/', async (req, res) => {
     } catch (err) { res.status(500).json({ status: "error", message: err.message }); }
 });
 
-// [POST] Simpan/Update Produk (Full Logic)
+// MASTER UPDATE (ADMIN & SUPERVISOR VALIDATION)
 router.post('/update-stock', async (req, res) => {
     try {
-        const { barcode, name, category, qty, costPrice, price, isFullUpdate } = req.body;
+        const { barcode, name, category, qty, costPrice, price, supplier, tax, isFullUpdate } = req.body;
         
         if (isFullUpdate) {
-            // Logika Update Master Data (Admin)
             const result = await Product.findOneAndUpdate(
                 { barcode: barcode },
                 { 
-                    name, 
-                    category: category || "Umum", 
+                    name, category, supplier,
                     stock: Number(qty), 
                     costPrice: Number(costPrice), 
                     price: Number(price),
-                    lastUpdate: new Date()
+                    tax: Number(tax || 11),
+                    lastUpdated: new Date()
                 },
                 { upsert: true, new: true }
             );
             return res.json({ status: "success", data: result });
         } else {
-            // Logika Pengurangan Stok (Kasir)
             const product = await Product.findOne({ barcode });
             if (product) {
                 product.stock -= Number(qty);
                 await product.save();
                 return res.json({ status: "success" });
             }
-            return res.status(404).json({ message: "Produk tidak ditemukan" });
+            return res.status(404).json({ message: "Produk tidak terdaftar" });
         }
-    } catch (err) { res.status(500).json({ status: "error", message: err.message }); }
+    } catch (err) { res.status(500).json({ status: "error" }); }
 });
 
-// [DELETE] Hapus Produk
-router.delete('/:barcode', async (req, res) => {
-    try {
-        await Product.findOneAndDelete({ barcode: req.params.barcode });
+// LOG WASTAGE (BARANG RUSAK/EXPIRED)
+router.post('/wastage', async (req, res) => {
+    const { barcode, qty } = req.body;
+    const product = await Product.findOne({ barcode });
+    if (product) {
+        product.stock -= Number(qty);
+        product.wastage += Number(qty);
+        await product.save();
         res.json({ status: "success" });
-    } catch (err) { res.status(500).json({ status: "error" }); }
+    }
+});
+
+router.delete('/:barcode', async (req, res) => {
+    await Product.findOneAndDelete({ barcode: req.params.barcode });
+    res.json({ status: "success" });
 });
 
 module.exports = router;
