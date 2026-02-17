@@ -1,194 +1,110 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>HQ Admin System - Enterprise Retail</title>
-    <style>
-        :root { --primary: #1e40af; --accent: #3b82f6; --bg: #f8fafc; --sidebar: #0f172a; }
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; background: var(--bg); color: #1e293b; }
-        
-        /* SIDEBAR */
-        .sidebar { width: 280px; background: var(--sidebar); height: 100vh; position: fixed; color: white; overflow-y: auto; }
-        .sidebar-brand { padding: 30px 20px; font-size: 20px; font-weight: bold; color: #38bdf8; border-bottom: 1px solid #1e293b; }
-        .menu-section { padding: 20px 0; }
-        .menu-label { padding: 0 25px 10px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-item { padding: 12px 25px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.2s; }
-        .nav-item:hover, .nav-item.active { background: #1e293b; color: #38bdf8; border-right: 4px solid #38bdf8; }
+<script>
+const API = "https://pos-server-fitun.onrender.com/api";
 
-        /* MAIN */
-        .main-content { margin-left: 280px; padding: 40px; width: 100%; box-sizing: border-box; }
-        .kamar { display: none; }
-        .kamar.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+function formatRupiah(num){
+    return "$" + Number(num || 0).toFixed(2);
+}
 
-        /* COMPONENTS */
-        .card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #f1f5f9; padding: 15px; font-size: 12px; color: #475569; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        
-        input, select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; margin-bottom: 10px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .btn-blue { background: var(--primary); color: white; }
+function tab(id, el) {
+    document.querySelectorAll('.kamar').forEach(k => k.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+    muatData();
+}
 
-        @media print { .sidebar, .no-print { display: none !important; } .main-content { margin: 0; } }
-    </style>
-</head>
-<body>
+async function muatData() {
+    try {
+        const [pRes, tRes] = await Promise.all([
+            fetch(`${API}/products`),
+            fetch(`${API}/transactions`)
+        ]);
 
-    <div class="sidebar no-print">
-        <div class="sidebar-brand">FITUN HQ SYSTEM</div>
-        <div class="menu-section">
-            <div class="menu-label">Main</div>
-            <div class="nav-item active" onclick="tab('k-dash', this)">🏠 Dashboard Utama</div>
-            
-            <div class="menu-label">Data Master</div>
-            <div class="nav-item" onclick="tab('k-katalog', this)">📦 Katalog Produk</div>
-            <div class="nav-item" onclick="tab('k-harga', this)">🏷️ Master Harga & PPN</div>
-            <div class="nav-item" onclick="tab('k-vendor', this)">🚚 Supplier & Vendor</div>
-            
-            <div class="menu-label">Management</div>
-            <div class="nav-item" onclick="tab('k-user', this)">👥 Manajemen User</div>
-            <div class="nav-item" onclick="tab('k-promo', this)">🎁 Pengaturan Promo</div>
-            
-            <div class="menu-label">Laporan</div>
-            <div class="nav-item" onclick="tab('k-fin', this)">💰 Laporan Finansial</div>
-            <div class="nav-item" onclick="tab('k-sys', this)">⚙️ Konfigurasi Sistem</div>
-        </div>
-    </div>
+        const products = await pRes.json();
+        const transactions = await tRes.json();
 
-    <main class="main-content">
-        <div id="k-dash" class="kamar active">
-            <h1>Global Performance</h1>
-            <div class="grid-4">
-                <div class="stat-card"><small>TOTAL PENDAPATAN</small><h2 id="d-omzet">$0.00</h2></div>
-                <div class="stat-card" style="border-left-color: #10b981"><small>TOTAL LABA</small><h2 id="d-laba">$0.00</h2></div>
-                <div class="stat-card" style="border-left-color: #f59e0b"><small>TOTAL PRODUK</small><h2 id="d-prod">0</h2></div>
-                <div class="stat-card" style="border-left-color: #ef4444"><small>OUTLET AKTIF</small><h2>1</h2></div>
-            </div>
-            <div class="card"><h3>Grafik Tren Penjualan</h3><p>(Integrasi Chart.js bisa diletakkan di sini)</p></div>
-        </div>
+        const tbody = document.querySelector("#t-prod tbody");
+        tbody.innerHTML = "";
 
-        <div id="k-katalog" class="kamar">
-            <div style="display:flex; justify-content:space-between">
-                <h1>Katalog & Inventaris Pusat</h1>
-                <button class="btn btn-blue" onclick="window.print()">🖨️ Print Laporan</button>
-            </div>
-            <div class="card no-print">
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px">
-                    <input type="text" id="bc" placeholder="Barcode SKU">
-                    <input type="text" id="nm" placeholder="Nama Produk">
-                    <select id="cat">
-                        <option>Food</option><option>Non-Food</option><option>Fresh</option>
-                    </select>
-                    <input type="number" id="hm" placeholder="Harga Modal">
-                    <input type="number" id="hj" placeholder="Harga Jual">
-                    <input type="text" id="sup" placeholder="Supplier">
-                </div>
-                <button class="btn btn-blue" style="width:100%" onclick="simpan()">💾 Simpan Master Data</button>
-            </div>
-            <div class="card">
-                <table id="t-prod">
-                    <thead><tr><th>SKU</th><th>Produk</th><th>Kategori</th><th>Modal</th><th>Jual</th><th>Supplier</th><th>Stok</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
+        products.forEach(p => {
+            const low = p.stock < (p.minStock || 10);
+            tbody.innerHTML += `
+                <tr style="${low ? 'background:#fee2e2' : ''}">
+                    <td>${p.barcode}</td>
+                    <td>${p.name}</td>
+                    <td>${p.category}</td>
+                    <td>${formatRupiah(p.costPrice)}</td>
+                    <td>${formatRupiah(p.price)}</td>
+                    <td>${p.supplier || '-'}</td>
+                    <td>${p.stock}</td>
+                </tr>
+            `;
+        });
 
-        <div id="k-fin" class="kamar">
-            <h1>Laporan Laba Rugi Global</h1>
-            <div class="card">
-                <table id="t-fin">
-                    <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Pendapatan</th><th>Laba Bersih</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
+        let omzet = 0;
+        let labaTotal = 0;
+        const bFin = document.querySelector("#t-fin tbody");
+        bFin.innerHTML = "";
 
-        <div id="k-sys" class="kamar">
-            <h1>Konfigurasi Sistem HQ</h1>
-            <div class="card">
-                <label>Nama Perusahaan</label><input type="text" value="FITUN RETAIL GROUP">
-                <label>API Key Payment</label><input type="password" value="********">
-                <button class="btn btn-blue">Backup Database Cloud</button>
-            </div>
-        </div>
-    </main>
+        transactions.forEach(t => {
+            let laba = 0;
+            omzet += t.total || 0;
 
-    <script>
-        const API = "https://pos-server-fitun.onrender.com/api";
+            t.items.forEach(i => {
+                const ref = products.find(p => p.barcode === i.barcode);
+                if (ref) {
+                    laba += (i.harga - ref.costPrice) * i.qty;
+                }
+            });
 
-        function tab(id, el) {
-            document.querySelectorAll('.kamar').forEach(k => k.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            el.classList.add('active');
-            muatData();
-        }
+            labaTotal += laba;
 
-        async function muatData() {
-            try {
-                const [pRes, tRes] = await Promise.all([fetch(`${API}/products`), fetch(`${API}/transactions`)]);
-                const products = await pRes.json();
-                const transactions = await tRes.json();
+            bFin.innerHTML += `
+                <tr>
+                    <td>${new Date(t.waktu).toLocaleDateString()}</td>
+                    <td>Penjualan</td>
+                    <td>${formatRupiah(t.total)}</td>
+                    <td>${formatRupiah(laba)}</td>
+                </tr>
+            `;
+        });
 
-                // Render Katalog
-                const bProd = document.querySelector("#t-prod tbody");
-                bProd.innerHTML = "";
-                products.forEach(p => {
-                    bProd.innerHTML += `<tr><td>${p.barcode}</td><td>${p.name}</td><td>${p.category}</td><td>$${p.costPrice}</td><td>$${p.price}</td><td>${p.supplier||'-'}</td><td>${p.stock}</td></tr>`;
-                });
+        document.getElementById('d-omzet').innerText = formatRupiah(omzet);
+        document.getElementById('d-laba').innerText = formatRupiah(labaTotal);
+        document.getElementById('d-prod').innerText = products.length;
 
-                // Reset hitungan
-                let omzet = 0, labaTotal = 0;
-                const bFin = document.querySelector("#t-fin tbody");
-                bFin.innerHTML = "";
+    } catch(e){
+        console.error(e);
+    }
+}
 
-                // Render Laporan Finansial & Hitung Laba
-                transactions.forEach(t => {
-                    let labaTransaksi = 0;
-                    omzet += t.total;
-                    
-                    t.items.forEach(i => {
-                        const ref = products.find(p => p.barcode === i.barcode || p.name === i.nama);
-                        if(ref) labaTransaksi += (i.harga - ref.costPrice) * i.qty;
-                    });
-                    
-                    labaTotal += labaTransaksi;
+async function simpan() {
+    const data = {
+        barcode: bc.value.trim(),
+        name: nm.value.trim(),
+        category: cat.value,
+        costPrice: Number(hm.value),
+        price: Number(hj.value),
+        supplier: sup.value.trim(),
+        qty: 0,
+        minStock: 10,
+        isFullUpdate: true
+    };
 
-                    // Isi Tabel Finansial yang tadinya kosong
-                    bFin.innerHTML += `<tr>
-                        <td>${new Date(t.waktu).toLocaleDateString()}</td>
-                        <td>Transaksi Penjualan</td>
-                        <td>$${t.total.toFixed(2)}</td>
-                        <td>$${labaTransaksi.toFixed(2)}</td>
-                    </tr>`;
-                });
+    if(!data.barcode || !data.name){
+        alert("Barcode & Nama wajib diisi");
+        return;
+    }
 
-                document.getElementById('d-omzet').innerText = "$" + omzet.toFixed(2);
-                document.getElementById('d-laba').innerText = "$" + labaTotal.toFixed(2);
-                document.getElementById('d-prod').innerText = products.length;
+    await fetch(`${API}/products/update-stock`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+    });
 
-            } catch(e) { console.error("Error loading data", e); }
-        }
+    alert("Data berhasil disimpan");
+    muatData();
+}
 
-        async function simpan() {
-            const d = { 
-                barcode: document.getElementById('bc').value, 
-                name: document.getElementById('nm').value, 
-                category: document.getElementById('cat').value,
-                costPrice: document.getElementById('hm').value,
-                price: document.getElementById('hj').value,
-                supplier: document.getElementById('sup').value,
-                qty: 0, isFullUpdate: true 
-            };
-            await fetch(`${API}/products/update-stock`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-            alert("Master Data Updated!"); muatData();
-        }
-        muatData();
-    </script>
-</body>
-</html>
+muatData();
+</script>

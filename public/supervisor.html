@@ -1,145 +1,105 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Store Supervisor - Operasional Toko</title>
-    <style>
-        :root { --p: #059669; --s: #064e3b; --bg: #f0fdf4; }
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; background: var(--bg); }
-        .sidebar { width: 260px; background: var(--s); height: 100vh; position: fixed; color: white; }
-        .nav-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid #065f46; font-size: 14px; }
-        .nav-item:hover, .nav-item.active { background: #065f46; color: #34d399; }
-        .main { margin-left: 260px; padding: 30px; width: 100%; }
-        .kamar { display: none; } .kamar.active { display: block; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
-        .btn-green { background: var(--p); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
-    </style>
-</head>
-<body>
+<script>
+const API = "https://pos-server-fitun.onrender.com/api";
 
-    <div class="sidebar">
-        <div style="padding: 25px; font-weight: bold; border-bottom: 1px solid #065f46">STORE SUPERVISOR</div>
-        <div class="nav-item active" onclick="tab('s-dash', this)">📡 Monitoring Kasir</div>
-        <div class="nav-item" onclick="tab('s-stok', this)">📋 Stock Opname</div>
-        <div class="nav-item" onclick="tab('s-rusak', this)">🗑️ Wastage & Damage</div>
-        <div class="nav-item" onclick="tab('s-hrd', this)">📅 Jadwal Shift Kru</div>
-        <div class="nav-item" onclick="tab('s-check', this)">✅ Checklist Harian</div>
-    </div>
+function tab(id, el) {
+    document.querySelectorAll('.kamar').forEach(k => k.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+    loadData();
+}
 
-    <div class="main">
-        <div id="s-dash" class="kamar active">
-            <h1>Dashboard Operasional Toko</h1>
-            <div class="grid">
-                <div class="card"><h3>Kasir Aktif</h3><p>2 Terminal</p></div>
-                <div class="card" style="color:red"><h3>Stok Kritis</h3><h2 id="s-crit">0</h2></div>
-                <div class="card"><h3>Target Harian</h3><p>75% Tercapai</p></div>
-            </div>
-            <div class="card">
-                <h3>Riwayat Transaksi Terkini</h3>
-                <table id="t-trx">
-                    <thead><tr><th>Waktu</th><th>Kasir</th><th>Total</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
+async function loadData() {
+    try {
+        const [pRes, tRes] = await Promise.all([
+            fetch(`${API}/products`),
+            fetch(`${API}/transactions`)
+        ]);
 
-        <div id="s-stok" class="kamar">
-            <h1>Stock Opname (Audit Fisik)</h1>
-            <div class="card">
-                <table id="t-opname">
-                    <thead><tr><th>Produk</th><th>Stok Sistem</th><th>Fisik</th><th>Action</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
+        const products = await pRes.json();
+        const transactions = await tRes.json();
 
-        <div id="s-rusak" class="kamar">
-            <h1>Laporan Barang Rusak/Expired</h1>
-            <div class="card">
-                <input type="text" id="w-bc" placeholder="Scan Barcode Barang Rusak">
-                <input type="number" id="w-qty" placeholder="Jumlah">
-                <button class="btn-green" onclick="laporkanRusak()">Laporkan Pemusnahan</button>
-            </div>
-        </div>
+        let crit = 0;
+        const bOpname = document.querySelector("#t-opname tbody");
+        bOpname.innerHTML = "";
 
-        <div id="s-check" class="kamar">
-            <h1>Daily Store Checklist</h1>
-            <div class="card">
-                <label><input type="checkbox"> Kebersihan Area Rak</label><br>
-                <label><input type="checkbox"> Suhu Chiller (2-5°C)</label><br>
-                <label><input type="checkbox"> Kesiapan Modal Kasir</label>
-            </div>
-        </div>
-    </div>
+        products.forEach(p => {
+            const low = p.stock < (p.minStock || 10);
+            if(low) crit++;
 
-    <script>
-        const API = "https://pos-server-fitun.onrender.com/api";
+            bOpname.innerHTML += `
+                <tr style="${low ? 'background:#fee2e2' : ''}">
+                    <td>${p.name}</td>
+                    <td>${p.stock}</td>
+                    <td><input type='number' id='inp-${p.barcode}' style='width:70px'></td>
+                    <td><button onclick="simpanFisik('${p.barcode}')">Save</button></td>
+                </tr>
+            `;
+        });
 
-        function tab(id, el) {
-            document.querySelectorAll('.kamar').forEach(k => k.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            el.classList.add('active');
-            loadData();
-        }
+        document.getElementById('s-crit').innerText = crit;
 
-        async function loadData() {
-            try {
-                const [pRes, tRes] = await Promise.all([fetch(`${API}/products`), fetch(`${API}/transactions`)]);
-                const products = await pRes.json();
-                const transactions = await tRes.json();
+        const bTrx = document.querySelector("#t-trx tbody");
+        bTrx.innerHTML = "";
 
-                // Monitor Stok Kritis & Tabel Opname
-                let crit = 0;
-                const bOpname = document.querySelector("#t-opname tbody");
-                bOpname.innerHTML = "";
-                products.forEach(p => {
-                    if(p.stock < 10) crit++;
-                    // Bagian yang saya lengkapi: Menampilkan input fisik dan tombol simpan
-                    bOpname.innerHTML += `<tr>
-                        <td>${p.name}</td>
-                        <td>${p.stock}</td>
-                        <td><input type='number' id='inp-${p.barcode}' style='width:50px' placeholder='0'></td>
-                        <td><button onclick="simpanFisik('${p.barcode}')">Save</button></td>
-                    </tr>`;
-                });
-                document.getElementById('s-crit').innerText = crit;
-
-                // Monitor Transaksi
-                const bTrx = document.querySelector("#t-trx tbody");
-                bTrx.innerHTML = "";
-                transactions.slice(-5).forEach(t => {
-                    bTrx.innerHTML += `<tr><td>${new Date(t.waktu).toLocaleTimeString()}</td><td>${t.kasir || 'Kasir Utama'}</td><td>$${t.total}</td></tr>`;
-                });
-            } catch(e) { console.error(e); }
-        }
-
-        // Fungsi baru untuk mendukung Tabel Opname
-        async function simpanFisik(bc) {
-            const qty = document.getElementById(`inp-${bc}`).value;
-            if(!qty) return alert("Masukkan jumlah fisik!");
-            await fetch(`${API}/products/update-stock`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({barcode: bc, qty: qty, isFullUpdate: true})
+        transactions
+            .sort((a,b)=> new Date(b.waktu)-new Date(a.waktu))
+            .slice(0,5)
+            .forEach(t => {
+                bTrx.innerHTML += `
+                    <tr>
+                        <td>${new Date(t.waktu).toLocaleTimeString()}</td>
+                        <td>${t.kasir || 'Kasir'}</td>
+                        <td>$${t.total}</td>
+                    </tr>
+                `;
             });
-            alert("Stok Fisik Diperbarui!"); loadData();
-        }
 
-        async function laporkanRusak() {
-            const bc = document.getElementById('w-bc').value;
-            const qty = document.getElementById('w-qty').value;
-            await fetch(`${API}/products/wastage`, { // Sesuaikan endpoint dengan product.js
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({barcode: bc, qty: qty})
-            });
-            alert("Data Wastage Dilaporkan!"); loadData();
-        }
-        loadData();
-    </script>
-</body>
-</html>
+    } catch(e){
+        console.error(e);
+    }
+}
+
+async function simpanFisik(barcode) {
+    const qty = document.getElementById(`inp-${barcode}`).value;
+
+    if(!qty){
+        alert("Masukkan jumlah fisik");
+        return;
+    }
+
+    await fetch(`${API}/products/update-stock`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+            barcode,
+            qty: Number(qty),
+            isFullUpdate: true
+        })
+    });
+
+    alert("Stok diperbarui");
+    loadData();
+}
+
+async function laporkanRusak() {
+    const bc = w_bc.value;
+    const qty = w_qty.value;
+
+    if(!bc || !qty){
+        alert("Data belum lengkap");
+        return;
+    }
+
+    await fetch(`${API}/products/wastage`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ barcode: bc, qty: Number(qty) })
+    });
+
+    alert("Wastage berhasil dilaporkan");
+    loadData();
+}
+
+loadData();
+</script>
