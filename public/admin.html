@@ -19,6 +19,36 @@
 * { box-sizing: border-box; }
 body { font-family: 'Inter', sans-serif; margin: 0; display: flex; background: var(--bg); color: #1e293b; font-size: 14px; }
 
+/* ===== LOGIN SCREEN ===== */
+#login-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+#login-screen.hidden { display: none; }
+.login-box {
+  background: white; border-radius: 20px; padding: 42px 40px;
+  width: 420px; max-width: 95vw;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  animation: loginIn 0.4s ease;
+}
+@keyframes loginIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.login-logo { text-align: center; margin-bottom: 28px; }
+.login-logo .logo-icon { font-size: 48px; }
+.login-logo h2 { margin: 10px 0 4px; font-size: 22px; font-weight: 800; color: #0f172a; }
+.login-logo p { margin: 0; font-size: 13px; color: #64748b; }
+.login-form .form-group { margin-bottom: 16px; }
+.login-form label { display: block; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.login-form input { width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+.login-form input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+.login-error { background: #fff5f5; border: 1.5px solid #fecaca; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; display: none; }
+.btn-login { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; margin-top: 4px; }
+.btn-login:hover { background: #1d4ed8; }
+.login-footer { text-align: center; margin-top: 18px; font-size: 12px; color: #94a3b8; }
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 42px; }
+.pw-toggle { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #94a3b8; }
+
 /* ===== SIDEBAR ===== */
 .sidebar { width: 280px; background: var(--sidebar); height: 100vh; position: fixed; color: white; overflow-y: auto; z-index: 100; display: flex; flex-direction: column; }
 .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid #1e293b; }
@@ -173,16 +203,24 @@ input[readonly] { background: #f8fafc; color: #64748b; }
 .info-row .label { color: #64748b; }
 .info-row .value { font-weight: 600; color: #0f172a; }
 </style>
+<!-- Socket.IO Client -->
+<script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- REAL-TIME INDICATOR -->
+<div id="rt-indicator" style="position:fixed;bottom:16px;right:16px;z-index:9998;display:flex;align-items:center;gap:8px;background:white;padding:8px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:12px;font-weight:600;color:#64748b;">
+  <span id="rt-dot" style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;"></span>
+  <span id="rt-text">Menghubungkan...</span>
+</div>
+
 <!-- SIDEBAR -->
 <div class="sidebar no-print">
   <div class="sidebar-brand">
-    <div class="logo-title">⚡ FITUN FOUN</div>
+    <div class="logo-title">⚡ FITUN HQ SYSTEM</div>
     <div class="logo-sub">Admin Control Panel</div>
   </div>
 
@@ -219,13 +257,52 @@ input[readonly] { background: #f8fafc; color: #64748b; }
     </div>
   </div>
 
+  <div class="menu-section">
+    <div class="menu-label">Keamanan</div>
+    <div class="nav-item" onclick="tab('k-password',this)">
+      <span class="nav-icon">🔐</span> Manajemen Password
+    </div>
+  </div>
+
   <div class="sidebar-footer">
+    <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #1e293b;">
+      <span style="font-size:11px;color:#475569;">Login sebagai</span><br>
+      <span style="font-size:13px;font-weight:600;color:#38bdf8;">👤 HQ Admin</span>
+    </div>
     <div id="clock" style="font-weight:600;color:#94a3b8;"></div>
     <div style="margin-top:4px;" id="today-date"></div>
+    <button onclick="logout()" style="margin-top:12px;width:100%;padding:8px;background:#1e293b;border:1px solid #334155;color:#94a3b8;border-radius:6px;cursor:pointer;font-size:12px;font-family:Inter;">🚪 Logout</button>
   </div>
 </div>
 
 <!-- MAIN CONTENT -->
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">⚡</div>
+      <h2>FITUN HQ SYSTEM</h2>
+      <p>Admin Control Panel — Masuk untuk melanjutkan</p>
+    </div>
+    <div class="login-form">
+      <div id="login-error" class="login-error">❌ Password salah. Coba lagi.</div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="login-user" value="admin" readonly style="background:#f8fafc;color:#64748b;">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="login-pw" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="pw-toggle" onclick="togglePw('login-pw',this)" type="button">👁️</button>
+        </div>
+      </div>
+      <button class="btn-login" onclick="doLogin()">🔐 Masuk sebagai Admin</button>
+    </div>
+    <div class="login-footer">FITUN Retail System • HQ Admin Panel</div>
+  </div>
+</div>
+
 <main class="main-content">
 
 <!-- ===================================================
@@ -579,6 +656,119 @@ input[readonly] { background: #f8fafc; color: #64748b; }
   </div>
 </div>
 
+<!-- ===================================================
+     MANAJEMEN PASSWORD
+=================================================== -->
+<div id="k-password" class="kamar">
+  <div class="page-header">
+    <div>
+      <h1>🔐 Manajemen Password</h1>
+      <p>Kelola password akun Admin, Supervisor, dan Kasir</p>
+    </div>
+  </div>
+
+  <!-- Reset Password Admin Sendiri -->
+  <div class="card" style="border-left: 4px solid var(--primary);">
+    <div class="card-title"><span>🛡️</span> Ganti Password Admin (Akun Anda)</div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>Password Lama</label>
+        <div class="pw-wrap">
+          <input type="password" id="adm-pw-lama" placeholder="Masukkan password saat ini">
+          <button class="pw-toggle" onclick="togglePw('adm-pw-lama',this)" type="button">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password Baru</label>
+        <div class="pw-wrap">
+          <input type="password" id="adm-pw-baru" placeholder="Password baru">
+          <button class="pw-toggle" onclick="togglePw('adm-pw-baru',this)" type="button">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Konfirmasi Password Baru</label>
+        <div class="pw-wrap">
+          <input type="password" id="adm-pw-konfirm" placeholder="Ulangi password baru">
+          <button class="pw-toggle" onclick="togglePw('adm-pw-konfirm',this)" type="button">👁️</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:4px;" onclick="gantiPasswordAdmin()">🔄 Ganti Password Admin</button>
+  </div>
+
+  <!-- Edit Password Supervisor -->
+  <div class="card" style="border-left: 4px solid var(--green);">
+    <div class="card-title"><span>🏪</span> Password Web Supervisor</div>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Password ini digunakan untuk masuk ke halaman supervisor.html</p>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>Password Supervisor Saat Ini</label>
+        <div class="pw-wrap">
+          <input type="password" id="sv-pw-show" id="sv-pw-show" readonly style="background:#f8fafc;">
+          <button class="pw-toggle" onclick="togglePw('sv-pw-show',this)" type="button">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password Baru Supervisor</label>
+        <div class="pw-wrap">
+          <input type="password" id="sv-pw-baru" placeholder="Password baru supervisor">
+          <button class="pw-toggle" onclick="togglePw('sv-pw-baru',this)" type="button">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Konfirmasi Password Baru</label>
+        <div class="pw-wrap">
+          <input type="password" id="sv-pw-konfirm" placeholder="Ulangi password baru">
+          <button class="pw-toggle" onclick="togglePw('sv-pw-konfirm',this)" type="button">👁️</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-success" style="margin-top:4px;" onclick="gantiPasswordSupervisor()">🔄 Ganti Password Supervisor</button>
+  </div>
+
+  <!-- Kelola Password Kasir -->
+  <div class="card" style="border-left: 4px solid var(--yellow);">
+    <div class="card-title"><span>👤</span> Password Kasir</div>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Atur password untuk setiap akun kasir di POS</p>
+
+    <!-- Tambah Kasir Baru -->
+    <div style="background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:18px;">
+      <div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:12px;">➕ Tambah / Update Akun Kasir</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Nama Kasir</label>
+          <input type="text" id="kasir-nama" placeholder="Contoh: Kasir 1, Siti, Budi">
+        </div>
+        <div class="form-group">
+          <label>Password Kasir</label>
+          <div class="pw-wrap">
+            <input type="password" id="kasir-pw" placeholder="Password untuk kasir ini">
+            <button class="pw-toggle" onclick="togglePw('kasir-pw',this)" type="button">👁️</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-warning" onclick="tambahKasir()">💾 Simpan Akun Kasir</button>
+    </div>
+
+    <!-- Daftar Kasir -->
+    <div class="card-title" style="margin-bottom:12px;"><span>📋</span> Daftar Akun Kasir Terdaftar</div>
+    <div class="table-wrap">
+      <table id="t-kasir">
+        <thead>
+          <tr><th>#</th><th>Nama Kasir</th><th>Password</th><th>Terakhir Diubah</th><th>Aksi</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Info keamanan -->
+  <div class="alert-banner info">
+    <span style="font-size:20px;">ℹ️</span>
+    <p>Password disimpan secara lokal di perangkat ini. Pastikan browser tidak diakses orang yang tidak berwenang.</p>
+  </div>
+</div>
+
 </main>
 
 <!-- ===================================================
@@ -687,6 +877,28 @@ input[readonly] { background: #f8fafc; color: #64748b; }
 
 <!-- MODAL KONFIRMASI HAPUS -->
 <div class="modal-overlay" id="modal-hapus">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h3>✏️ Edit Password Kasir</h3>
+      <button class="modal-close" onclick="closeModal('modal-edit-kasir')">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Nama Kasir</label>
+      <input type="text" id="ek-nama" readonly style="background:#f8fafc;">
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Password Baru</label>
+      <div class="pw-wrap">
+        <input type="password" id="ek-pw" placeholder="Password baru untuk kasir ini">
+        <button class="pw-toggle" onclick="togglePw('ek-pw',this)" type="button">👁️</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-kasir')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanEditKasir()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
   <div class="modal" style="max-width:420px;">
     <div class="modal-header">
       <h3>🗑️ Hapus Produk</h3>
@@ -1368,6 +1580,72 @@ function renderPagination(containerId, total, perPage, current, onPage){
    INIT
 ========================================= */
 muatData();
+
+/* =========================================
+   SOCKET.IO REAL-TIME
+========================================= */
+const socket = io();
+
+// Status koneksi
+socket.on('connect', () => {
+  document.getElementById('rt-dot').style.background = '#10b981';
+  document.getElementById('rt-text').innerText = 'Real-time Aktif';
+  document.getElementById('rt-indicator').style.background = '#ecfdf5';
+  console.log('🟢 Socket.IO terhubung');
+});
+
+socket.on('disconnect', () => {
+  document.getElementById('rt-dot').style.background = '#ef4444';
+  document.getElementById('rt-text').innerText = 'Terputus - Reconnecting...';
+  document.getElementById('rt-indicator').style.background = '#fff5f5';
+});
+
+// Terima transaksi baru dari kasir
+socket.on('transaksi_baru', (trx) => {
+  // Tambah ke cache lokal tanpa reload penuh
+  cacheTransactions.push(trx);
+  // Update dashboard & laporan langsung
+  renderDashboard();
+  renderFin(cacheTransactions, cacheProducts);
+  renderTerlaris(cacheTransactions, cacheProducts);
+  toast(`🧾 Transaksi baru dari kasir ${trx.kasir||'-'}: $${Number(trx.total||0).toLocaleString()}`, 'info');
+});
+
+// Terima update stok (dari kasir, supervisor, atau admin lain)
+socket.on('stok_update', async (data) => {
+  // Reload data produk dari server
+  try {
+    const pRes = await fetch(`${API}/products`);
+    cacheProducts = await pRes.json();
+    renderProduk(cacheProducts);
+    renderRestock(cacheProducts);
+    renderLowStock(cacheProducts);
+    renderWastage(cacheProducts);
+    renderDashboard();
+    // Update stat cards
+    document.getElementById('d-prod').innerText = cacheProducts.length;
+    document.getElementById('d-kritis').innerText = cacheProducts.filter(p=>p.stock<=5).length;
+  } catch(e) { console.error('Error reload stok:', e); }
+
+  if(data.trigger !== 'admin_edit') {
+    toast(`📦 Stok diperbarui (${data.trigger})`, 'info');
+  }
+});
+
+// Terima update produk (tambah/edit/hapus dari admin)
+socket.on('produk_update', async (data) => {
+  try {
+    const pRes = await fetch(`${API}/products`);
+    cacheProducts = await pRes.json();
+    renderProduk(cacheProducts);
+  } catch(e) {}
+});
+
+// Terima laporan wastage
+socket.on('wastage_update', (data) => {
+  toast(`🗑️ Wastage: ${data.nama} - ${data.qty} unit`, 'info');
+  muatData();
+});
 </script>
 </body>
 </html>

@@ -36,15 +36,8 @@ router.get('/', async (req, res) => {
 router.post('/update-stock', async (req, res) => {
     try {
         const {
-            barcode,
-            name,
-            category,
-            qty,
-            costPrice,
-            price,
-            supplier,
-            tax,
-            isFullUpdate
+            barcode, name, category, qty,
+            costPrice, price, supplier, tax, isFullUpdate
         } = req.body;
 
         if (!barcode) {
@@ -53,17 +46,14 @@ router.post('/update-stock', async (req, res) => {
 
         if (isFullUpdate) {
             // ADMIN / SUPERVISOR UPDATE
-            const updateData = {
-                lastUpdated: new Date()
-            };
-
-            if (name !== undefined) updateData.name = name;
-            if (category !== undefined) updateData.category = category;
-            if (supplier !== undefined) updateData.supplier = supplier;
-            if (qty !== undefined) updateData.stock = Number(qty);
+            const updateData = { lastUpdated: new Date() };
+            if (name !== undefined)      updateData.name = name;
+            if (category !== undefined)  updateData.category = category;
+            if (supplier !== undefined)  updateData.supplier = supplier;
+            if (qty !== undefined)       updateData.stock = Number(qty);
             if (costPrice !== undefined) updateData.costPrice = Number(costPrice);
-            if (price !== undefined) updateData.price = Number(price);
-            if (tax !== undefined) updateData.tax = Number(tax);
+            if (price !== undefined)     updateData.price = Number(price);
+            if (tax !== undefined)       updateData.tax = Number(tax);
 
             const result = await Product.findOneAndUpdate(
                 { barcode },
@@ -71,19 +61,31 @@ router.post('/update-stock', async (req, res) => {
                 { upsert: true, new: true }
             );
 
+            // 🔴 Broadcast update produk ke semua client
+            const io = req.app.get('io');
+            if (io) {
+                io.emit('produk_update', {
+                    type: 'update',
+                    barcode: result.barcode,
+                    name: result.name,
+                    stock: result.stock,
+                    price: result.price,
+                    category: result.category
+                });
+                // Trigger reload semua produk di client
+                io.emit('stok_update', { trigger: 'admin_edit', barcode });
+            }
+
             return res.json({ status: "success", data: result });
-        } 
-        else {
+
+        } else {
             // KASIR – PENGURANGAN STOK
             const product = await Product.findOne({ barcode });
-
             if (!product) {
                 return res.status(404).json({ message: "Produk tidak ditemukan" });
             }
 
             const jumlah = Number(qty) || 0;
-
-            // 🔒 PROTEK STOK MINUS
             if (product.stock < jumlah) {
                 return res.status(400).json({ message: "Stok tidak mencukupi" });
             }
@@ -92,8 +94,19 @@ router.post('/update-stock', async (req, res) => {
             product.lastUpdated = new Date();
             await product.save();
 
+            // 🔴 Broadcast update stok ke semua client
+            const io = req.app.get('io');
+            if (io) {
+                io.emit('stok_update', {
+                    trigger: 'kasir',
+                    barcode,
+                    stockBaru: product.stock
+                });
+            }
+
             return res.json({ status: "success" });
         }
+
     } catch (err) {
         res.status(500).json({ status: "error", message: err.message });
     }
@@ -111,14 +124,11 @@ router.post('/wastage', async (req, res) => {
         }
 
         const product = await Product.findOne({ barcode });
-
         if (!product) {
             return res.status(404).json({ message: "Barcode tidak ditemukan" });
         }
 
         const jumlah = Number(qty);
-
-        // 🔒 PROTEK STOK MINUS
         if (product.stock < jumlah) {
             return res.status(400).json({ message: "Stok tidak cukup untuk wastage" });
         }
@@ -128,7 +138,21 @@ router.post('/wastage', async (req, res) => {
         product.lastUpdated = new Date();
         await product.save();
 
+        // 🔴 Broadcast wastage ke semua client
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('wastage_update', {
+                barcode,
+                nama: product.name,
+                qty: jumlah,
+                stockBaru: product.stock,
+                totalWastage: product.wastage
+            });
+            io.emit('stok_update', { trigger: 'wastage', barcode });
+        }
+
         return res.json({ status: "success" });
+
     } catch (err) {
         res.status(500).json({ status: "error" });
     }
@@ -139,7 +163,17 @@ router.post('/wastage', async (req, res) => {
 ===================== */
 router.delete('/:barcode', async (req, res) => {
     try {
-        await Product.findOneAndDelete({ barcode: req.params.barcode });
+        const deleted = await Product.findOneAndDelete({ barcode: req.params.barcode });
+
+        // 🔴 Broadcast hapus produk ke semua client
+        const io = req.app.get('io');
+        if (io && deleted) {
+            io.emit('produk_update', {
+                type: 'delete',
+                barcode: req.params.barcode
+            });
+        }
+
         res.json({ status: "success" });
     } catch (err) {
         res.status(500).json({ status: "error" });

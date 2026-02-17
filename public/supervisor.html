@@ -171,12 +171,26 @@ input[readonly] { background: #f8fafc; color: #64748b; }
   .no-print { display: none !important; }
   .card { box-shadow: none; border: 1px solid #e2e8f0; break-inside: avoid; }
 }
+
+/* ===== LIVE PULSE ===== */
+@keyframes livePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(5,150,105,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(5,150,105,0); }
+}
 </style>
+<!-- Socket.IO Client -->
+<script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- REAL-TIME INDICATOR -->
+<div id="rt-indicator" style="position:fixed;bottom:16px;right:16px;z-index:9998;display:flex;align-items:center;gap:8px;background:white;padding:8px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:12px;font-weight:600;color:#64748b;">
+  <span id="rt-dot" style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;transition:background 0.3s;"></span>
+  <span id="rt-text">Menghubungkan...</span>
+</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -1211,6 +1225,85 @@ function resetChecklist(){
 loadData();
 // Auto refresh setiap 60 detik
 setInterval(loadData, 60000);
+
+/* =========================================
+   SOCKET.IO REAL-TIME
+========================================= */
+const socket = io();
+
+// Status koneksi
+socket.on('connect', () => {
+  document.getElementById('rt-dot').style.background = '#059669';
+  document.getElementById('rt-dot').style.animation = 'pulse 1.5s infinite';
+  document.getElementById('rt-text').innerText = 'Real-time Aktif';
+  document.getElementById('rt-indicator').style.background = '#ecfdf5';
+  console.log('🟢 Socket.IO terhubung');
+});
+
+socket.on('disconnect', () => {
+  document.getElementById('rt-dot').style.background = '#ef4444';
+  document.getElementById('rt-dot').style.animation = 'none';
+  document.getElementById('rt-text').innerText = 'Terputus - Reconnecting...';
+  document.getElementById('rt-indicator').style.background = '#fff5f5';
+});
+
+// Transaksi baru dari kasir - langsung update dashboard
+socket.on('transaksi_baru', (trx) => {
+  // Tambah ke cache lokal
+  cacheTransactions.push(trx);
+
+  // Update UI langsung tanpa reload penuh
+  renderDashboard();
+  renderTrxAll(cacheTransactions);
+
+  // Notif visual mencolok untuk supervisor
+  toast(`🧾 TRANSAKSI BARU — Kasir: ${trx.kasir||'-'} | Total: $${Number(trx.total||0).toLocaleString()}`, 'success');
+
+  // Kedipkan dashboard jika sedang di halaman lain
+  const dashNavItem = document.querySelector('.nav-item.active');
+  if(dashNavItem && !document.getElementById('s-dash').classList.contains('active')) {
+    const counter = document.getElementById('sv-trx-hari');
+    if(counter) counter.style.color = '#059669';
+    setTimeout(()=>{ if(counter) counter.style.color = ''; }, 2000);
+  }
+});
+
+// Update stok dari manapun (admin edit, kasir belanja, wastage)
+socket.on('stok_update', async (data) => {
+  try {
+    const pRes = await fetch(`${API}/products`);
+    cacheProducts = await pRes.json();
+    renderDashboard();
+    renderOpname(cacheProducts);
+    renderKritis(cacheProducts);
+    renderWastage(cacheProducts);
+  } catch(e) { console.error('Error reload stok:', e); }
+
+  if(data.trigger === 'admin_edit') {
+    toast(`✏️ Admin mengupdate produk (barcode: ${data.barcode})`, 'info');
+  } else if(data.trigger === 'wastage') {
+    toast(`🗑️ Wastage baru dilaporkan`, 'info');
+  }
+});
+
+// Produk baru ditambah/dihapus admin
+socket.on('produk_update', async (data) => {
+  try {
+    const pRes = await fetch(`${API}/products`);
+    cacheProducts = await pRes.json();
+    renderDashboard();
+    renderOpname(cacheProducts);
+    renderKritis(cacheProducts);
+  } catch(e) {}
+  if(data.type === 'delete') toast(`🗑️ Produk dihapus admin (${data.barcode})`, 'info');
+  else toast(`📦 Data produk diperbarui admin`, 'info');
+});
+
+// Wastage dilaporkan (dari supervisor lain atau admin)
+socket.on('wastage_update', (data) => {
+  toast(`🗑️ Wastage: ${data.nama} — ${data.qty} unit dibuang`, 'info');
+  loadData();
+});
 </script>
 </body>
 </html>
