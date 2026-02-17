@@ -1,105 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Store Supervisor - Operasional Toko</title>
+<style>
+:root { --p:#059669; --s:#064e3b; --bg:#f0fdf4; }
+body { font-family:'Inter',sans-serif; margin:0; display:flex; background:var(--bg); }
+.sidebar { width:260px; background:var(--s); height:100vh; position:fixed; color:white; }
+.nav-item { padding:15px 25px; cursor:pointer; border-bottom:1px solid #065f46; font-size:14px; }
+.nav-item:hover,.nav-item.active { background:#065f46; color:#34d399; }
+.main { margin-left:260px; padding:30px; width:100%; }
+.kamar { display:none; } .kamar.active { display:block; }
+.card { background:white; padding:20px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.05); margin-bottom:20px; }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+table { width:100%; border-collapse:collapse; background:white; }
+th,td { padding:12px; border:1px solid #eee; text-align:left; }
+.btn-green { background:var(--p); color:white; border:none; padding:10px 14px; border-radius:5px; cursor:pointer; }
+.low { background:#fee2e2; }
+.warn { background:#fef3c7; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+<div style="padding:25px;font-weight:bold;border-bottom:1px solid #065f46">STORE SUPERVISOR</div>
+<div class="nav-item active" onclick="tab('s-dash',this)">📡 Monitoring Kasir</div>
+<div class="nav-item" onclick="tab('s-stok',this)">📋 Stock Opname</div>
+<div class="nav-item" onclick="tab('s-rusak',this)">🗑️ Wastage & Damage</div>
+<div class="nav-item" onclick="tab('s-check',this)">✅ Checklist Harian</div>
+</div>
+
+<div class="main">
+
+<div id="s-dash" class="kamar active">
+<h1>Dashboard Operasional</h1>
+<div class="grid">
+<div class="card"><h3>Kasir Aktif</h3><p>2 Terminal</p></div>
+<div class="card" style="color:red"><h3>Stok Kritis</h3><h2 id="s-crit">0</h2></div>
+<div class="card"><h3>Target Harian</h3><p>75% Tercapai</p></div>
+</div>
+
+<div class="card">
+<h3>Transaksi Terakhir</h3>
+<table id="t-trx">
+<thead><tr><th>Waktu</th><th>Kasir</th><th>Total</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<div id="s-stok" class="kamar">
+<h1>Stock Opname (Fisik)</h1>
+<div class="card">
+<table id="t-opname">
+<thead>
+<tr><th>Produk</th><th>Stok Sistem</th><th>Stok Fisik</th><th>Aksi</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<div id="s-rusak" class="kamar">
+<h1>Laporan Barang Rusak / Expired</h1>
+<div class="card">
+<input type="text" id="w-bc" placeholder="Barcode Barang">
+<input type="number" id="w-qty" placeholder="Jumlah">
+<button class="btn-green" onclick="laporkanRusak()">Laporkan</button>
+</div>
+</div>
+
+<div id="s-check" class="kamar">
+<h1>Checklist Harian</h1>
+<div class="card">
+<label><input type="checkbox" data-key="clean"> Kebersihan Area</label><br>
+<label><input type="checkbox" data-key="chiller"> Suhu Chiller OK</label><br>
+<label><input type="checkbox" data-key="cash"> Kas Awal Sesuai</label>
+</div>
+</div>
+
+</div>
+
 <script>
-const API = "https://pos-server-fitun.onrender.com/api";
+const API="https://pos-server-fitun.onrender.com/api";
+let cacheProducts=[];
 
-function tab(id, el) {
-    document.querySelectorAll('.kamar').forEach(k => k.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    el.classList.add('active');
-    loadData();
+function tab(id,el){
+document.querySelectorAll('.kamar').forEach(k=>k.classList.remove('active'));
+document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+el.classList.add('active');
 }
 
-async function loadData() {
-    try {
-        const [pRes, tRes] = await Promise.all([
-            fetch(`${API}/products`),
-            fetch(`${API}/transactions`)
-        ]);
+async function loadData(){
+try{
+const pRes=await fetch(`${API}/products`);
+const products=await pRes.json();
+cacheProducts=products;
+renderOpname(products);
+renderKritis(products);
 
-        const products = await pRes.json();
-        const transactions = await tRes.json();
-
-        let crit = 0;
-        const bOpname = document.querySelector("#t-opname tbody");
-        bOpname.innerHTML = "";
-
-        products.forEach(p => {
-            const low = p.stock < (p.minStock || 10);
-            if(low) crit++;
-
-            bOpname.innerHTML += `
-                <tr style="${low ? 'background:#fee2e2' : ''}">
-                    <td>${p.name}</td>
-                    <td>${p.stock}</td>
-                    <td><input type='number' id='inp-${p.barcode}' style='width:70px'></td>
-                    <td><button onclick="simpanFisik('${p.barcode}')">Save</button></td>
-                </tr>
-            `;
-        });
-
-        document.getElementById('s-crit').innerText = crit;
-
-        const bTrx = document.querySelector("#t-trx tbody");
-        bTrx.innerHTML = "";
-
-        transactions
-            .sort((a,b)=> new Date(b.waktu)-new Date(a.waktu))
-            .slice(0,5)
-            .forEach(t => {
-                bTrx.innerHTML += `
-                    <tr>
-                        <td>${new Date(t.waktu).toLocaleTimeString()}</td>
-                        <td>${t.kasir || 'Kasir'}</td>
-                        <td>$${t.total}</td>
-                    </tr>
-                `;
-            });
-
-    } catch(e){
-        console.error(e);
-    }
+const tRes=await fetch(`${API}/transactions`);
+if(tRes.ok){
+renderTrx(await tRes.json());
+}
+}catch(e){console.error(e);}
 }
 
-async function simpanFisik(barcode) {
-    const qty = document.getElementById(`inp-${barcode}`).value;
-
-    if(!qty){
-        alert("Masukkan jumlah fisik");
-        return;
-    }
-
-    await fetch(`${API}/products/update-stock`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-            barcode,
-            qty: Number(qty),
-            isFullUpdate: true
-        })
-    });
-
-    alert("Stok diperbarui");
-    loadData();
+function renderKritis(products){
+document.getElementById('s-crit').innerText =
+products.filter(p=>p.stock<=5).length;
 }
 
-async function laporkanRusak() {
-    const bc = w_bc.value;
-    const qty = w_qty.value;
-
-    if(!bc || !qty){
-        alert("Data belum lengkap");
-        return;
-    }
-
-    await fetch(`${API}/products/wastage`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ barcode: bc, qty: Number(qty) })
-    });
-
-    alert("Wastage berhasil dilaporkan");
-    loadData();
+function renderOpname(products){
+const tbody=document.querySelector("#t-opname tbody");
+tbody.innerHTML="";
+products.forEach(p=>{
+let cls=p.stock<=5?"low":"";
+tbody.innerHTML+=`
+<tr class="${cls}">
+<td>${p.name}</td>
+<td>${p.stock}</td>
+<td><input type="number" id="fis-${p.barcode}" style="width:70px"></td>
+<td><button onclick="simpanFisik('${p.barcode}')">Simpan</button></td>
+</tr>`;
+});
 }
+
+function renderTrx(trx){
+const tbody=document.querySelector("#t-trx tbody");
+tbody.innerHTML="";
+trx.slice(-5).forEach(t=>{
+tbody.innerHTML+=`
+<tr>
+<td>${new Date(t.waktu).toLocaleTimeString()}</td>
+<td>${t.kasir||'-'}</td>
+<td>$${Number(t.total||0).toLocaleString()}</td>
+</tr>`;
+});
+}
+
+async function simpanFisik(bc){
+const inp=document.getElementById(`fis-${bc}`);
+const qty=Number(inp.value);
+if(isNaN(qty)||qty<0) return alert("Jumlah tidak valid");
+
+if(!confirm("Yakin update stok fisik?")) return;
+
+await fetch(`${API}/products/update-stock`,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({barcode:bc,qty,isFullUpdate:true})
+});
+alert("Stock opname disimpan");
+loadData();
+}
+
+async function laporkanRusak(){
+const bc=document.getElementById("w-bc").value.trim();
+const qty=Number(document.getElementById("w-qty").value);
+if(!bc||qty<=0) return alert("Data tidak valid");
+
+const found=cacheProducts.find(p=>p.barcode===bc);
+if(!found) return alert("Barcode tidak ditemukan");
+
+await fetch(`${API}/products/wastage`,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({barcode:bc,qty})
+});
+alert("Wastage dilaporkan");
+document.getElementById("w-bc").value="";
+document.getElementById("w-qty").value="";
+loadData();
+}
+
+/* Checklist persistence */
+document.querySelectorAll('#s-check input').forEach(c=>{
+c.checked=localStorage.getItem(c.dataset.key)==="1";
+c.onchange=()=>localStorage.setItem(c.dataset.key,c.checked?"1":"0");
+});
 
 loadData();
 </script>
+</body>
+</html>
