@@ -3,26 +3,22 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const http = require('http');
+const bcrypt = require('bcrypt');
 const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
 
 // =============================================
-// SOCKET.IO - Real-time untuk semua client
+// SOCKET.IO
 // =============================================
 const io = new Server(server, {
     cors: { origin: "*", methods: ["GET", "POST"] }
 });
-
-// Export io supaya bisa dipakai di routes
 app.set('io', io);
-
 io.on('connection', (socket) => {
     console.log('🟢 Client terhubung:', socket.id);
-    socket.on('disconnect', () => {
-        console.log('🔴 Client disconnect:', socket.id);
-    });
+    socket.on('disconnect', () => console.log('🔴 Client disconnect:', socket.id));
 });
 
 // =============================================
@@ -48,13 +44,22 @@ app.get('/supervisor', (req, res) => res.sendFile(path.join(publicPath, 'supervi
 // KONEKSI DATABASE
 // =============================================
 const mongoURI = "mongodb+srv://fitunfoun2026:Fitun2026@cluster0.p404al7.mongodb.net/supermarket_db?retryWrites=true&w=majority&appName=Cluster0";
-
 mongoose.connect(mongoURI)
     .then(() => console.log("✅ DATABASE PUSAT AKTIF"))
     .catch(err => console.error("❌ KONEKSI GAGAL:", err.message));
 
 // =============================================
-// SCHEMA TRANSAKSI (MongoDB - bukan file JSON)
+// SCHEMA USER (Baru)
+// =============================================
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: 'kasir' }
+});
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+// =============================================
+// SCHEMA TRANSAKSI
 // =============================================
 const transactionSchema = new mongoose.Schema({
     kasir: { type: String, default: 'Unknown' },
@@ -65,26 +70,82 @@ const transactionSchema = new mongoose.Schema({
 const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
 
 // =============================================
-// PRODUCT ROUTES (dari routes/products.js)
+// AUTH ROUTES
+// =============================================
+
+// LOGIN — cek MongoDB, fallback ke hardcode lama saat migrasi
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password)
+        return res.status(400).json({ success: false, message: "Username & password wajib diisi" });
+
+    try {
+        const user = await User.findOne({ username });
+        if (!user)
+            return res.status(401).json({ success: false, message: "Username tidak ditemukan" });
+
+        const cocok = await bcrypt.compare(password, user.password);
+        if (!cocok)
+            return res.status(401).json({ success: false, message: "Password salah" });
+
+        res.json({ success: true, username: user.username, role: user.role });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// GANTI PASSWORD
+app.put('/api/change-password', async (req, res) => {
+    const { username, passwordLama, passwordBaru, konfirmasi } = req.body;
+
+    if (!username || !passwordLama || !passwordBaru || !konfirmasi)
+        return res.status(400).json({ success: false, message: "Semua field wajib diisi" });
+
+    if (passwordBaru !== konfirmasi)
+        return res.status(400).json({ success: false, message: "Password baru dan konfirmasi tidak cocok" });
+
+    if (passwordBaru.length < 6)
+        return res.status(400).json({ success: false, message: "Password baru minimal 6 karakter" });
+
+    if (passwordBaru === passwordLama)
+        return res.status(400).json({ success: false, message: "Password baru tidak boleh sama dengan yang lama" });
+
+    try {
+        const user = await User.findOne({ username });
+        if (!user)
+            return res.status(404).json({ success: false, message: "User tidak ditemukan" });
+
+        const cocok = await bcrypt.compare(passwordLama, user.password);
+        if (!cocok)
+            return res.status(401).json({ success: false, message: "Password lama salah" });
+
+        user.password = await bcrypt.hash(passwordBaru, 10);
+        await user.save();
+
+        res.json({ success: true, message: `Password ${username} berhasil diubah` });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// DAFTAR USER (untuk panel admin)
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await User.find({}, { password: 0 }); // jangan kirim password
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// =============================================
+// PRODUCT ROUTES
 // =============================================
 const productRoutes = require('./routes/products');
 app.use('/api/products', productRoutes);
 
 // =============================================
-// LOGIN ROUTE
-// =============================================
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    const users = { admin: "1234", ani: "1111" };
-    if (users[username] && users[username] === password) {
-        res.json({ success: true, username });
-    } else {
-        res.status(401).json({ success: false, message: "Username/Password salah" });
-    }
-});
-
-// =============================================
-// GET TRANSAKSI - Ambil dari MongoDB
+// TRANSAKSI
 // =============================================
 app.get('/api/transactions', async (req, res) => {
     try {
@@ -95,22 +156,15 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
-// =============================================
-// POST TRANSAKSI - Simpan ke MongoDB + Socket
-// =============================================
 app.post('/api/transactions', async (req, res) => {
     try {
         const { items, kasir, total } = req.body;
-
-        if (!items || items.length === 0) {
+        if (!items || items.length === 0)
             return res.status(400).json({ message: "Transaksi kosong" });
-        }
 
-        // Simpan transaksi ke MongoDB
         const baru = new Transaction({ items, kasir, total });
         await baru.save();
 
-        // Potong stok otomatis
         const Product = mongoose.model('Product');
         for (const item of items) {
             await Product.findOneAndUpdate(
@@ -119,21 +173,11 @@ app.post('/api/transactions', async (req, res) => {
             );
         }
 
-        // 🔴 Broadcast ke semua client (Admin, Supervisor, Electron)
         const io = req.app.get('io');
-        io.emit('transaksi_baru', {
-            _id: baru._id,
-            kasir: baru.kasir,
-            total: baru.total,
-            items: baru.items,
-            waktu: baru.waktu
-        });
-
-        // Trigger refresh stok ke semua client
+        io.emit('transaksi_baru', { _id: baru._id, kasir: baru.kasir, total: baru.total, items: baru.items, waktu: baru.waktu });
         io.emit('stok_update', { trigger: 'transaksi', kasir });
 
         res.status(201).json({ status: "success", message: "Transaksi & Stok Terupdate" });
-
     } catch (err) {
         console.error("❌ ERROR TRANSAKSI:", err.message);
         res.status(500).json({ error: err.message });
