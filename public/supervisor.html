@@ -401,37 +401,38 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const API="https://pos-server-fitun.onrender.com/api";
-// Akun supervisor — sesuaikan di sini
-const SV_USERS={supervisor:"supervisor123",admin:"1234",ani:"1111"};
+// Autentikasi via API MongoDB (password tidak disimpan hardcode)
 let cacheProducts=[],cacheTransactions=[],filteredOpname=[],filteredTrxAll=[];
 
 /* ===== LOGIN ===== */
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('sv-user').value.trim();
   const p=document.getElementById('sv-pass').value;
   const err=document.getElementById('sv-error');
   if(!u||!p){err.innerText="Username & password wajib diisi";return;}
-  if(SV_USERS[u]&&SV_USERS[u]===p){
-    sessionStorage.setItem('fitun_sv',u);
+  err.innerText="⏳ Memeriksa...";
+  try{
+    const res=await fetch(`${API}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const data=await res.json();
+    if(!res.ok){err.innerText="❌ "+(data.message||"Username atau password salah");document.getElementById('sv-pass').value='';return;}
+    sessionStorage.setItem('fitun_sv',data.username);
+    sessionStorage.setItem('fitun_role',data.role||'');
     document.getElementById('loginPage').style.display='none';
     document.getElementById('appLayout').style.display='flex';
-    document.getElementById('lbl-user').innerText='👤 '+u;
+    document.getElementById('lbl-user').innerText='👤 '+data.username;
     document.getElementById('rt-indicator').style.display='flex';
     loadData();initSocket();
-  }else{
-    err.innerText="❌ Username atau password salah";
-    document.getElementById('sv-pass').value='';
-  }
+  }catch(e){err.innerText="❌ Gagal konek ke server";document.getElementById('sv-pass').value='';}
 }
 document.getElementById('sv-btn').onclick=doLogin;
 document.getElementById('sv-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('sv-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('sv-pass').focus();});
 
-function logout(){if(!confirm("Yakin mau logout?"))return;sessionStorage.removeItem('fitun_sv');location.reload();}
+function logout(){if(!confirm("Yakin mau logout?"))return;sessionStorage.removeItem('fitun_sv');sessionStorage.removeItem('fitun_role');location.reload();}
 
 (function checkSession(){
   const saved=sessionStorage.getItem('fitun_sv');
-  if(saved&&SV_USERS[saved]){
+  if(saved){
     document.getElementById('loginPage').style.display='none';
     document.getElementById('appLayout').style.display='flex';
     document.getElementById('lbl-user').innerText='👤 '+saved;
@@ -485,18 +486,15 @@ function renderDashboard(){
   document.getElementById('s-crit').innerText=kritis.length;
   document.getElementById('sv-wastage').innerText=wastageTotal;
 
-  // 5 transaksi terakhir
   const tbody=document.querySelector("#t-trx tbody");tbody.innerHTML="";
   const last5=cacheTransactions.slice(-5).reverse();
   if(!last5.length){tbody.innerHTML='<tr><td colspan="4"><div class="empty-state" style="padding:20px;"><div class="empty-icon">🧾</div><p>Belum ada transaksi</p></div></td></tr>';}
   else{last5.forEach(t=>{const items=(t.items||[]).reduce((s,i)=>s+Number(i.qty||0),0);tbody.innerHTML+=`<tr><td>${new Date(t.waktu).toLocaleTimeString('id-ID')}</td><td>${t.kasir||'-'}</td><td>${items}</td><td>${fmt(t.total)}</td></tr>`;});}
 
-  // Stok kritis top 5
   const tbodyK=document.querySelector("#t-kritis-dash tbody");tbodyK.innerHTML="";
   if(!kritis.length){tbodyK.innerHTML='<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">✅ Tidak ada stok kritis</td></tr>';}
   else{kritis.sort((a,b)=>a.stock-b.stock).slice(0,5).forEach(p=>{const badge=p.stock===0?'<span class="badge badge-red">Habis</span>':'<span class="badge badge-yellow">Kritis</span>';tbodyK.innerHTML+=`<tr><td>${p.name}</td><td><strong>${p.stock}</strong></td><td>${badge}</td></tr>`;});}
 
-  // Per kategori
   const katMap={};
   cacheProducts.forEach(p=>{const k=p.category||'Lainnya';if(!katMap[k])katMap[k]={sku:0,stok:0,kritis:0,habis:0};katMap[k].sku++;katMap[k].stok+=p.stock||0;if(p.stock===0)katMap[k].habis++;else if(p.stock<=5)katMap[k].kritis++;});
   const tbodyKat=document.querySelector("#t-kategori-stok tbody");tbodyKat.innerHTML="";

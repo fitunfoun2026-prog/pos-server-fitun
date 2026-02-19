@@ -418,40 +418,42 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const API="https://pos-server-fitun.onrender.com/api";
-// Akun admin & password — sesuaikan di sini
-const ADMIN_USERS={admin:"1234",supervisor:"supervisor123"};
+// Autentikasi via API MongoDB (password tidak disimpan hardcode)
 let cacheProducts=[],cacheTransactions=[],editBarcode="",hapusBarcode="";
 let filteredProds=[],finRows=[];
 let prodPage=1;const prodPerPage=15;
 let finPage=1;const finPerPage=20;
 
 /* ===== LOGIN ===== */
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('adm-user').value.trim();
   const p=document.getElementById('adm-pass').value;
   const err=document.getElementById('adm-error');
   if(!u||!p){err.innerText="Username & password wajib diisi";return;}
-  if(ADMIN_USERS[u]&&ADMIN_USERS[u]===p){
-    sessionStorage.setItem('fitun_admin',u);
+  err.innerText="⏳ Memeriksa...";
+  try{
+    const res=await fetch(`${API}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const data=await res.json();
+    if(!res.ok){err.innerText="❌ "+(data.message||"Username atau password salah");document.getElementById('adm-pass').value='';return;}
+    if(data.role==='kasir'){err.innerText="❌ Akun kasir tidak bisa masuk ke Admin Panel";document.getElementById('adm-pass').value='';return;}
+    sessionStorage.setItem('fitun_admin',data.username);
+    sessionStorage.setItem('fitun_role',data.role||'');
     document.getElementById('loginPage').style.display='none';
     document.getElementById('appLayout').style.display='flex';
-    document.getElementById('lbl-user').innerText='👤 '+u;
+    document.getElementById('lbl-user').innerText='👤 '+data.username;
     document.getElementById('rt-indicator').style.display='flex';
     muatData();initSocket();
-  }else{
-    err.innerText="❌ Username atau password salah";
-    document.getElementById('adm-pass').value='';
-  }
+  }catch(e){err.innerText="❌ Gagal konek ke server";document.getElementById('adm-pass').value='';}
 }
 document.getElementById('adm-btn').onclick=doLogin;
 document.getElementById('adm-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('adm-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('adm-pass').focus();});
 
-function logout(){if(!confirm("Yakin mau logout?"))return;sessionStorage.removeItem('fitun_admin');location.reload();}
+function logout(){if(!confirm("Yakin mau logout?"))return;sessionStorage.removeItem('fitun_admin');sessionStorage.removeItem('fitun_role');location.reload();}
 
 (function checkSession(){
   const saved=sessionStorage.getItem('fitun_admin');
-  if(saved&&ADMIN_USERS[saved]){
+  if(saved){
     document.getElementById('loginPage').style.display='none';
     document.getElementById('appLayout').style.display='flex';
     document.getElementById('lbl-user').innerText='👤 '+saved;
