@@ -139,6 +139,37 @@ app.get('/api/users', async (req, res) => {
 });
 
 // =============================================
+// MIGRATION ENDPOINT — SEMENTARA
+// Buka di browser: https://pos-server-fitun.onrender.com/api/migrate-users
+// Setelah berhasil, hapus endpoint ini dari app.js
+// =============================================
+app.get('/api/migrate-users', async (req, res) => {
+    const defaultUsers = [
+        { username: 'admin',      password: '1234',          role: 'admin' },
+        { username: 'supervisor', password: 'supervisor123',  role: 'supervisor' },
+        { username: 'ani',        password: '1111',          role: 'kasir' },
+    ];
+
+    const hasil = [];
+    for (const u of defaultUsers) {
+        try {
+            const sudahAda = await User.findOne({ username: u.username });
+            if (sudahAda) {
+                hasil.push(`⏭️ ${u.username}: sudah ada, dilewati`);
+                continue;
+            }
+            const hashed = await bcrypt.hash(u.password, 10);
+            await User.create({ username: u.username, password: hashed, role: u.role });
+            hasil.push(`✅ ${u.username}: berhasil dibuat`);
+        } catch (err) {
+            hasil.push(`❌ ${u.username}: ${err.message}`);
+        }
+    }
+
+    res.json({ selesai: true, hasil });
+});
+
+// =============================================
 // PRODUCT ROUTES
 // =============================================
 const productRoutes = require('./routes/products');
