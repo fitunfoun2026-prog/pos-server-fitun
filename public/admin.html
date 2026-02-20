@@ -195,7 +195,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 <div class="login-page" id="loginPage">
   <div class="login-card">
     <div class="login-logo">
-      <h1>⚡ FITUN FOUN</h1>
+      <h1>⚡ FITUN HQ SYSTEM</h1>
       <p>Admin Control Panel</p>
     </div>
     <span class="login-badge">🔐 Area Terbatas — Admin Only</span>
@@ -212,7 +212,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 <div class="app-layout" id="appLayout" style="display:none;">
 <div class="sidebar no-print">
   <div class="sidebar-brand">
-    <div class="logo-title">⚡ FITUN FOUN</div>
+    <div class="logo-title">⚡ FITUN HQ SYSTEM</div>
     <div class="logo-sub">Admin Control Panel</div>
     <div class="logo-user" id="lbl-user">👤 admin</div>
   </div>
@@ -235,6 +235,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   <div class="menu-section">
     <div class="menu-label">Pengaturan</div>
     <div class="nav-item" onclick="tab('k-setting',this)"><span class="nav-icon">🔐</span> Setting Password</div>
+    <div class="nav-item" onclick="tab('k-nota',this)"><span class="nav-icon">🧾</span> Setting Nota</div>
   </div>
   <div class="sidebar-footer">
     <div class="s-clock" id="clock"></div>
@@ -427,6 +428,99 @@ input[readonly]{background:#f8fafc;color:#64748b;}
       <input type="password" id="cp-konfirm" placeholder="Ulangi password baru">
     </div>
     <button class="btn btn-primary btn-full" onclick="gantiPasswordSaya()">🔐 Simpan Password Baru</button>
+  </div>
+</div>
+<!-- ===================== SETTING NOTA ===================== -->
+<div id="k-nota" class="kamar">
+  <div class="page-header">
+    <div><h1>Setting Nota / Struk</h1><p>Atur tampilan nota yang dicetak di kasir</p></div>
+    <div class="header-actions no-print">
+      <button class="btn btn-outline btn-sm" onclick="muatSettingNota()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- FORM SETTING -->
+    <div>
+      <div class="card">
+        <div class="card-title"><span>🏪</span> Identitas Toko</div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Nama Toko</label>
+          <input type="text" id="sn-namaToko" placeholder="Contoh: FITUN FOUN">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Alamat</label>
+          <input type="text" id="sn-alamat" placeholder="Alamat toko (opsional)">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Nomor Telepon</label>
+          <input type="text" id="sn-telepon" placeholder="+670 ... (opsional)">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Header Tambahan</label>
+          <input type="text" id="sn-headerTambahan" placeholder="Teks ekstra di bawah nama toko (opsional)">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>📝</span> Footer Nota</div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Baris 1</label>
+          <input type="text" id="sn-footer1" placeholder="Contoh: Terima kasih!">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Baris 2</label>
+          <input type="text" id="sn-footer2" placeholder="Baris ke-2 footer">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Baris 3</label>
+          <input type="text" id="sn-footer3" placeholder="Baris ke-3 footer">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>⚙️</span> Opsi Tampilan Nota</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;">
+            <input type="checkbox" id="sn-tampilKasir" style="width:16px;height:16px;accent-color:var(--primary);">
+            Tampilkan nama kasir di nota
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;">
+            <input type="checkbox" id="sn-tampilTanggal" style="width:16px;height:16px;accent-color:var(--primary);">
+            Tampilkan tanggal & jam di nota
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;">
+            <input type="checkbox" id="sn-tampilNomor" style="width:16px;height:16px;accent-color:var(--primary);">
+            Tampilkan nomor transaksi di nota
+          </label>
+        </div>
+        <button class="btn btn-primary btn-full" style="margin-top:20px;" onclick="simpanSettingNota()">💾 Simpan Setting Nota</button>
+      </div>
+    </div>
+
+    <!-- PREVIEW NOTA -->
+    <div>
+      <div class="card" style="position:sticky;top:20px;">
+        <div class="card-title"><span>👁️</span> Preview Nota</div>
+        <div id="nota-preview" style="
+          background:white;
+          border:1px dashed #cbd5e1;
+          border-radius:8px;
+          padding:20px;
+          font-family:'Courier New',monospace;
+          font-size:12px;
+          line-height:1.7;
+          color:#1e293b;
+          max-width:300px;
+          margin:0 auto;
+        ">
+          <!-- Preview diisi oleh JS -->
+        </div>
+        <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:12px;">
+          * Preview tampilan nota di kasir
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1048,6 +1142,115 @@ async function konfirmasiHapusUser() {
     }
   } catch (e) { toast("Error koneksi", "error"); }
 }
+
+/* ============================================================
+   SETTING NOTA
+   ============================================================ */
+
+// Extend tab() agar load nota saat tab dibuka
+const _tabOri = tab;
+tab = function(id, el) {
+  _tabOri(id, el);
+  if (id === 'k-nota') muatSettingNota();
+};
+
+async function muatSettingNota() {
+  try {
+    const res = await fetch(`${API}/setting-nota`);
+    const s = await res.json();
+    document.getElementById('sn-namaToko').value = s.namaToko || '';
+    document.getElementById('sn-alamat').value = s.alamat || '';
+    document.getElementById('sn-telepon').value = s.telepon || '';
+    document.getElementById('sn-headerTambahan').value = s.headerTambahan || '';
+    document.getElementById('sn-footer1').value = s.footerLine1 || '';
+    document.getElementById('sn-footer2').value = s.footerLine2 || '';
+    document.getElementById('sn-footer3').value = s.footerLine3 || '';
+    document.getElementById('sn-tampilKasir').checked = s.tampilkanKasir !== false;
+    document.getElementById('sn-tampilTanggal').checked = s.tampilkanTanggal !== false;
+    document.getElementById('sn-tampilNomor').checked = s.tampilkanNomor === true;
+    updatePreviewNota();
+  } catch (e) {
+    toast("Gagal memuat setting nota", "error");
+  }
+}
+
+async function simpanSettingNota() {
+  const body = {
+    namaToko: document.getElementById('sn-namaToko').value.trim(),
+    alamat: document.getElementById('sn-alamat').value.trim(),
+    telepon: document.getElementById('sn-telepon').value.trim(),
+    headerTambahan: document.getElementById('sn-headerTambahan').value.trim(),
+    footerLine1: document.getElementById('sn-footer1').value.trim(),
+    footerLine2: document.getElementById('sn-footer2').value.trim(),
+    footerLine3: document.getElementById('sn-footer3').value.trim(),
+    tampilkanKasir: document.getElementById('sn-tampilKasir').checked,
+    tampilkanTanggal: document.getElementById('sn-tampilTanggal').checked,
+    tampilkanNomor: document.getElementById('sn-tampilNomor').checked,
+  };
+  if (!body.namaToko) { toast("Nama toko wajib diisi", "error"); return; }
+  try {
+    const res = await fetch(`${API}/setting-nota`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      toast(data.message || "Setting nota berhasil disimpan", "success");
+      updatePreviewNota();
+    } else {
+      toast(data.message || "Gagal menyimpan", "error");
+    }
+  } catch (e) { toast("Error koneksi", "error"); }
+}
+
+function updatePreviewNota() {
+  const namaToko = document.getElementById('sn-namaToko').value || 'NAMA TOKO';
+  const alamat = document.getElementById('sn-alamat').value;
+  const telepon = document.getElementById('sn-telepon').value;
+  const header = document.getElementById('sn-headerTambahan').value;
+  const f1 = document.getElementById('sn-footer1').value;
+  const f2 = document.getElementById('sn-footer2').value;
+  const f3 = document.getElementById('sn-footer3').value;
+  const kasir = document.getElementById('sn-tampilKasir').checked;
+  const tanggal = document.getElementById('sn-tampilTanggal').checked;
+  const nomor = document.getElementById('sn-tampilNomor').checked;
+  const garis = '--------------------------------';
+  const now = new Date();
+  let html = `<div style="text-align:center;">`;
+  html += `<div style="font-size:15px;font-weight:700;letter-spacing:1px;">${namaToko}</div>`;
+  if (alamat) html += `<div>${alamat}</div>`;
+  if (telepon) html += `<div>Tel: ${telepon}</div>`;
+  if (header) html += `<div>${header}</div>`;
+  html += `</div><div>${garis}</div>`;
+  if (nomor) html += `<div>No: TRX-${Math.floor(Math.random()*9000)+1000}</div>`;
+  if (tanggal) html += `<div>Tgl: ${now.toLocaleDateString('id-ID')} ${now.toLocaleTimeString('id-ID')}</div>`;
+  if (kasir) html += `<div>Kasir: ani</div>`;
+  html += `<div>${garis}</div>`;
+  html += `<div style="display:flex;justify-content:space-between;"><span>Beras 5kg x1</span><span>$3.50</span></div>`;
+  html += `<div style="display:flex;justify-content:space-between;"><span>Minyak 1L x2</span><span>$4.00</span></div>`;
+  html += `<div style="display:flex;justify-content:space-between;"><span>Gula 1kg x1</span><span>$1.50</span></div>`;
+  html += `<div>${garis}</div>`;
+  html += `<div style="display:flex;justify-content:space-between;font-weight:700;"><span>TOTAL</span><span>$9.00</span></div>`;
+  html += `<div style="display:flex;justify-content:space-between;"><span>Bayar</span><span>$10.00</span></div>`;
+  html += `<div style="display:flex;justify-content:space-between;"><span>Kembali</span><span>$1.00</span></div>`;
+  html += `<div>${garis}</div><div style="text-align:center;">`;
+  if (f1) html += `<div>${f1}</div>`;
+  if (f2) html += `<div>${f2}</div>`;
+  if (f3) html += `<div>${f3}</div>`;
+  html += `</div>`;
+  document.getElementById('nota-preview').innerHTML = html;
+}
+
+// Preview realtime saat input berubah
+['sn-namaToko','sn-alamat','sn-telepon','sn-headerTambahan','sn-footer1','sn-footer2','sn-footer3'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updatePreviewNota);
+});
+['sn-tampilKasir','sn-tampilTanggal','sn-tampilNomor'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', updatePreviewNota);
+});
 </script>
 </body>
 </html>

@@ -240,6 +240,52 @@ app.get('/api/migrate-users', async (req, res) => {
 });
 
 // =============================================
+// SCHEMA SETTING NOTA
+// =============================================
+const notaSchema = new mongoose.Schema({
+    key: { type: String, default: 'main', unique: true },
+    namaToko: { type: String, default: 'FITUN FOUN' },
+    alamat: { type: String, default: '' },
+    telepon: { type: String, default: '' },
+    headerTambahan: { type: String, default: '' },
+    footerLine1: { type: String, default: 'Obrigado 🙏' },
+    footerLine2: { type: String, default: "sasan ne'ebe mau hola ona" },
+    footerLine3: { type: String, default: 'labele fo fila fali' },
+    tampilkanKasir: { type: Boolean, default: true },
+    tampilkanTanggal: { type: Boolean, default: true },
+    tampilkanNomor: { type: Boolean, default: false },
+}, { timestamps: true });
+const SettingNota = mongoose.models.SettingNota || mongoose.model('SettingNota', notaSchema);
+
+// GET setting nota
+app.get('/api/setting-nota', async (req, res) => {
+    try {
+        let setting = await SettingNota.findOne({ key: 'main' });
+        if (!setting) setting = await SettingNota.create({ key: 'main' });
+        res.json(setting);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// SIMPAN setting nota
+app.post('/api/setting-nota', async (req, res) => {
+    try {
+        const fields = ['namaToko','alamat','telepon','headerTambahan','footerLine1','footerLine2','footerLine3','tampilkanKasir','tampilkanTanggal','tampilkanNomor'];
+        const update = {};
+        fields.forEach(f => { if (req.body[f] !== undefined) update[f] = req.body[f]; });
+        const setting = await SettingNota.findOneAndUpdate(
+            { key: 'main' },
+            update,
+            { upsert: true, new: true }
+        );
+        res.json({ success: true, message: 'Setting nota berhasil disimpan', data: setting });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// =============================================
 // PRODUCT ROUTES
 // =============================================
 const productRoutes = require('./routes/products');
