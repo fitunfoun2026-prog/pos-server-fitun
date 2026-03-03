@@ -100,6 +100,8 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .btn-red:hover{background:#dc2626;}
 .btn-outline{background:white;border:1.5px solid #e2e8f0;color:#475569;}
 .btn-outline:hover{border-color:var(--p);color:var(--p);}
+.btn-purple{background:var(--purple);color:white;}
+.btn-purple:hover{background:#7c3aed;}
 .btn-sm{padding:6px 12px;font-size:12px;}
 .btn-full{width:100%;justify-content:center;margin-top:12px;}
 
@@ -170,12 +172,24 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .rt-indicator{position:fixed;bottom:16px;right:16px;z-index:9998;display:flex;align-items:center;gap:8px;background:white;padding:8px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:12px;font-weight:600;color:#64748b;}
 .rt-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;transition:background 0.3s;}
 
+/* ===== BARCODE PRINT STYLES ===== */
+.barcode-preview-box{border:1.5px dashed #a7f3d0;border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f0fdf4;min-height:120px;margin-bottom:16px;}
+.barcode-preview-box .bc-prod-name{font-size:12px;font-weight:700;color:#0f172a;text-align:center;margin-bottom:6px;max-width:200px;word-break:break-word;}
+.barcode-preview-box .bc-prod-price{font-size:13px;font-weight:700;color:#059669;margin-top:6px;}
+.barcode-size-btn{padding:7px 14px;border:1.5px solid #e2e8f0;background:white;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:#475569;transition:all 0.2s;font-family:'Inter',sans-serif;}
+.barcode-size-btn:hover,.barcode-size-btn.active{background:var(--p);color:white;border-color:var(--p);}
+.barcode-count-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.barcode-count-wrap input{width:70px;text-align:center;}
+
 @media print{
   .sidebar{display:none !important;}
   .main{margin:0;padding:20px;width:100%;}
   .no-print{display:none !important;}
   .card{box-shadow:none;border:1px solid #e2e8f0;break-inside:avoid;}
+  body.printing-barcode *:not(#barcode-print-area):not(#barcode-print-area *){display:none !important;}
+  body.printing-barcode #barcode-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;}
 }
+#barcode-print-area{display:none;}
 </style>
 </head>
 <body>
@@ -277,7 +291,13 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 
 <!-- STOCK OPNAME -->
 <div id="s-stok" class="kamar">
-  <div class="page-header"><div><h1>Stock Opname (Fisik)</h1><p>Pencocokan stok sistem vs stok fisik di rak</p></div><button class="btn btn-outline btn-sm no-print" onclick="window.print()">🖨️ Print</button></div>
+  <div class="page-header">
+    <div><h1>Stock Opname (Fisik)</h1><p>Pencocokan stok sistem vs stok fisik di rak</p></div>
+    <div class="header-actions no-print">
+      <button class="btn btn-purple btn-sm" onclick="openBulkPrintBarcode()">🏷️ Print Barcode Massal</button>
+      <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
   <div class="card no-print" style="padding:14px 18px;">
     <div class="filter-bar">
       <div class="search-box"><input type="text" id="opname-search" placeholder="Cari produk..." oninput="filterOpname()"></div>
@@ -302,7 +322,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
   <div class="card">
     <div class="card-title"><span>🚨</span> Daftar Produk Kritis</div>
-    <div class="table-wrap"><table id="t-stok-kritis"><thead><tr><th>#</th><th>SKU</th><th>Produk</th><th>Kategori</th><th>Supplier</th><th>Stok</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+    <div class="table-wrap"><table id="t-stok-kritis"><thead><tr><th>#</th><th>SKU</th><th>Produk</th><th>Kategori</th><th>Supplier</th><th>Stok</th><th>Status</th><th class="no-print">Barcode</th></tr></thead><tbody></tbody></table></div>
   </div>
 </div>
 
@@ -393,16 +413,114 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
+<!-- ========== MODAL PRINT BARCODE (Single) ========== -->
+<div class="modal-overlay" id="modal-barcode-sv">
+  <div class="modal" style="width:560px;">
+    <div class="modal-header">
+      <h3>🏷️ Print Barcode</h3>
+      <button class="modal-close" onclick="closeModal('modal-barcode-sv')">✕</button>
+    </div>
+    <div style="background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:700;font-size:15px;color:#0f172a;" id="sv-bc-modal-nama">-</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">SKU: <span id="sv-bc-modal-sku" style="font-family:monospace;font-weight:600;">-</span> &nbsp;|&nbsp; Harga: <span id="sv-bc-modal-harga" style="font-weight:600;color:#059669;">-</span></div>
+    </div>
+    <div class="barcode-preview-box">
+      <div class="bc-prod-name" id="sv-bc-preview-nama">-</div>
+      <svg id="sv-bc-preview-svg"></svg>
+      <div class="bc-prod-price" id="sv-bc-preview-harga">-</div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Ukuran Label</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="barcode-size-btn active" id="sv-size-small" onclick="setSvBarcodeSize('small')">Kecil</button>
+        <button class="barcode-size-btn" id="sv-size-medium" onclick="setSvBarcodeSize('medium')">Sedang</button>
+        <button class="barcode-size-btn" id="sv-size-large" onclick="setSvBarcodeSize('large')">Besar</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Jumlah Label</div>
+      <div class="barcode-count-wrap">
+        <button class="btn btn-outline btn-sm" onclick="ubahJumlahSvBC(-1)">−</button>
+        <input type="number" id="sv-bc-jumlah" value="1" min="1" max="100" onchange="clampSvJumlahBC()">
+        <button class="btn btn-outline btn-sm" onclick="ubahJumlahSvBC(1)">+</button>
+        <span style="font-size:13px;color:#64748b;">label</span>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('sv-bc-jumlah').value=5">×5</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('sv-bc-jumlah').value=10">×10</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('sv-bc-jumlah').value=20">×20</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="sv-bc-show-name" checked onchange="updateSvBCPreview()" style="accent-color:var(--p);width:15px;height:15px;">
+        Tampilkan nama produk
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="sv-bc-show-price" checked onchange="updateSvBCPreview()" style="accent-color:var(--p);width:15px;height:15px;">
+        Tampilkan harga
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-barcode-sv')">Batal</button>
+      <button class="btn btn-purple" onclick="printSvBarcode()">🖨️ Print Barcode</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL PRINT BARCODE MASSAL ========== -->
+<div class="modal-overlay" id="modal-barcode-bulk">
+  <div class="modal" style="width:600px;">
+    <div class="modal-header">
+      <h3>🏷️ Print Barcode Massal</h3>
+      <button class="modal-close" onclick="closeModal('modal-barcode-bulk')">✕</button>
+    </div>
+    <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e;">
+      ℹ️ Mode massal: cetak 1 label per produk untuk semua produk yang ditampilkan di tabel Stock Opname.
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Ukuran Label</div>
+      <div style="display:flex;gap:8px;">
+        <button class="barcode-size-btn active" id="bulk-size-small" onclick="setBulkSize('small')">Kecil</button>
+        <button class="barcode-size-btn" id="bulk-size-medium" onclick="setBulkSize('medium')">Sedang</button>
+        <button class="barcode-size-btn" id="bulk-size-large" onclick="setBulkSize('large')">Besar</button>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="bulk-show-name" checked style="accent-color:var(--p);width:15px;height:15px;">
+        Tampilkan nama produk
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="bulk-show-price" checked style="accent-color:var(--p);width:15px;height:15px;">
+        Tampilkan harga
+      </label>
+    </div>
+    <div style="background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:13px;color:#475569;">Total produk yang akan dicetak: <strong id="bulk-total-count">0</strong> label</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-barcode-bulk')">Batal</button>
+      <button class="btn btn-purple" onclick="printBulkBarcode()">🖨️ Print Semua Barcode</button>
+    </div>
+  </div>
+</div>
+
+<!-- AREA PRINT BARCODE -->
+<div id="barcode-print-area"></div>
+
 <!-- RT INDICATOR -->
 <div class="rt-indicator no-print" id="rt-indicator" style="display:none;">
   <span class="rt-dot" id="rt-dot"></span><span id="rt-text">Menghubungkan...</span>
 </div>
 
+<!-- JsBarcode CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const API="https://pos-server-fitun.onrender.com/api";
-// Autentikasi via API MongoDB (password tidak disimpan hardcode)
 let cacheProducts=[],cacheTransactions=[],filteredOpname=[],filteredTrxAll=[];
+let svBcCurrentBarcode="",svBcCurrentSize="small",bulkCurrentSize="small";
 
 /* ===== LOGIN ===== */
 async function doLogin(){
@@ -531,13 +649,29 @@ function lihatDetailTrx(idx){
 }
 
 /* ===== STOCK OPNAME ===== */
-function renderOpname(products){filteredOpname=[...products];renderTabelOpname(filteredOpname);document.getElementById('opname-count').innerText=`(${products.length} produk)`;}
+function renderOpname(products){
+  filteredOpname=[...products];
+  renderTabelOpname(filteredOpname);
+  document.getElementById('opname-count').innerText=`(${products.length} produk)`;
+}
 function renderTabelOpname(list){
   const tbody=document.querySelector("#t-opname tbody");tbody.innerHTML="";
   if(!list.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><p>Tidak ada produk</p></div></td></tr>';return;}
   list.forEach((p,i)=>{
     const cls=p.stock===0?'low':p.stock<=5?'warn-row':'';
-    tbody.innerHTML+=`<tr class="${cls}"><td>${i+1}</td><td>${p.name}</td><td><span class="badge badge-blue">${p.category||'-'}</span></td><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td><strong>${p.stock}</strong></td><td><input type="number" class="input-inline" id="fis-${p.barcode}" placeholder="-" min="0" onchange="hitungSelisih('${p.barcode}',${p.stock})"></td><td id="selisih-${p.barcode}" style="font-weight:600;color:#94a3b8;">-</td><td class="no-print"><button class="btn btn-green btn-sm" onclick="simpanFisik('${p.barcode}',${p.stock})">✅ Simpan</button></td></tr>`;
+    tbody.innerHTML+=`<tr class="${cls}">
+      <td>${i+1}</td>
+      <td>${p.name}</td>
+      <td><span class="badge badge-blue">${p.category||'-'}</span></td>
+      <td style="font-family:monospace;font-size:12px;">${p.barcode}</td>
+      <td><strong>${p.stock}</strong></td>
+      <td><input type="number" class="input-inline" id="fis-${p.barcode}" placeholder="-" min="0" onchange="hitungSelisih('${p.barcode}',${p.stock})"></td>
+      <td id="selisih-${p.barcode}" style="font-weight:600;color:#94a3b8;">-</td>
+      <td class="no-print" style="white-space:nowrap;">
+        <button class="btn btn-purple btn-sm" onclick="openSvPrintBarcode('${p.barcode}')" title="Print Barcode">🏷️</button>
+        <button class="btn btn-green btn-sm" onclick="simpanFisik('${p.barcode}',${p.stock})">✅</button>
+      </td>
+    </tr>`;
   });
 }
 function filterOpname(){
@@ -579,10 +713,19 @@ function renderKritis(products){
   document.getElementById('sk-habis').innerText=habis.length;document.getElementById('sk-kritis').innerText=kritis.length;document.getElementById('sk-warn').innerText=warn.length;
   const tbody=document.querySelector("#t-stok-kritis tbody");tbody.innerHTML="";
   const list=[...habis,...kritis,...warn];
-  if(!list.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua stok aman!</p></div></td></tr>';return;}
+  if(!list.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua stok aman!</p></div></td></tr>';return;}
   list.forEach((p,i)=>{
     const badge=p.stock===0?'<span class="badge badge-red">Habis</span>':p.stock<=5?'<span class="badge badge-yellow">Kritis</span>':'<span class="badge badge-purple">Perhatian</span>';
-    tbody.innerHTML+=`<tr><td>${i+1}</td><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td>${p.name}</td><td><span class="badge badge-blue">${p.category||'-'}</span></td><td>${p.supplier||'-'}</td><td><strong>${p.stock}</strong></td><td>${badge}</td></tr>`;
+    tbody.innerHTML+=`<tr>
+      <td>${i+1}</td>
+      <td style="font-family:monospace;font-size:12px;">${p.barcode}</td>
+      <td>${p.name}</td>
+      <td><span class="badge badge-blue">${p.category||'-'}</span></td>
+      <td>${p.supplier||'-'}</td>
+      <td><strong>${p.stock}</strong></td>
+      <td>${badge}</td>
+      <td class="no-print"><button class="btn btn-purple btn-sm" onclick="openSvPrintBarcode('${p.barcode}')">🏷️</button></td>
+    </tr>`;
   });
 }
 
@@ -672,6 +815,214 @@ function resetChecklist(){
   if(!confirm("Reset semua checklist hari ini?"))return;
   document.querySelectorAll('.checklist-item').forEach(item=>{localStorage.removeItem(item.dataset.key);item.classList.remove('done');item.querySelector('input[type=checkbox]').checked=false;});
   updateProgress();toast("Checklist direset","info");
+}
+
+/* ============================================================
+   FITUR PRINT BARCODE — SUPERVISOR
+   ============================================================ */
+
+// Helper generate barcode ke SVG element
+function generateBarcodeToSvg(svgEl, barcode, width, height) {
+  try {
+    JsBarcode(svgEl, barcode, {
+      format: "CODE128",
+      width: width,
+      height: height,
+      displayValue: true,
+      fontSize: 8,
+      margin: 2,
+      background: "white"
+    });
+    return true;
+  } catch(e) {
+    try {
+      JsBarcode(svgEl, barcode, {
+        format: "CODE39",
+        width: width,
+        height: height,
+        displayValue: true,
+        fontSize: 8,
+        margin: 2,
+        background: "white"
+      });
+      return true;
+    } catch(e2) {
+      return false;
+    }
+  }
+}
+
+// Buka modal print barcode single produk (dari tabel)
+function openSvPrintBarcode(barcode) {
+  const p = cacheProducts.find(x => x.barcode === barcode);
+  if (!p) { toast("Produk tidak ditemukan", "error"); return; }
+  svBcCurrentBarcode = barcode;
+  svBcCurrentSize = 'small';
+
+  document.getElementById('sv-bc-modal-nama').innerText = p.name;
+  document.getElementById('sv-bc-modal-sku').innerText = barcode;
+  document.getElementById('sv-bc-modal-harga').innerText = fmt(p.price);
+  document.getElementById('sv-bc-preview-nama').innerText = p.name;
+  document.getElementById('sv-bc-preview-harga').innerText = fmt(p.price);
+  document.getElementById('sv-bc-jumlah').value = 1;
+  document.getElementById('sv-bc-show-name').checked = true;
+  document.getElementById('sv-bc-show-price').checked = true;
+  document.querySelectorAll('[id^="sv-size-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('sv-size-small').classList.add('active');
+
+  openModal('modal-barcode-sv');
+  updateSvBCPreview();
+}
+
+function updateSvBCPreview() {
+  const svgEl = document.getElementById('sv-bc-preview-svg');
+  const showName = document.getElementById('sv-bc-show-name').checked;
+  const showPrice = document.getElementById('sv-bc-show-price').checked;
+  document.getElementById('sv-bc-preview-nama').style.display = showName ? 'block' : 'none';
+  document.getElementById('sv-bc-preview-harga').style.display = showPrice ? 'block' : 'none';
+  const widthMap = { small: 1.2, medium: 1.6, large: 2.0 };
+  const heightMap = { small: 40, medium: 55, large: 70 };
+  try {
+    JsBarcode(svgEl, svBcCurrentBarcode, {
+      format: "CODE128",
+      width: widthMap[svBcCurrentSize],
+      height: heightMap[svBcCurrentSize],
+      displayValue: true,
+      fontSize: 10,
+      margin: 4,
+      background: "transparent"
+    });
+  } catch(e) {}
+}
+
+function setSvBarcodeSize(size) {
+  svBcCurrentSize = size;
+  document.querySelectorAll('[id^="sv-size-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('sv-size-' + size).classList.add('active');
+  updateSvBCPreview();
+}
+
+function ubahJumlahSvBC(delta) {
+  const inp = document.getElementById('sv-bc-jumlah');
+  let val = parseInt(inp.value) + delta;
+  if (val < 1) val = 1;
+  if (val > 100) val = 100;
+  inp.value = val;
+}
+
+function clampSvJumlahBC() {
+  const inp = document.getElementById('sv-bc-jumlah');
+  let val = parseInt(inp.value) || 1;
+  if (val < 1) val = 1;
+  if (val > 100) val = 100;
+  inp.value = val;
+}
+
+function printSvBarcode() {
+  const p = cacheProducts.find(x => x.barcode === svBcCurrentBarcode);
+  if (!p) { toast("Produk tidak ditemukan", "error"); return; }
+  const jumlah = parseInt(document.getElementById('sv-bc-jumlah').value) || 1;
+  const showName = document.getElementById('sv-bc-show-name').checked;
+  const showPrice = document.getElementById('sv-bc-show-price').checked;
+  const size = svBcCurrentSize;
+  const widthMap = { small: 1.0, medium: 1.4, large: 1.8 };
+  const heightMap = { small: 35, medium: 50, large: 65 };
+
+  doBuildAndPrint([{ product: p, jumlah }], size, widthMap[size], heightMap[size], showName, showPrice);
+  closeModal('modal-barcode-sv');
+}
+
+// Modal print barcode massal
+function openBulkPrintBarcode() {
+  bulkCurrentSize = 'small';
+  document.getElementById('bulk-total-count').innerText = filteredOpname.length;
+  document.querySelectorAll('[id^="bulk-size-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('bulk-size-small').classList.add('active');
+  openModal('modal-barcode-bulk');
+}
+
+function setBulkSize(size) {
+  bulkCurrentSize = size;
+  document.querySelectorAll('[id^="bulk-size-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('bulk-size-' + size).classList.add('active');
+}
+
+function printBulkBarcode() {
+  if (!filteredOpname.length) { toast("Tidak ada produk untuk dicetak", "error"); return; }
+  const showName = document.getElementById('bulk-show-name').checked;
+  const showPrice = document.getElementById('bulk-show-price').checked;
+  const size = bulkCurrentSize;
+  const widthMap = { small: 1.0, medium: 1.4, large: 1.8 };
+  const heightMap = { small: 35, medium: 50, large: 65 };
+
+  const items = filteredOpname.map(p => ({ product: p, jumlah: 1 }));
+  doBuildAndPrint(items, size, widthMap[size], heightMap[size], showName, showPrice);
+  closeModal('modal-barcode-bulk');
+}
+
+// Fungsi utama: bangun label & print
+function doBuildAndPrint(items, size, bw, bh, showName, showPrice) {
+  const area = document.getElementById('barcode-print-area');
+  area.innerHTML = '';
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:white;';
+
+  items.forEach(({ product: p, jumlah }) => {
+    for (let i = 0; i < jumlah; i++) {
+      const label = document.createElement('div');
+      const labelW = size === 'small' ? '100px' : size === 'medium' ? '140px' : '180px';
+      label.style.cssText = `width:${labelW};border:1px solid #ccc;padding:5px 6px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;`;
+
+      if (showName) {
+        const nameEl = document.createElement('div');
+        nameEl.innerText = p.name;
+        nameEl.style.cssText = `font-size:${size==='small'?'8':'10'}px;font-weight:700;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;font-family:Arial,sans-serif;`;
+        label.appendChild(nameEl);
+      }
+
+      const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      label.appendChild(svgEl);
+      generateBarcodeToSvg(svgEl, p.barcode, bw, bh);
+
+      if (showPrice) {
+        const priceEl = document.createElement('div');
+        priceEl.innerText = fmt(p.price);
+        priceEl.style.cssText = `font-size:${size==='small'?'8':'10'}px;font-weight:700;color:#059669;margin-top:2px;font-family:Arial,sans-serif;`;
+        label.appendChild(priceEl);
+      }
+
+      grid.appendChild(label);
+    }
+  });
+
+  area.appendChild(grid);
+
+  const printStyle = document.createElement('style');
+  printStyle.id = 'bc-print-style';
+  printStyle.innerHTML = `
+    @media print {
+      body > *:not(#barcode-print-area) { display: none !important; }
+      #barcode-print-area {
+        display: block !important;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+        background: white;
+        z-index: 99999;
+      }
+    }
+  `;
+  document.head.appendChild(printStyle);
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      const ps = document.getElementById('bc-print-style');
+      if (ps) ps.remove();
+      area.innerHTML = '';
+    }, 1500);
+  }, 300);
 }
 
 /* ===== SOCKET.IO ===== */

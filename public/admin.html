@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HQ Admin System - Fitun Foun</title>
+<title>WEB ADMIN</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 :root{--primary:#1e40af;--accent:#3b82f6;--bg:#f8fafc;--sidebar:#0f172a;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--purple:#8b5cf6;}
@@ -98,6 +98,8 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .btn-warning:hover{background:#d97706;}
 .btn-outline{background:white;border:1.5px solid #e2e8f0;color:#475569;}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+.btn-purple{background:var(--purple);color:white;}
+.btn-purple:hover{background:#7c3aed;}
 .btn-sm{padding:6px 12px;font-size:12px;}
 .btn-full{width:100%;justify-content:center;}
 
@@ -181,11 +183,39 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .pw-strength.strong{background:#10b981;width:100%;}
 .pw-strength-label{font-size:11px;margin-top:3px;}
 
-@media print{
+/* ===== BARCODE PRINT STYLES ===== */
+.barcode-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.barcode-preview-box{border:1.5px dashed #cbd5e1;border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;min-height:120px;}
+.barcode-preview-box .bc-prod-name{font-size:12px;font-weight:700;color:#0f172a;text-align:center;margin-bottom:6px;max-width:180px;word-break:break-word;}
+.barcode-preview-box .bc-prod-price{font-size:13px;font-weight:700;color:var(--primary);margin-top:6px;}
+.barcode-count-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.barcode-count-wrap input{width:90px;}
+.barcode-size-wrap{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.barcode-size-btn{padding:7px 14px;border:1.5px solid #e2e8f0;background:white;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:#475569;transition:all 0.2s;font-family:'Inter',sans-serif;}
+.barcode-size-btn:hover,.barcode-size-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+/* ===== PRINT BARCODE PAGE ===== */
+@media print {
   .sidebar,.no-print{display:none !important;}
-  .main-content{margin:0;padding:20px;width:100%;}
+  .main-content{margin:0;padding:0;width:100%;}
   .card{box-shadow:none;border:1px solid #e2e8f0;}
+  body.printing-barcode *:not(#barcode-print-area):not(#barcode-print-area *){display:none !important;}
+  body.printing-barcode #barcode-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;}
 }
+#barcode-print-area{display:none;}
+#barcode-print-area.show{display:block;}
+
+.barcode-label-grid{display:flex;flex-wrap:wrap;gap:6px;padding:10px;}
+.barcode-label{border:1px solid #e2e8f0;border-radius:4px;padding:6px 8px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;}
+.barcode-label.size-small{width:100px;}
+.barcode-label.size-medium{width:140px;}
+.barcode-label.size-large{width:180px;}
+.barcode-label .bl-name{font-size:9px;font-weight:700;text-align:center;color:#0f172a;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px;}
+.barcode-label.size-medium .bl-name{font-size:10px;}
+.barcode-label.size-large .bl-name{font-size:11px;}
+.barcode-label .bl-price{font-size:9px;font-weight:700;color:#1e40af;margin-top:3px;}
+.barcode-label.size-medium .bl-price{font-size:10px;}
+.barcode-label.size-large .bl-price{font-size:11px;}
 </style>
 </head>
 <body>
@@ -384,7 +414,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
-<!-- ===================== SETTING PASSWORD ===================== -->
+<!-- SETTING PASSWORD -->
 <div id="k-setting" class="kamar">
   <div class="page-header">
     <div><h1>Setting Password</h1><p>Kelola akun dan password semua user sistem</p></div>
@@ -393,139 +423,75 @@ input[readonly]{background:#f8fafc;color:#64748b;}
       <button class="btn btn-outline btn-sm" onclick="muatUsers()">🔄 Refresh</button>
     </div>
   </div>
-
-  <!-- STATISTIK USER -->
   <div class="grid-3" id="user-stats-grid">
     <div class="stat-card" style="border-left-color:var(--red);"><div class="stat-label">Admin</div><div class="stat-value" id="stat-admin">0</div><div class="stat-sub">Akses penuh</div></div>
     <div class="stat-card" style="border-left-color:var(--purple);"><div class="stat-label">Supervisor</div><div class="stat-value" id="stat-supervisor">0</div><div class="stat-sub">Akses laporan</div></div>
     <div class="stat-card" style="border-left-color:var(--accent);"><div class="stat-label">Kasir</div><div class="stat-value" id="stat-kasir">0</div><div class="stat-sub">Akses kasir</div></div>
   </div>
-
-  <!-- DAFTAR USER -->
   <div class="card">
     <div class="card-title"><span>👥</span> Daftar Semua User</div>
-    <div id="user-list-container">
-      <div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data user...</p></div>
-    </div>
+    <div id="user-list-container"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data user...</p></div></div>
   </div>
-
-  <!-- GANTI PASSWORD SAYA -->
   <div class="card" style="max-width:520px;">
     <div class="card-title"><span>🔑</span> Ganti Password Saya</div>
     <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Untuk mengubah password akun kamu sendiri, masukkan password lama terlebih dahulu.</p>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label>Password Lama</label>
-      <input type="password" id="cp-lama" placeholder="Masukkan password lama">
-    </div>
-    <div class="form-group" style="margin-bottom:4px;">
-      <label>Password Baru</label>
-      <input type="password" id="cp-baru" placeholder="Minimal 6 karakter" oninput="cekKekuatan('cp-baru','cp-strength','cp-strength-label')">
-    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Password Lama</label><input type="password" id="cp-lama" placeholder="Masukkan password lama"></div>
+    <div class="form-group" style="margin-bottom:4px;"><label>Password Baru</label><input type="password" id="cp-baru" placeholder="Minimal 6 karakter" oninput="cekKekuatan('cp-baru','cp-strength','cp-strength-label')"></div>
     <div class="pw-strength" id="cp-strength"></div>
     <div class="pw-strength-label" id="cp-strength-label" style="color:#94a3b8;font-size:11px;margin-bottom:12px;"></div>
-    <div class="form-group" style="margin-bottom:20px;">
-      <label>Konfirmasi Password Baru</label>
-      <input type="password" id="cp-konfirm" placeholder="Ulangi password baru">
-    </div>
+    <div class="form-group" style="margin-bottom:20px;"><label>Konfirmasi Password Baru</label><input type="password" id="cp-konfirm" placeholder="Ulangi password baru"></div>
     <button class="btn btn-primary btn-full" onclick="gantiPasswordSaya()">🔐 Simpan Password Baru</button>
   </div>
 </div>
-<!-- ===================== SETTING NOTA ===================== -->
+
+<!-- SETTING NOTA -->
 <div id="k-nota" class="kamar">
   <div class="page-header">
     <div><h1>Setting Nota / Struk</h1><p>Atur tampilan nota yang dicetak di kasir</p></div>
-    <div class="header-actions no-print">
-      <button class="btn btn-outline btn-sm" onclick="muatSettingNota()">🔄 Refresh</button>
-    </div>
+    <div class="header-actions no-print"><button class="btn btn-outline btn-sm" onclick="muatSettingNota()">🔄 Refresh</button></div>
   </div>
-
   <div class="grid-2">
-    <!-- FORM SETTING -->
     <div>
       <div class="card">
         <div class="card-title"><span>🏪</span> Identitas Toko</div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label>Nama Toko</label>
-          <input type="text" id="sn-namaToko" placeholder="Contoh: FITUN FOUN">
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label>Alamat</label>
-          <input type="text" id="sn-alamat" placeholder="Alamat toko (opsional)">
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label>Nomor Telepon</label>
-          <input type="text" id="sn-telepon" placeholder="+670 ... (opsional)">
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label>Header Tambahan</label>
-          <input type="text" id="sn-headerTambahan" placeholder="Teks ekstra di bawah nama toko (opsional)">
-        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Nama Toko</label><input type="text" id="sn-namaToko" placeholder="Contoh: FITUN FOUN"></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Alamat</label><input type="text" id="sn-alamat" placeholder="Alamat toko (opsional)"></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Nomor Telepon</label><input type="text" id="sn-telepon" placeholder="+670 ... (opsional)"></div>
+        <div class="form-group" style="margin-bottom:0;"><label>Header Tambahan</label><input type="text" id="sn-headerTambahan" placeholder="Teks ekstra di bawah nama toko (opsional)"></div>
       </div>
-
       <div class="card">
         <div class="card-title"><span>📝</span> Footer Nota</div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label>Baris 1</label>
-          <input type="text" id="sn-footer1" placeholder="Contoh: Terima kasih!">
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label>Baris 2</label>
-          <input type="text" id="sn-footer2" placeholder="Baris ke-2 footer">
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label>Baris 3</label>
-          <input type="text" id="sn-footer3" placeholder="Baris ke-3 footer">
-        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Baris 1</label><input type="text" id="sn-footer1" placeholder="Contoh: Terima kasih!"></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Baris 2</label><input type="text" id="sn-footer2" placeholder="Baris ke-2 footer"></div>
+        <div class="form-group" style="margin-bottom:0;"><label>Baris 3</label><input type="text" id="sn-footer3" placeholder="Baris ke-3 footer"></div>
       </div>
-
       <div class="card">
         <div class="card-title"><span>⚙️</span> Opsi Tampilan Nota</div>
         <div style="display:flex;flex-direction:column;gap:14px;">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;">
-            <input type="checkbox" id="sn-tampilKasir" style="width:16px;height:16px;accent-color:var(--primary);">
-            Tampilkan nama kasir di nota
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;">
-            <input type="checkbox" id="sn-tampilTanggal" style="width:16px;height:16px;accent-color:var(--primary);">
-            Tampilkan tanggal & jam di nota
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;">
-            <input type="checkbox" id="sn-tampilNomor" style="width:16px;height:16px;accent-color:var(--primary);">
-            Tampilkan nomor transaksi di nota
-          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;"><input type="checkbox" id="sn-tampilKasir" style="width:16px;height:16px;accent-color:var(--primary);">Tampilkan nama kasir di nota</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;"><input type="checkbox" id="sn-tampilTanggal" style="width:16px;height:16px;accent-color:var(--primary);">Tampilkan tanggal & jam di nota</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;"><input type="checkbox" id="sn-tampilNomor" style="width:16px;height:16px;accent-color:var(--primary);">Tampilkan nomor transaksi di nota</label>
         </div>
         <button class="btn btn-primary btn-full" style="margin-top:20px;" onclick="simpanSettingNota()">💾 Simpan Setting Nota</button>
       </div>
     </div>
-
-    <!-- PREVIEW NOTA -->
     <div>
       <div class="card" style="position:sticky;top:20px;">
         <div class="card-title"><span>👁️</span> Preview Nota</div>
-        <div id="nota-preview" style="
-          background:white;
-          border:1px dashed #cbd5e1;
-          border-radius:8px;
-          padding:20px;
-          font-family:'Courier New',monospace;
-          font-size:12px;
-          line-height:1.7;
-          color:#1e293b;
-          max-width:300px;
-          margin:0 auto;
-        ">
-          <!-- Preview diisi oleh JS -->
-        </div>
-        <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:12px;">
-          * Preview tampilan nota di kasir
-        </p>
+        <div id="nota-preview" style="background:white;border:1px dashed #cbd5e1;border-radius:8px;padding:20px;font-family:'Courier New',monospace;font-size:12px;line-height:1.7;color:#1e293b;max-width:300px;margin:0 auto;"></div>
+        <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:12px;">* Preview tampilan nota di kasir</p>
       </div>
     </div>
   </div>
 </div>
 
 </main>
-</div><!-- end app-layout -->
+</div>
+
+<!-- ==============================
+     AREA PRINT BARCODE (hidden)
+     ============================== -->
+<div id="barcode-print-area"></div>
 
 <!-- ========== MODAL TAMBAH PRODUK ========== -->
 <div class="modal-overlay" id="modal-tambah">
@@ -572,79 +538,104 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
+<!-- ========== MODAL PRINT BARCODE ========== -->
+<div class="modal-overlay" id="modal-barcode">
+  <div class="modal" style="width:600px;">
+    <div class="modal-header">
+      <h3>🏷️ Print Barcode</h3>
+      <button class="modal-close" onclick="closeModal('modal-barcode')">✕</button>
+    </div>
+
+    <!-- Info produk -->
+    <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:700;font-size:15px;color:#0f172a;" id="bc-modal-nama">-</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px;">SKU: <span id="bc-modal-sku" style="font-family:monospace;font-weight:600;">-</span> &nbsp;|&nbsp; Harga: <span id="bc-modal-harga" style="font-weight:600;color:#1e40af;">-</span></div>
+    </div>
+
+    <!-- Preview barcode -->
+    <div class="barcode-preview-box" style="margin-bottom:16px;">
+      <div class="bc-prod-name" id="bc-preview-nama">-</div>
+      <svg id="bc-preview-svg"></svg>
+      <div class="bc-prod-price" id="bc-preview-harga">-</div>
+    </div>
+
+    <!-- Ukuran label -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Ukuran Label</div>
+      <div class="barcode-size-wrap">
+        <button class="barcode-size-btn active" id="size-small" onclick="setBarcodeSize('small')">Kecil (100px)</button>
+        <button class="barcode-size-btn" id="size-medium" onclick="setBarcodeSize('medium')">Sedang (140px)</button>
+        <button class="barcode-size-btn" id="size-large" onclick="setBarcodeSize('large')">Besar (180px)</button>
+      </div>
+    </div>
+
+    <!-- Jumlah cetak -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Jumlah Label</div>
+      <div class="barcode-count-wrap">
+        <button class="btn btn-outline btn-sm" onclick="ubahJumlahBC(-1)">−</button>
+        <input type="number" id="bc-jumlah" value="1" min="1" max="100" style="width:70px;text-align:center;" onchange="clampJumlahBC()">
+        <button class="btn btn-outline btn-sm" onclick="ubahJumlahBC(1)">+</button>
+        <span style="font-size:13px;color:#64748b;">label</span>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="setBatchCount(5)">×5</button>
+          <button class="btn btn-outline btn-sm" onclick="setBatchCount(10)">×10</button>
+          <button class="btn btn-outline btn-sm" onclick="setBatchCount(20)">×20</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opsi tampilan -->
+    <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="bc-show-name" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;">
+        Tampilkan nama produk
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="bc-show-price" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;">
+        Tampilkan harga
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-barcode')">Batal</button>
+      <button class="btn btn-purple" onclick="printBarcode()">🖨️ Print Barcode</button>
+    </div>
+  </div>
+</div>
+
 <!-- ========== MODAL RESET PASSWORD USER ========== -->
 <div class="modal-overlay" id="modal-reset-pw">
   <div class="modal" style="max-width:440px;">
-    <div class="modal-header">
-      <h3>🔐 Reset Password User</h3>
-      <button class="modal-close" onclick="closeModal('modal-reset-pw')">✕</button>
-    </div>
-    <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:#92400e;">
-      ⚠️ Reset password untuk: <strong id="reset-username-label"></strong>. User tidak perlu tahu password lama.
-    </div>
-    <div class="form-group" style="margin-bottom:4px;">
-      <label>Password Baru</label>
-      <input type="password" id="reset-pw-baru" placeholder="Minimal 6 karakter" oninput="cekKekuatan('reset-pw-baru','reset-strength','reset-strength-label')">
-    </div>
+    <div class="modal-header"><h3>🔐 Reset Password User</h3><button class="modal-close" onclick="closeModal('modal-reset-pw')">✕</button></div>
+    <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:#92400e;">⚠️ Reset password untuk: <strong id="reset-username-label"></strong>. User tidak perlu tahu password lama.</div>
+    <div class="form-group" style="margin-bottom:4px;"><label>Password Baru</label><input type="password" id="reset-pw-baru" placeholder="Minimal 6 karakter" oninput="cekKekuatan('reset-pw-baru','reset-strength','reset-strength-label')"></div>
     <div class="pw-strength" id="reset-strength"></div>
     <div class="pw-strength-label" id="reset-strength-label" style="color:#94a3b8;font-size:11px;margin-bottom:12px;"></div>
-    <div class="form-group" style="margin-bottom:4px;">
-      <label>Konfirmasi Password Baru</label>
-      <input type="password" id="reset-pw-konfirm" placeholder="Ulangi password baru">
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-reset-pw')">Batal</button>
-      <button class="btn btn-warning" onclick="simpanResetPassword()">🔐 Reset Password</button>
-    </div>
+    <div class="form-group" style="margin-bottom:4px;"><label>Konfirmasi Password Baru</label><input type="password" id="reset-pw-konfirm" placeholder="Ulangi password baru"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-reset-pw')">Batal</button><button class="btn btn-warning" onclick="simpanResetPassword()">🔐 Reset Password</button></div>
   </div>
 </div>
 
 <!-- ========== MODAL TAMBAH USER BARU ========== -->
 <div class="modal-overlay" id="modal-user-baru">
   <div class="modal" style="max-width:440px;">
-    <div class="modal-header">
-      <h3>➕ Tambah User Baru</h3>
-      <button class="modal-close" onclick="closeModal('modal-user-baru')">✕</button>
-    </div>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label>Username</label>
-      <input type="text" id="nu-username" placeholder="Nama user (tanpa spasi)">
-    </div>
-    <div class="form-group" style="margin-bottom:4px;">
-      <label>Password</label>
-      <input type="password" id="nu-password" placeholder="Minimal 6 karakter" oninput="cekKekuatan('nu-password','nu-strength','nu-strength-label')">
-    </div>
+    <div class="modal-header"><h3>➕ Tambah User Baru</h3><button class="modal-close" onclick="closeModal('modal-user-baru')">✕</button></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Username</label><input type="text" id="nu-username" placeholder="Nama user (tanpa spasi)"></div>
+    <div class="form-group" style="margin-bottom:4px;"><label>Password</label><input type="password" id="nu-password" placeholder="Minimal 6 karakter" oninput="cekKekuatan('nu-password','nu-strength','nu-strength-label')"></div>
     <div class="pw-strength" id="nu-strength"></div>
     <div class="pw-strength-label" id="nu-strength-label" style="color:#94a3b8;font-size:11px;margin-bottom:12px;"></div>
-    <div class="form-group" style="margin-bottom:20px;">
-      <label>Role</label>
-      <select id="nu-role">
-        <option value="kasir">Kasir</option>
-        <option value="supervisor">Supervisor</option>
-        <option value="admin">Admin</option>
-      </select>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-user-baru')">Batal</button>
-      <button class="btn btn-primary" onclick="simpanUserBaru()">💾 Simpan User</button>
-    </div>
+    <div class="form-group" style="margin-bottom:20px;"><label>Role</label><select id="nu-role"><option value="kasir">Kasir</option><option value="supervisor">Supervisor</option><option value="admin">Admin</option></select></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-user-baru')">Batal</button><button class="btn btn-primary" onclick="simpanUserBaru()">💾 Simpan User</button></div>
   </div>
 </div>
 
 <!-- ========== MODAL HAPUS USER ========== -->
 <div class="modal-overlay" id="modal-hapus-user">
   <div class="modal" style="max-width:420px;">
-    <div class="modal-header">
-      <h3>🗑️ Hapus User</h3>
-      <button class="modal-close" onclick="closeModal('modal-hapus-user')">✕</button>
-    </div>
-    <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#991b1b;">
-      ⚠️ Yakin hapus user <strong id="hapus-user-label"></strong>? Tindakan ini tidak dapat dibatalkan.
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-hapus-user')">Batal</button>
-      <button class="btn btn-danger" onclick="konfirmasiHapusUser()">🗑️ Ya, Hapus User</button>
-    </div>
+    <div class="modal-header"><h3>🗑️ Hapus User</h3><button class="modal-close" onclick="closeModal('modal-hapus-user')">✕</button></div>
+    <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#991b1b;">⚠️ Yakin hapus user <strong id="hapus-user-label"></strong>? Tindakan ini tidak dapat dibatalkan.</div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-hapus-user')">Batal</button><button class="btn btn-danger" onclick="konfirmasiHapusUser()">🗑️ Ya, Hapus User</button></div>
   </div>
 </div>
 
@@ -653,6 +644,8 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   <span class="rt-dot" id="rt-dot"></span><span id="rt-text">Menghubungkan...</span>
 </div>
 
+<!-- JsBarcode CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const API="https://pos-server-fitun.onrender.com/api";
@@ -661,6 +654,7 @@ let filteredProds=[],finRows=[];
 let prodPage=1;const prodPerPage=15;
 let finPage=1;const finPerPage=20;
 let resetTargetUsername="",hapusTargetUsername="";
+let bcCurrentBarcode="",bcCurrentSize="small";
 
 /* ===== LOGIN ===== */
 async function doLogin(){
@@ -719,6 +713,7 @@ function tab(id,el){
   document.getElementById(id).classList.add('active');
   el.classList.add('active');
   if(id==='k-setting') muatUsers();
+  if(id==='k-nota') muatSettingNota();
 }
 
 /* ===== FORMAT ===== */
@@ -793,7 +788,22 @@ function renderHalamanProduk(){
     const idx=start+i+1,margin=p.price>0?((p.price-p.costPrice)/p.price*100).toFixed(1):0;
     const low=p.stock<=5?"low-stock":"";
     const stokB=p.stock===0?`<span class="badge badge-red">Habis</span>`:p.stock<=5?`<span class="badge badge-yellow">${p.stock}</span>`:`<span class="badge badge-green">${p.stock}</span>`;
-    tbody.innerHTML+=`<tr class="${low}"><td>${idx}</td><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td><strong>${p.name}</strong></td><td><span class="badge badge-blue">${p.category||'-'}</span></td><td>${fmt(p.costPrice)}</td><td>${fmt(p.price)}</td><td>${margin}%</td><td>${p.supplier||'-'}</td><td>${stokB}</td><td class="no-print" style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="openEdit('${p.barcode}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="openHapus('${p.barcode}','${p.name.replace(/'/g,"\\'")}')">🗑️</button></td></tr>`;
+    tbody.innerHTML+=`<tr class="${low}">
+      <td>${idx}</td>
+      <td style="font-family:monospace;font-size:12px;">${p.barcode}</td>
+      <td><strong>${p.name}</strong></td>
+      <td><span class="badge badge-blue">${p.category||'-'}</span></td>
+      <td>${fmt(p.costPrice)}</td>
+      <td>${fmt(p.price)}</td>
+      <td>${margin}%</td>
+      <td>${p.supplier||'-'}</td>
+      <td>${stokB}</td>
+      <td class="no-print" style="white-space:nowrap;">
+        <button class="btn btn-purple btn-sm" onclick="openPrintBarcode('${p.barcode}')" title="Print Barcode">🏷️</button>
+        <button class="btn btn-outline btn-sm" onclick="openEdit('${p.barcode}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="openHapus('${p.barcode}','${p.name.replace(/'/g,"\\'")}')">🗑️</button>
+      </td>
+    </tr>`;
   });
   renderPagination('pagination-prod',filteredProds.length,prodPerPage,prodPage,p=>{prodPage=p;renderHalamanProduk();});
 }
@@ -949,23 +959,212 @@ function renderPagination(cId,total,perPage,current,onPage){
   const next=document.createElement('button');next.className='page-btn';next.innerText='→';next.disabled=current===pages;next.onclick=()=>onPage(current+1);el.appendChild(next);
 }
 
-/* ===== SOCKET.IO ===== */
-function initSocket(){
-  const socket=io();
-  const dot=document.getElementById('rt-dot'),txt=document.getElementById('rt-text'),ind=document.getElementById('rt-indicator');
-  socket.on('connect',()=>{dot.style.cssText='background:#10b981;animation:pulse 1.5s infinite;';txt.innerText='Real-time Aktif';ind.style.background='#ecfdf5';});
-  socket.on('disconnect',()=>{dot.style.cssText='background:#ef4444;';txt.innerText='Terputus...';ind.style.background='#fff5f5';});
-  socket.on('transaksi_baru',trx=>{cacheTransactions.push(trx);renderDashboard();renderFin(cacheTransactions,cacheProducts);renderTerlaris(cacheTransactions,cacheProducts);toast(`🧾 Transaksi baru — Kasir: ${trx.kasir||'-'} | ${fmt(trx.total)}`,'info');});
-  socket.on('stok_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderProduk(cacheProducts);renderRestock(cacheProducts);renderLowStock(cacheProducts);renderWastage(cacheProducts);renderDashboard();}catch{}});
-  socket.on('produk_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderProduk(cacheProducts);}catch{}});
-  socket.on('wastage_update',data=>{toast(`🗑️ Wastage: ${data.nama} — ${data.qty} unit`,'info');muatData();});
+/* ============================================================
+   FITUR PRINT BARCODE
+   ============================================================ */
+
+function openPrintBarcode(barcode) {
+  const p = cacheProducts.find(x => x.barcode === barcode);
+  if (!p) { toast("Produk tidak ditemukan", "error"); return; }
+  bcCurrentBarcode = barcode;
+  bcCurrentSize = 'small';
+
+  // Isi info modal
+  document.getElementById('bc-modal-nama').innerText = p.name;
+  document.getElementById('bc-modal-sku').innerText = barcode;
+  document.getElementById('bc-modal-harga').innerText = fmt(p.price);
+  document.getElementById('bc-preview-nama').innerText = p.name;
+  document.getElementById('bc-preview-harga').innerText = fmt(p.price);
+
+  // Reset opsi
+  document.getElementById('bc-jumlah').value = 1;
+  document.getElementById('bc-show-name').checked = true;
+  document.getElementById('bc-show-price').checked = true;
+  document.querySelectorAll('.barcode-size-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('size-small').classList.add('active');
+
+  openModal('modal-barcode');
+  updateBCPreview();
+}
+
+function updateBCPreview() {
+  const svgEl = document.getElementById('bc-preview-svg');
+  const showName = document.getElementById('bc-show-name').checked;
+  const showPrice = document.getElementById('bc-show-price').checked;
+  const p = cacheProducts.find(x => x.barcode === bcCurrentBarcode);
+
+  document.getElementById('bc-preview-nama').style.display = showName ? 'block' : 'none';
+  document.getElementById('bc-preview-harga').style.display = showPrice ? 'block' : 'none';
+
+  // Tentukan lebar barcode berdasar ukuran
+  const widthMap = { small: 1.2, medium: 1.6, large: 2.0 };
+  const heightMap = { small: 40, medium: 55, large: 70 };
+  const w = widthMap[bcCurrentSize] || 1.2;
+  const h = heightMap[bcCurrentSize] || 40;
+
+  try {
+    JsBarcode(svgEl, bcCurrentBarcode, {
+      format: "CODE128",
+      width: w,
+      height: h,
+      displayValue: true,
+      fontSize: 10,
+      margin: 4,
+      background: "transparent"
+    });
+  } catch(e) {
+    // Jika barcode tidak valid untuk CODE128, coba EAN13 atau hanya text
+    try {
+      JsBarcode(svgEl, bcCurrentBarcode, {
+        format: "CODE39",
+        width: w,
+        height: h,
+        displayValue: true,
+        fontSize: 10,
+        margin: 4,
+        background: "transparent"
+      });
+    } catch(e2) {
+      svgEl.innerHTML = `<text x="10" y="30" font-size="12" fill="red">Barcode tidak valid</text>`;
+    }
+  }
+}
+
+function setBarcodeSize(size) {
+  bcCurrentSize = size;
+  document.querySelectorAll('.barcode-size-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('size-' + size).classList.add('active');
+  updateBCPreview();
+}
+
+function ubahJumlahBC(delta) {
+  const inp = document.getElementById('bc-jumlah');
+  let val = parseInt(inp.value) + delta;
+  if (val < 1) val = 1;
+  if (val > 100) val = 100;
+  inp.value = val;
+}
+
+function clampJumlahBC() {
+  const inp = document.getElementById('bc-jumlah');
+  let val = parseInt(inp.value) || 1;
+  if (val < 1) val = 1;
+  if (val > 100) val = 100;
+  inp.value = val;
+}
+
+function setBatchCount(n) {
+  document.getElementById('bc-jumlah').value = n;
+}
+
+function printBarcode() {
+  const p = cacheProducts.find(x => x.barcode === bcCurrentBarcode);
+  if (!p) { toast("Produk tidak ditemukan", "error"); return; }
+
+  const jumlah = parseInt(document.getElementById('bc-jumlah').value) || 1;
+  const showName = document.getElementById('bc-show-name').checked;
+  const showPrice = document.getElementById('bc-show-price').checked;
+  const size = bcCurrentSize;
+
+  const widthMap = { small: 1.0, medium: 1.4, large: 1.8 };
+  const heightMap = { small: 35, medium: 50, large: 65 };
+  const w = widthMap[size];
+  const h = heightMap[size];
+
+  // Buat area print
+  const area = document.getElementById('barcode-print-area');
+  area.innerHTML = '';
+
+  const grid = document.createElement('div');
+  grid.className = 'barcode-label-grid';
+  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:white;';
+
+  for (let i = 0; i < jumlah; i++) {
+    const label = document.createElement('div');
+    label.className = `barcode-label size-${size}`;
+    label.style.cssText = 'border:1px solid #ccc;padding:5px 6px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;';
+
+    if (showName) {
+      const nameEl = document.createElement('div');
+      nameEl.className = 'bl-name';
+      nameEl.innerText = p.name;
+      nameEl.style.cssText = `font-size:${size==='small'?'8':'10'}px;font-weight:700;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;`;
+      label.appendChild(nameEl);
+    }
+
+    const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    label.appendChild(svgEl);
+
+    if (showPrice) {
+      const priceEl = document.createElement('div');
+      priceEl.className = 'bl-price';
+      priceEl.innerText = fmt(p.price);
+      priceEl.style.cssText = `font-size:${size==='small'?'8':'10'}px;font-weight:700;color:#1e40af;margin-top:2px;`;
+      label.appendChild(priceEl);
+    }
+
+    grid.appendChild(label);
+
+    try {
+      JsBarcode(svgEl, bcCurrentBarcode, {
+        format: "CODE128",
+        width: w,
+        height: h,
+        displayValue: true,
+        fontSize: 8,
+        margin: 2,
+        background: "white"
+      });
+    } catch(e) {
+      try {
+        JsBarcode(svgEl, bcCurrentBarcode, {
+          format: "CODE39",
+          width: w,
+          height: h,
+          displayValue: true,
+          fontSize: 8,
+          margin: 2,
+          background: "white"
+        });
+      } catch(e2) {}
+    }
+  }
+
+  area.appendChild(grid);
+
+  // Print
+  const printStyle = document.createElement('style');
+  printStyle.id = 'bc-print-style';
+  printStyle.innerHTML = `
+    @media print {
+      body > *:not(#barcode-print-area) { display: none !important; }
+      #barcode-print-area {
+        display: block !important;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+        background: white;
+        z-index: 99999;
+      }
+    }
+  `;
+  document.head.appendChild(printStyle);
+
+  closeModal('modal-barcode');
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      const ps = document.getElementById('bc-print-style');
+      if (ps) ps.remove();
+      area.innerHTML = '';
+    }, 1500);
+  }, 300);
 }
 
 /* ============================================================
    SETTING PASSWORD — KELOLA USER
    ============================================================ */
-
-// Cek kekuatan password
 function cekKekuatan(inputId, barId, labelId) {
   const pw = document.getElementById(inputId).value;
   const bar = document.getElementById(barId);
@@ -981,49 +1180,22 @@ function cekKekuatan(inputId, barId, labelId) {
   else { bar.className = 'pw-strength strong'; label.innerText = '✅ Kuat'; label.style.color = '#10b981'; }
 }
 
-// Muat daftar user
 async function muatUsers() {
   const container = document.getElementById('user-list-container');
   container.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data user...</p></div>';
   try {
     const res = await fetch(`${API}/users`);
     const users = await res.json();
-
-    // Update statistik
     document.getElementById('stat-admin').innerText = users.filter(u => u.role === 'admin').length;
     document.getElementById('stat-supervisor').innerText = users.filter(u => u.role === 'supervisor').length;
     document.getElementById('stat-kasir').innerText = users.filter(u => u.role === 'kasir').length;
-
     const currentUser = sessionStorage.getItem('fitun_admin');
-
-    if (!users.length) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><p>Belum ada user terdaftar</p></div>';
-      return;
-    }
-
+    if (!users.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><p>Belum ada user terdaftar</p></div>'; return; }
     container.innerHTML = users.map(u => {
       const isSelf = u.username === currentUser;
       const avatar = u.role === 'admin' ? '👑' : u.role === 'supervisor' ? '🧑‍💼' : '🧑‍💻';
-      const roleBadge = u.role === 'admin'
-        ? '<span class="badge badge-red">Admin</span>'
-        : u.role === 'supervisor'
-        ? '<span class="badge badge-purple">Supervisor</span>'
-        : '<span class="badge badge-blue">Kasir</span>';
-
-      return `
-        <div class="user-card">
-          <div class="user-card-info">
-            <div class="user-avatar">${avatar}</div>
-            <div>
-              <div class="user-name">${u.username} ${isSelf ? '<span class="badge badge-green" style="font-size:10px;">Saya</span>' : ''}</div>
-              <div class="user-meta">${roleBadge}</div>
-            </div>
-          </div>
-          <div class="user-actions">
-            <button class="btn btn-warning btn-sm" onclick="openResetPassword('${u.username}')">🔐 Reset PW</button>
-            ${!isSelf ? `<button class="btn btn-danger btn-sm" onclick="openHapusUser('${u.username}')">🗑️</button>` : ''}
-          </div>
-        </div>`;
+      const roleBadge = u.role === 'admin' ? '<span class="badge badge-red">Admin</span>' : u.role === 'supervisor' ? '<span class="badge badge-purple">Supervisor</span>' : '<span class="badge badge-blue">Kasir</span>';
+      return `<div class="user-card"><div class="user-card-info"><div class="user-avatar">${avatar}</div><div><div class="user-name">${u.username} ${isSelf ? '<span class="badge badge-green" style="font-size:10px;">Saya</span>' : ''}</div><div class="user-meta">${roleBadge}</div></div></div><div class="user-actions"><button class="btn btn-warning btn-sm" onclick="openResetPassword('${u.username}')">🔐 Reset PW</button>${!isSelf ? `<button class="btn btn-danger btn-sm" onclick="openHapusUser('${u.username}')">🗑️</button>` : ''}</div></div>`;
     }).join('');
   } catch (e) {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Gagal memuat data user</p></div>';
@@ -1031,7 +1203,6 @@ async function muatUsers() {
   }
 }
 
-// Ganti password sendiri (butuh password lama)
 async function gantiPasswordSaya() {
   const username = sessionStorage.getItem('fitun_admin');
   const passwordLama = document.getElementById('cp-lama').value;
@@ -1041,26 +1212,13 @@ async function gantiPasswordSaya() {
   if (passwordBaru !== konfirmasi) { toast("Konfirmasi password tidak cocok", "error"); return; }
   if (passwordBaru.length < 6) { toast("Password baru minimal 6 karakter", "error"); return; }
   try {
-    const res = await fetch(`${API}/change-password`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, passwordLama, passwordBaru, konfirmasi })
-    });
+    const res = await fetch(`${API}/change-password`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, passwordLama, passwordBaru, konfirmasi }) });
     const data = await res.json();
-    if (res.ok) {
-      toast(data.message || "Password berhasil diubah", "success");
-      document.getElementById('cp-lama').value = '';
-      document.getElementById('cp-baru').value = '';
-      document.getElementById('cp-konfirm').value = '';
-      document.getElementById('cp-strength').className = 'pw-strength';
-      document.getElementById('cp-strength-label').innerText = '';
-    } else {
-      toast(data.message || "Gagal mengubah password", "error");
-    }
+    if (res.ok) { toast(data.message || "Password berhasil diubah", "success"); document.getElementById('cp-lama').value = ''; document.getElementById('cp-baru').value = ''; document.getElementById('cp-konfirm').value = ''; document.getElementById('cp-strength').className = 'pw-strength'; document.getElementById('cp-strength-label').innerText = ''; }
+    else { toast(data.message || "Gagal mengubah password", "error"); }
   } catch (e) { toast("Error koneksi", "error"); }
 }
 
-// Reset password user lain (admin — tanpa password lama)
 function openResetPassword(username) {
   resetTargetUsername = username;
   document.getElementById('reset-username-label').innerText = username;
@@ -1078,22 +1236,13 @@ async function simpanResetPassword() {
   if (passwordBaru !== konfirmasi) { toast("Konfirmasi tidak cocok", "error"); return; }
   if (passwordBaru.length < 6) { toast("Password minimal 6 karakter", "error"); return; }
   try {
-    const res = await fetch(`${API}/admin/reset-password`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: resetTargetUsername, passwordBaru })
-    });
+    const res = await fetch(`${API}/admin/reset-password`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: resetTargetUsername, passwordBaru }) });
     const data = await res.json();
-    if (res.ok) {
-      toast(data.message || "Password berhasil direset", "success");
-      closeModal('modal-reset-pw');
-    } else {
-      toast(data.message || "Gagal reset password", "error");
-    }
+    if (res.ok) { toast(data.message || "Password berhasil direset", "success"); closeModal('modal-reset-pw'); }
+    else { toast(data.message || "Gagal reset password", "error"); }
   } catch (e) { toast("Error koneksi", "error"); }
 }
 
-// Tambah user baru
 async function simpanUserBaru() {
   const username = document.getElementById('nu-username').value.trim();
   const password = document.getElementById('nu-password').value;
@@ -1102,27 +1251,13 @@ async function simpanUserBaru() {
   if (username.includes(' ')) { toast("Username tidak boleh mengandung spasi", "error"); return; }
   if (password.length < 6) { toast("Password minimal 6 karakter", "error"); return; }
   try {
-    const res = await fetch(`${API}/admin/create-user`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, role })
-    });
+    const res = await fetch(`${API}/admin/create-user`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password, role }) });
     const data = await res.json();
-    if (res.ok) {
-      toast(data.message || "User berhasil dibuat", "success");
-      closeModal('modal-user-baru');
-      document.getElementById('nu-username').value = '';
-      document.getElementById('nu-password').value = '';
-      document.getElementById('nu-strength').className = 'pw-strength';
-      document.getElementById('nu-strength-label').innerText = '';
-      muatUsers();
-    } else {
-      toast(data.message || "Gagal membuat user", "error");
-    }
+    if (res.ok) { toast(data.message || "User berhasil dibuat", "success"); closeModal('modal-user-baru'); document.getElementById('nu-username').value = ''; document.getElementById('nu-password').value = ''; document.getElementById('nu-strength').className = 'pw-strength'; document.getElementById('nu-strength-label').innerText = ''; muatUsers(); }
+    else { toast(data.message || "Gagal membuat user", "error"); }
   } catch (e) { toast("Error koneksi", "error"); }
 }
 
-// Hapus user
 function openHapusUser(username) {
   hapusTargetUsername = username;
   document.getElementById('hapus-user-label').innerText = username;
@@ -1133,27 +1268,14 @@ async function konfirmasiHapusUser() {
   try {
     const res = await fetch(`${API}/admin/delete-user/${hapusTargetUsername}`, { method: 'DELETE' });
     const data = await res.json();
-    if (res.ok) {
-      toast(data.message || "User berhasil dihapus", "success");
-      closeModal('modal-hapus-user');
-      muatUsers();
-    } else {
-      toast(data.message || "Gagal hapus user", "error");
-    }
+    if (res.ok) { toast(data.message || "User berhasil dihapus", "success"); closeModal('modal-hapus-user'); muatUsers(); }
+    else { toast(data.message || "Gagal hapus user", "error"); }
   } catch (e) { toast("Error koneksi", "error"); }
 }
 
 /* ============================================================
    SETTING NOTA
    ============================================================ */
-
-// Extend tab() agar load nota saat tab dibuka
-const _tabOri = tab;
-tab = function(id, el) {
-  _tabOri(id, el);
-  if (id === 'k-nota') muatSettingNota();
-};
-
 async function muatSettingNota() {
   try {
     const res = await fetch(`${API}/setting-nota`);
@@ -1169,9 +1291,7 @@ async function muatSettingNota() {
     document.getElementById('sn-tampilTanggal').checked = s.tampilkanTanggal !== false;
     document.getElementById('sn-tampilNomor').checked = s.tampilkanNomor === true;
     updatePreviewNota();
-  } catch (e) {
-    toast("Gagal memuat setting nota", "error");
-  }
+  } catch (e) { toast("Gagal memuat setting nota", "error"); }
 }
 
 async function simpanSettingNota() {
@@ -1189,18 +1309,10 @@ async function simpanSettingNota() {
   };
   if (!body.namaToko) { toast("Nama toko wajib diisi", "error"); return; }
   try {
-    const res = await fetch(`${API}/setting-nota`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    const res = await fetch(`${API}/setting-nota`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const data = await res.json();
-    if (res.ok) {
-      toast(data.message || "Setting nota berhasil disimpan", "success");
-      updatePreviewNota();
-    } else {
-      toast(data.message || "Gagal menyimpan", "error");
-    }
+    if (res.ok) { toast(data.message || "Setting nota berhasil disimpan", "success"); updatePreviewNota(); }
+    else { toast(data.message || "Gagal menyimpan", "error"); }
   } catch (e) { toast("Error koneksi", "error"); }
 }
 
@@ -1242,7 +1354,6 @@ function updatePreviewNota() {
   document.getElementById('nota-preview').innerHTML = html;
 }
 
-// Preview realtime saat input berubah
 ['sn-namaToko','sn-alamat','sn-telepon','sn-headerTambahan','sn-footer1','sn-footer2','sn-footer3'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updatePreviewNota);
@@ -1251,6 +1362,18 @@ function updatePreviewNota() {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', updatePreviewNota);
 });
+
+/* ===== SOCKET.IO ===== */
+function initSocket(){
+  const socket=io();
+  const dot=document.getElementById('rt-dot'),txt=document.getElementById('rt-text'),ind=document.getElementById('rt-indicator');
+  socket.on('connect',()=>{dot.style.cssText='background:#10b981;animation:pulse 1.5s infinite;';txt.innerText='Real-time Aktif';ind.style.background='#ecfdf5';});
+  socket.on('disconnect',()=>{dot.style.cssText='background:#ef4444;';txt.innerText='Terputus...';ind.style.background='#fff5f5';});
+  socket.on('transaksi_baru',trx=>{cacheTransactions.push(trx);renderDashboard();renderFin(cacheTransactions,cacheProducts);renderTerlaris(cacheTransactions,cacheProducts);toast(`🧾 Transaksi baru — Kasir: ${trx.kasir||'-'} | ${fmt(trx.total)}`,'info');});
+  socket.on('stok_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderProduk(cacheProducts);renderRestock(cacheProducts);renderLowStock(cacheProducts);renderWastage(cacheProducts);renderDashboard();}catch{}});
+  socket.on('produk_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderProduk(cacheProducts);}catch{}});
+  socket.on('wastage_update',data=>{toast(`🗑️ Wastage: ${data.nama} — ${data.qty} unit`,'info');muatData();});
+}
 </script>
 </body>
 </html>
