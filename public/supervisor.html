@@ -553,7 +553,15 @@ input[readonly]{background:#f8fafc;color:#64748b;}
     <div class="table-wrap">
       <table id="sv-t-expired">
         <thead>
-          <tr><th>#</th><th>SKU</th><th>Produk</th><th>Kategori</th><th>Stok</th><th>Tgl Expired</th><th>Sisa Hari</th><th>Status</th></tr>
+          <tr>
+            <th style="width:36px;">#</th>
+            <th>Produk</th>
+            <th style="width:90px;">Kategori</th>
+            <th style="width:50px;">Stok</th>
+            <th style="width:105px;">Tgl Expired</th>
+            <th style="width:75px;">Sisa Hari</th>
+            <th style="width:125px;">Status</th>
+          </tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -1313,7 +1321,7 @@ function svRenderTblExpired(list) {
   if (!tbody) return;
   tbody.innerHTML = '';
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;">&#10003; Tidak ada produk expired yang terdaftar</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#94a3b8;">&#10003; Tidak ada produk expired yang terdaftar</td></tr>';
     return;
   }
   list.forEach(function(p, i) {
@@ -1332,14 +1340,14 @@ function svRenderTblExpired(list) {
     tbody.innerHTML +=
       '<tr class="' + rowCls + '">' +
       '<td>' + (i+1) + '</td>' +
-      '<td style="font-family:monospace;font-size:12px;">' + p.barcode + '</td>' +
       '<td><strong>' + p.name + '</strong>' +
+        '<br><span style="font-size:11px;color:#94a3b8;font-family:monospace;">' + p.barcode + '</span>' +
         (p.expiredNote ? '<br><span style="font-size:11px;color:#94a3b8;">' + p.expiredNote + '</span>' : '') +
       '</td>' +
       '<td><span class="badge badge-blue">' + (p.category || '-') + '</span></td>' +
       '<td>' + stk + '</td>' +
-      '<td>' + svFmtTgl(p.expiredDate) + '</td>' +
-      '<td>' + sTxt + '</td>' +
+      '<td style="white-space:nowrap;">' + svFmtTgl(p.expiredDate) + '</td>' +
+      '<td style="white-space:nowrap;">' + sTxt + '</td>' +
       '<td>' + svExpBadge(s) + '</td>' +
       '</tr>';
   });
