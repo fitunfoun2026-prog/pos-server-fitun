@@ -2,182 +2,106 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const Product = mongoose.models.Product || mongoose.model(
-    'Product',
-    new mongoose.Schema({
-        barcode: { type: String, unique: true },
-        name: String,
-        category: String,
-        stock: { type: Number, default: 0 },
-        costPrice: { type: Number, default: 0 },
-        price: { type: Number, default: 0 },
-        supplier: String,
-        tax: { type: Number, default: 11 },
-        wastage: { type: Number, default: 0 },
-        lastUpdated: { type: Date, default: Date.now }
-    })
-);
+const productSchema = new mongoose.Schema({
+  barcode:     { type: String, required: true, unique: true },
+  name:        { type: String, required: true },
+  category:    { type: String, default: 'Umum' },
+  stock:       { type: Number, default: 0 },
+  costPrice:   { type: Number, default: 0 },
+  price:       { type: Number, default: 0 },
+  supplier:    { type: String, default: '' },
+  tax:         { type: Number, default: 11 },
+  wastage:     { type: Number, default: 0 },
+  expiredDate: { type: Date, default: null },
+  expiredNote: { type: String, default: '' },
+  lastUpdated: { type: Date, default: Date.now }
+});
 
-/* =====================
-   GET ALL PRODUCTS
-===================== */
+const Product = mongoose.model('Product', productSchema);
+
+// GET semua produk
 router.get('/', async (req, res) => {
-    try {
-        const products = await Product.find().sort({ name: 1 });
-        res.json(products);
-    } catch (err) {
-        res.status(500).json({ status: "error", message: err.message });
-    }
+  try {
+    const products = await Product.find({}).sort({ name: 1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal mengambil data produk', error: err.message });
+  }
 });
 
-/* =====================
-   UPDATE MASTER & STOCK
-===================== */
+// POST update-stock (tambah/edit produk + support expiredDate)
 router.post('/update-stock', async (req, res) => {
-    try {
-        const {
-            barcode, name, category, qty,
-            costPrice, price, supplier, tax, isFullUpdate
-        } = req.body;
+  try {
+    const { barcode, name, category, costPrice, price, supplier, qty, tax, isFullUpdate, expiredDate, expiredNote } = req.body;
+    if (!barcode || !name) return res.status(400).json({ message: 'Barcode dan nama produk wajib diisi' });
 
-        if (!barcode) {
-            return res.status(400).json({ message: "Barcode wajib diisi" });
-        }
+    const updateData = {
+      name,
+      category:  category  || 'Umum',
+      costPrice: Number(costPrice) || 0,
+      price:     Number(price)     || 0,
+      supplier:  supplier  || '',
+      tax:       Number(tax) || 11,
+      lastUpdated: new Date()
+    };
 
-        if (isFullUpdate) {
-            // ADMIN / SUPERVISOR UPDATE
-            const updateData = { lastUpdated: new Date() };
-            if (name !== undefined)      updateData.name = name;
-            if (category !== undefined)  updateData.category = category;
-            if (supplier !== undefined)  updateData.supplier = supplier;
-            if (qty !== undefined)       updateData.stock = Number(qty);
-            if (costPrice !== undefined) updateData.costPrice = Number(costPrice);
-            if (price !== undefined)     updateData.price = Number(price);
-            if (tax !== undefined)       updateData.tax = Number(tax);
+    // Field expired
+    if (expiredDate !== undefined) updateData.expiredDate = expiredDate ? new Date(expiredDate) : null;
+    if (expiredNote !== undefined) updateData.expiredNote = expiredNote || '';
 
-            const result = await Product.findOneAndUpdate(
-                { barcode },
-                { $set: updateData },
-                { upsert: true, new: true }
-            );
-
-            // 🔴 Broadcast update produk ke semua client
-            const io = req.app.get('io');
-            if (io) {
-                io.emit('produk_update', {
-                    type: 'update',
-                    barcode: result.barcode,
-                    name: result.name,
-                    stock: result.stock,
-                    price: result.price,
-                    category: result.category
-                });
-                // Trigger reload semua produk di client
-                io.emit('stok_update', { trigger: 'admin_edit', barcode });
-            }
-
-            return res.json({ status: "success", data: result });
-
-        } else {
-            // KASIR – PENGURANGAN STOK
-            const product = await Product.findOne({ barcode });
-            if (!product) {
-                return res.status(404).json({ message: "Produk tidak ditemukan" });
-            }
-
-            const jumlah = Number(qty) || 0;
-            if (product.stock < jumlah) {
-                return res.status(400).json({ message: "Stok tidak mencukupi" });
-            }
-
-            product.stock -= jumlah;
-            product.lastUpdated = new Date();
-            await product.save();
-
-            // 🔴 Broadcast update stok ke semua client
-            const io = req.app.get('io');
-            if (io) {
-                io.emit('stok_update', {
-                    trigger: 'kasir',
-                    barcode,
-                    stockBaru: product.stock
-                });
-            }
-
-            return res.json({ status: "success" });
-        }
-
-    } catch (err) {
-        res.status(500).json({ status: "error", message: err.message });
+    if (isFullUpdate) {
+      updateData.stock = Number(qty) || 0;
+      const product = await Product.findOneAndUpdate({ barcode }, { $set: updateData }, { upsert: true, new: true });
+      const io = req.app.get('io');
+      if (io) io.emit('produk_update', { barcode, name, stock: product.stock });
+      return res.json({ message: 'Produk berhasil disimpan', product });
+    } else {
+      const product = await Product.findOneAndUpdate(
+        { barcode },
+        { $set: updateData, $inc: { stock: Number(qty) || 0 } },
+        { upsert: true, new: true }
+      );
+      const io = req.app.get('io');
+      if (io) io.emit('stok_update', { barcode, name, stock: product.stock });
+      return res.json({ message: 'Stok berhasil diupdate', product });
     }
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal update produk', error: err.message });
+  }
 });
 
-/* =====================
-   WASTAGE (BARANG RUSAK)
-===================== */
+// POST wastage
 router.post('/wastage', async (req, res) => {
-    try {
-        const { barcode, qty } = req.body;
-
-        if (!barcode || !qty) {
-            return res.status(400).json({ message: "Data tidak lengkap" });
-        }
-
-        const product = await Product.findOne({ barcode });
-        if (!product) {
-            return res.status(404).json({ message: "Barcode tidak ditemukan" });
-        }
-
-        const jumlah = Number(qty);
-        if (product.stock < jumlah) {
-            return res.status(400).json({ message: "Stok tidak cukup untuk wastage" });
-        }
-
-        product.stock -= jumlah;
-        product.wastage += jumlah;
-        product.lastUpdated = new Date();
-        await product.save();
-
-        // 🔴 Broadcast wastage ke semua client
-        const io = req.app.get('io');
-        if (io) {
-            io.emit('wastage_update', {
-                barcode,
-                nama: product.name,
-                qty: jumlah,
-                stockBaru: product.stock,
-                totalWastage: product.wastage
-            });
-            io.emit('stok_update', { trigger: 'wastage', barcode });
-        }
-
-        return res.json({ status: "success" });
-
-    } catch (err) {
-        res.status(500).json({ status: "error" });
-    }
+  try {
+    const { barcode, qty } = req.body;
+    if (!barcode || !qty || qty <= 0) return res.status(400).json({ message: 'Data tidak valid' });
+    const product = await Product.findOne({ barcode });
+    if (!product) return res.status(404).json({ message: 'Produk tidak ditemukan' });
+    if (qty > product.stock) return res.status(400).json({ message: `Stok tidak cukup. Tersedia: ${product.stock}` });
+    product.stock -= Number(qty);
+    product.wastage = (product.wastage || 0) + Number(qty);
+    product.lastUpdated = new Date();
+    await product.save();
+    const io = req.app.get('io');
+    if (io) io.emit('wastage_update', { barcode, nama: product.name, qty });
+    res.json({ message: `Wastage ${product.name}: ${qty} unit berhasil dilaporkan`, product });
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal melaporkan wastage', error: err.message });
+  }
 });
 
-/* =====================
-   DELETE PRODUCT
-===================== */
+// DELETE produk
 router.delete('/:barcode', async (req, res) => {
-    try {
-        const deleted = await Product.findOneAndDelete({ barcode: req.params.barcode });
-
-        // 🔴 Broadcast hapus produk ke semua client
-        const io = req.app.get('io');
-        if (io && deleted) {
-            io.emit('produk_update', {
-                type: 'delete',
-                barcode: req.params.barcode
-            });
-        }
-
-        res.json({ status: "success" });
-    } catch (err) {
-        res.status(500).json({ status: "error" });
-    }
+  try {
+    const { barcode } = req.params;
+    const deleted = await Product.findOneAndDelete({ barcode });
+    if (!deleted) return res.status(404).json({ message: 'Produk tidak ditemukan' });
+    const io = req.app.get('io');
+    if (io) io.emit('produk_update', { barcode, deleted: true });
+    res.json({ message: 'Produk berhasil dihapus' });
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal menghapus produk', error: err.message });
+  }
 });
 
 module.exports = router;
