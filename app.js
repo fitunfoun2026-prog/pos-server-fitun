@@ -39,6 +39,9 @@ app.use(express.static(publicPath));
 app.get('/', (req, res) => res.sendFile(path.join(publicPath, 'admin.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(publicPath, 'admin.html')));
 app.get('/supervisor', (req, res) => res.sendFile(path.join(publicPath, 'supervisor.html')));
+app.get('/kasir', (req, res) => res.sendFile(path.join(publicPath, 'index.html')));
+app.get('/cetak-barcode', (req, res) => res.sendFile(path.join(publicPath, 'cetak-barcode.html')));
+app.get('/cetak-barcode', (req, res) => res.sendFile(path.join(publicPath, 'cetak-barcode.html')));
 
 // =============================================
 // KONEKSI DATABASE
