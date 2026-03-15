@@ -935,13 +935,13 @@ function updateBCPreview(){
   namaEl.style.display=showName?'block':'none';
   namaEl.innerText=p.name;
 
-  // Update info baris di preview
+  // Update info baris di preview — selalu tampil, tanpa emoji
   const infoEl=document.getElementById('bc-preview-info');
   const infoParts=[];
-  if(showBerat&&p.berat)infoParts.push('⚖️ '+p.berat);
-  if(showPrice)infoParts.push('💰 '+fmt(p.price));
-  if(showAsal&&p.asalBarang)infoParts.push('🌍 '+p.asalBarang);
-  if(showExpired&&p.expiredDate)infoParts.push('📅 '+new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}));
+  if(showBerat)infoParts.push('Berat: '+(p.berat||'-'));
+  if(showPrice)infoParts.push('Harga: '+fmt(p.price));
+  if(showAsal)infoParts.push('Asal: '+(p.asalBarang||'-'));
+  if(showExpired&&p.expiredDate)infoParts.push('Exp: '+new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}));
   infoEl.style.display=infoParts.length?'block':'none';
   infoEl.innerHTML=infoParts.join(' &nbsp;|&nbsp; ');
 
@@ -993,35 +993,35 @@ function printBarcode(){
     label.appendChild(svgEl);
     try{JsBarcode(svgEl,bcCurrentBarcode,{format:"CODE128",width:wm[size],height:hm[size],displayValue:true,fontSize:8,margin:2,background:"white"});}catch(e){}
 
-    // Berat
-    if(showBerat&&p.berat){
+    // Berat — selalu tampil jika checkbox aktif
+    if(showBerat){
       const el=document.createElement('div');
-      el.innerText='⚖️ '+p.berat;
+      el.innerText='Berat: '+(p.berat||'-');
       el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:2px;text-align:center;`;
       label.appendChild(el);
     }
 
-    // Harga
+    // Harga — tanpa emoji
     if(showPrice){
       const el=document.createElement('div');
-      el.innerText='💰 '+fmt(p.price);
+      el.innerText='Harga: '+fmt(p.price);
       el.style.cssText=`font-size:${fsMd};font-weight:700;color:#1e40af;margin-top:2px;text-align:center;`;
       label.appendChild(el);
     }
 
-    // Asal Barang
-    if(showAsal&&p.asalBarang){
+    // Asal Barang — selalu tampil jika checkbox aktif
+    if(showAsal){
       const el=document.createElement('div');
-      el.innerText='🌍 '+p.asalBarang;
+      el.innerText='Asal: '+(p.asalBarang||'-');
       el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:1px;text-align:center;`;
       label.appendChild(el);
     }
 
-    // Tanggal Expired
+    // Tanggal Expired — tanpa emoji
     if(showExpired&&p.expiredDate){
       const tgl=new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
       const el=document.createElement('div');
-      el.innerText='📅 Exp: '+tgl;
+      el.innerText='Exp: '+tgl;
       el.style.cssText=`font-size:${fsSm};color:#dc2626;margin-top:1px;text-align:center;font-weight:600;`;
       label.appendChild(el);
     }
