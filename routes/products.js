@@ -14,6 +14,8 @@ const productSchema = new mongoose.Schema({
   wastage:     { type: Number, default: 0 },
   expiredDate: { type: Date, default: null },
   expiredNote: { type: String, default: '' },
+  berat:       { type: String, default: '' },   // <-- TAMBAHAN
+  asalBarang:  { type: String, default: '' },   // <-- TAMBAHAN
   lastUpdated: { type: Date, default: Date.now }
 });
 
@@ -29,10 +31,16 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST update-stock (tambah/edit produk + support expiredDate)
+// POST update-stock (tambah/edit produk)
 router.post('/update-stock', async (req, res) => {
   try {
-    const { barcode, name, category, costPrice, price, supplier, qty, tax, isFullUpdate, expiredDate, expiredNote } = req.body;
+    const {
+      barcode, name, category, costPrice, price, supplier,
+      qty, tax, isFullUpdate,
+      expiredDate, expiredNote,
+      berat, asalBarang          // <-- TAMBAHAN
+    } = req.body;
+
     if (!barcode || !name) return res.status(400).json({ message: 'Barcode dan nama produk wajib diisi' });
 
     const updateData = {
@@ -49,9 +57,17 @@ router.post('/update-stock', async (req, res) => {
     if (expiredDate !== undefined) updateData.expiredDate = expiredDate ? new Date(expiredDate) : null;
     if (expiredNote !== undefined) updateData.expiredNote = expiredNote || '';
 
+    // Field berat & asal — TAMBAHAN
+    if (berat !== undefined) updateData.berat = berat || '';
+    if (asalBarang !== undefined) updateData.asalBarang = asalBarang || '';
+
     if (isFullUpdate) {
       updateData.stock = Number(qty) || 0;
-      const product = await Product.findOneAndUpdate({ barcode }, { $set: updateData }, { upsert: true, new: true });
+      const product = await Product.findOneAndUpdate(
+        { barcode },
+        { $set: updateData },
+        { upsert: true, new: true }
+      );
       const io = req.app.get('io');
       if (io) io.emit('produk_update', { barcode, name, stock: product.stock });
       return res.json({ message: 'Produk berhasil disimpan', product });
