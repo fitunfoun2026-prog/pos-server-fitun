@@ -9,8 +9,6 @@
 :root{--p:#059669;--s:#064e3b;--bg:#f0fdf4;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;}
 *{box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;margin:0;background:var(--bg);color:#1e293b;font-size:14px;}
-
-/* LOGIN */
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#022c22 0%,#064e3b 50%,#022c22 100%);}
 .login-card{background:#065f46;border-radius:16px;padding:40px 36px;width:380px;box-shadow:0 25px 60px rgba(0,0,0,0.5);border:1px solid #047857;}
 .login-logo{text-align:center;margin-bottom:28px;}
@@ -23,8 +21,6 @@ body{font-family:'Inter',sans-serif;margin:0;background:var(--bg);color:#1e293b;
 .login-btn{width:100%;padding:13px;background:#059669;color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s;}
 .login-btn:hover{background:#047857;}
 .login-error{color:#fca5a5;font-size:13px;text-align:center;margin-top:12px;min-height:20px;}
-
-/* LAYOUT */
 .app-layout{display:flex;}
 .sidebar{width:270px;background:var(--s);height:100vh;position:fixed;color:white;overflow-y:auto;display:flex;flex-direction:column;z-index:100;}
 .sidebar-brand{padding:22px 20px;border-bottom:1px solid #065f46;}
@@ -42,36 +38,31 @@ body{font-family:'Inter',sans-serif;margin:0;background:var(--bg);color:#1e293b;
 .sidebar-footer .s-date{font-size:11px;color:#6ee7b7;margin-top:3px;opacity:0.6;}
 .btn-logout-side{width:100%;margin-top:10px;padding:9px;background:#065f46;border:1px solid #047857;color:#6ee7b7;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;transition:all 0.2s;}
 .btn-logout-side:hover{background:#7f1d1d;color:#fca5a5;border-color:#ef4444;}
-
 .main{margin-left:270px;padding:28px 34px;width:calc(100% - 270px);min-height:100vh;}
 .kamar{display:none;}
 .kamar.active{display:block;animation:fadeIn 0.25s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
 /* PAGE HEADER */
-.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
 .page-header h1{margin:0;font-size:23px;font-weight:700;color:#0f172a;}
 .page-header p{margin:4px 0 0;color:#64748b;font-size:13px;}
-.header-actions{display:flex;gap:10px;align-items:center;}
-
-/* CARDS */
+.header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .card{background:white;border-radius:12px;padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:20px;}
 .card-title{font-size:15px;font-weight:600;color:#0f172a;margin:0 0 16px;display:flex;align-items:center;gap:8px;}
+/* ===== FIX: grid dengan min-width:0 agar tidak overflow ===== */
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
-
-/* STAT CARDS */
+.grid-3>*,.grid-4>*,.grid-2>*{min-width:0;}
+/* STAT CARDS — font-size responsif */
 .stat-card{background:white;padding:18px 20px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.07);border-left:4px solid var(--p);}
 .stat-card .stat-label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:1px;}
-.stat-card .stat-value{font-size:28px;font-weight:700;color:#0f172a;line-height:1.2;margin-top:6px;}
+.stat-card .stat-value{font-size:clamp(18px,2.2vw,28px);font-weight:700;color:#0f172a;line-height:1.2;margin-top:6px;}
 .stat-card .stat-sub{font-size:12px;color:#94a3b8;margin-top:4px;}
 .stat-card.danger{border-left-color:var(--red);}
 .stat-card.warn{border-left-color:var(--yellow);}
 .stat-card.blue{border-left-color:var(--blue);}
 .stat-card.purple{border-left-color:var(--purple);}
-
-/* TABLES */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;}
 thead th{text-align:left;background:#f8fafc;padding:12px 14px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.8px;border-bottom:2px solid #e2e8f0;white-space:nowrap;}
@@ -81,8 +72,6 @@ tbody tr:last-child td{border-bottom:none;}
 .low{background:#fff5f5 !important;}
 .low td:first-child{border-left:3px solid var(--red);}
 .warn-row{background:#fffbeb !important;}
-
-/* FORM */
 .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .form-group{display:flex;flex-direction:column;gap:5px;}
 .form-group label{font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;}
@@ -90,8 +79,6 @@ input[type=text],input[type=number],input[type=date],select{padding:10px 12px;bo
 input:focus,select:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(5,150,105,0.1);}
 input[readonly]{background:#f8fafc;color:#64748b;}
 .input-inline{width:80px;text-align:center;padding:6px 8px;}
-
-/* BUTTONS */
 .btn{padding:9px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;font-family:'Inter',sans-serif;}
 .btn:active{transform:scale(0.97);}
 .btn-green{background:var(--p);color:white;}
@@ -104,24 +91,18 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .btn-purple:hover{background:#7c3aed;}
 .btn-sm{padding:6px 12px;font-size:12px;}
 .btn-full{width:100%;justify-content:center;margin-top:12px;}
-
-/* BADGES */
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .badge-green{background:#d1fae5;color:#065f46;}
 .badge-red{background:#fee2e2;color:#991b1b;}
 .badge-yellow{background:#fef3c7;color:#92400e;}
 .badge-blue{background:#dbeafe;color:#1e40af;}
 .badge-purple{background:#ede9fe;color:#5b21b6;}
-
-/* TOAST */
 .toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
 .toast{background:#1e293b;color:white;padding:13px 18px;border-radius:10px;font-size:13.5px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,0.2);animation:toastIn 0.3s ease;max-width:320px;}
 @keyframes toastIn{from{transform:translateX(120%);}to{transform:translateX(0);}}
 .toast.success{border-left:4px solid var(--p);}
 .toast.error{border-left:4px solid var(--red);}
 .toast.info{border-left:4px solid var(--blue);}
-
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:white;border-radius:14px;padding:26px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modalIn 0.25s ease;}
@@ -131,14 +112,10 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:#94a3b8;}
 .modal-close:hover{color:#ef4444;}
 .modal-footer{margin-top:18px;display:flex;justify-content:flex-end;gap:10px;}
-
-/* FILTER BAR */
 .filter-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
 .search-box{position:relative;flex:1;min-width:180px;}
 .search-box input{padding-left:36px;}
 .search-box::before{content:'🔎';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;}
-
-/* CHECKLIST */
 .checklist-item{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:10px;margin-bottom:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all 0.2s;}
 .checklist-item:hover{border-color:var(--p);background:#f0fdf4;}
 .checklist-item.done{border-color:#6ee7b7;background:#ecfdf5;}
@@ -149,31 +126,19 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .cl-section{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;padding:8px 0 4px;}
 .progress-bar-wrap{background:#e2e8f0;border-radius:10px;height:10px;overflow:hidden;margin:8px 0 16px;}
 .progress-bar{height:100%;background:linear-gradient(to right,var(--p),#34d399);border-radius:10px;transition:width 0.4s ease;}
-
-/* LIVE DOT */
 .live-dot{display:inline-block;width:8px;height:8px;background:var(--p);border-radius:50%;margin-right:6px;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
-
-/* INFO ROW */
 .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13.5px;}
 .info-row:last-child{border-bottom:none;}
 .info-row .label{color:#64748b;}
 .info-row .value{font-weight:600;color:#0f172a;}
-
-/* SHIFT BOX */
 .shift-box{border:1.5px dashed #a7f3d0;border-radius:10px;padding:16px 18px;background:#f0fdf4;margin-bottom:14px;}
 .shift-box h4{margin:0 0 10px;font-size:14px;color:#065f46;}
-
-/* EMPTY STATE */
 .empty-state{text-align:center;padding:40px 20px;color:#94a3b8;}
 .empty-state .empty-icon{font-size:44px;margin-bottom:10px;}
-
-/* RT INDICATOR */
 .rt-indicator{position:fixed;bottom:16px;right:16px;z-index:9998;display:flex;align-items:center;gap:8px;background:white;padding:8px 14px;border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-size:12px;font-weight:600;color:#64748b;}
 .rt-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;transition:background 0.3s;}
-
-
-/* ===== EXPIRED STYLES ===== */
+/* EXPIRED */
 .alert-expired{background:#fff5f5;border:1.5px solid #fecaca;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:12px;}
 .alert-expired p{margin:0;font-size:13.5px;color:#991b1b;}
 .alert-near-expired{background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:12px;}
@@ -182,8 +147,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .expired-row td:first-child{border-left:3px solid #ef4444;}
 .near-expired-row td{background:#fffbeb !important;}
 .near-expired-row td:first-child{border-left:3px solid #f59e0b;}
-
-/* ===== BARCODE PRINT STYLES ===== */
+/* BARCODE */
 .barcode-preview-box{border:1.5px dashed #a7f3d0;border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f0fdf4;min-height:120px;margin-bottom:16px;}
 .barcode-preview-box .bc-prod-name{font-size:12px;font-weight:700;color:#0f172a;text-align:center;margin-bottom:6px;max-width:200px;word-break:break-word;}
 .barcode-preview-box .bc-prod-price{font-size:13px;font-weight:700;color:#059669;margin-top:6px;}
@@ -191,14 +155,11 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .barcode-size-btn:hover,.barcode-size-btn.active{background:var(--p);color:white;border-color:var(--p);}
 .barcode-count-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
 .barcode-count-wrap input{width:70px;text-align:center;}
-
 @media print{
   .sidebar{display:none !important;}
   .main{margin:0;padding:20px;width:100%;}
   .no-print{display:none !important;}
   .card{box-shadow:none;border:1px solid #e2e8f0;break-inside:avoid;}
-  body.printing-barcode *:not(#barcode-print-area):not(#barcode-print-area *){display:none !important;}
-  body.printing-barcode #barcode-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;}
 }
 #barcode-print-area{display:none;}
 </style>
@@ -206,7 +167,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 <body>
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN -->
 <div class="login-page" id="loginPage">
   <div class="login-card">
     <div class="login-logo">
@@ -248,6 +209,10 @@ input[readonly]{background:#f8fafc;color:#64748b;}
     <div class="nav-item" onclick="tab('s-laporan',this)"><span class="nav-icon">📊</span> Laporan Shift</div>
     <div class="nav-item" onclick="tab('s-check',this)"><span class="nav-icon">✅</span> Checklist Harian</div>
   </div>
+  <div class="menu-section">
+    <div class="menu-label">Lainnya</div>
+    <div class="nav-item" onclick="window.open('/cetak-barcode','_blank')"><span class="nav-icon">🏷️</span> Cetak Barcode</div>
+  </div>
   <div class="sidebar-footer">
     <div class="s-clock" id="sv-clock"></div>
     <div class="s-date" id="sv-date"></div>
@@ -269,22 +234,29 @@ input[readonly]{background:#f8fafc;color:#64748b;}
     <div class="stat-card danger"><div class="stat-label">Stok Kritis</div><div class="stat-value" id="s-crit">0</div><div class="stat-sub">Produk ≤ 5 unit</div></div>
     <div class="stat-card warn"><div class="stat-label">Total Wastage</div><div class="stat-value" id="sv-wastage">0</div><div class="stat-sub">Unit terbuang</div></div>
   </div>
+
+  <!-- FIX: grid-2 dengan struktur benar — kolom kiri & kolom kanan masing-masing 1 div -->
   <div class="grid-2">
-    <div class="card">
+    <!-- Kolom kiri -->
+    <div class="card" style="margin-bottom:0;">
       <div class="card-title"><span>🧾</span> Transaksi Terakhir</div>
       <div class="table-wrap"><table id="t-trx"><thead><tr><th>Waktu</th><th>Kasir</th><th>Items</th><th>Total</th></tr></thead><tbody></tbody></table></div>
     </div>
-  <div id="sv-alert-expired" class="alert-expired" style="display:none;"><span style="font-size:20px;">&#9940;</span><p id="sv-alert-expired-text"></p></div>
-  <div id="sv-alert-near-expired" class="alert-near-expired" style="display:none;"><span style="font-size:20px;">&#9888;</span><p id="sv-alert-near-expired-text"></p></div>
-  <div class="grid-2" style="margin-bottom:20px;">
-    <div class="stat-card danger"><div class="stat-label">Sudah Expired</div><div class="stat-value" id="sv-d-expired" style="color:#ef4444;">0</div><div class="stat-sub">Segera disingkirkan</div></div>
-    <div class="stat-card warn"><div class="stat-label">Mendekati Expired</div><div class="stat-value" id="sv-d-near-expired" style="color:#f59e0b;">0</div><div class="stat-sub">Expired dalam 30 hari</div></div>
-  </div>
-    <div class="card">
-      <div class="card-title"><span>🚨</span> Stok Kritis Top 5</div>
-      <div class="table-wrap"><table id="t-kritis-dash"><thead><tr><th>Produk</th><th>Stok</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+    <!-- Kolom kanan: alert + expired stats + stok kritis -->
+    <div>
+      <div id="sv-alert-expired" class="alert-expired" style="display:none;"><span style="font-size:20px;">&#9940;</span><p id="sv-alert-expired-text"></p></div>
+      <div id="sv-alert-near-expired" class="alert-near-expired" style="display:none;"><span style="font-size:20px;">&#9888;</span><p id="sv-alert-near-expired-text"></p></div>
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div class="stat-card danger"><div class="stat-label">Sudah Expired</div><div class="stat-value" id="sv-d-expired" style="color:#ef4444;">0</div><div class="stat-sub">Segera disingkirkan</div></div>
+        <div class="stat-card warn"><div class="stat-label">Mendekati Expired</div><div class="stat-value" id="sv-d-near-expired" style="color:#f59e0b;">0</div><div class="stat-sub">Expired dalam 30 hari</div></div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-title"><span>🚨</span> Stok Kritis Top 5</div>
+        <div class="table-wrap"><table id="t-kritis-dash"><thead><tr><th>Produk</th><th>Stok</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      </div>
     </div>
   </div>
+
   <div class="card">
     <div class="card-title"><span>📦</span> Ringkasan Stok per Kategori</div>
     <div class="table-wrap"><table id="t-kategori-stok"><thead><tr><th>Kategori</th><th>Jumlah SKU</th><th>Total Stok</th><th>Stok Kritis</th><th>Stok Habis</th></tr></thead><tbody></tbody></table></div>
@@ -370,6 +342,52 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
+<!-- ===== MONITORING EXPIRED — LAYOUT DIPERBAIKI ===== -->
+<div id="s-expired" class="kamar">
+  <div class="page-header">
+    <div><h1>&#128197; Monitoring Expired</h1><p>Produk yang sudah atau mendekati tanggal kadaluarsa</p></div>
+    <div class="header-actions no-print">
+      <button class="btn btn-outline btn-sm" onclick="loadData()">&#x1F504; Refresh</button>
+      <button class="btn btn-outline btn-sm" onclick="window.print()">&#x1F5A8;&#xFE0F; Print</button>
+    </div>
+  </div>
+  <!-- grid-3 dengan min-width:0 sudah ditambahkan di CSS global -->
+  <div class="grid-3">
+    <div class="stat-card danger">
+      <div class="stat-label">Sudah Expired</div>
+      <div class="stat-value" id="sv-exp-sudah">0</div>
+      <div class="stat-sub">Harus segera disingkirkan</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="stat-label">Expired &le; 7 Hari</div>
+      <div class="stat-value" id="sv-exp-7hari">0</div>
+      <div class="stat-sub">Sangat mendesak</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Expired &le; 30 Hari</div>
+      <div class="stat-value" id="sv-exp-30hari">0</div>
+      <div class="stat-sub">Perlu perhatian</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>&#128197;</span> Daftar Produk Expired / Mendekati Expired</div>
+    <div class="filter-bar no-print">
+      <select id="sv-exp-filter" onchange="svFilterTableExpired()" style="padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-family:Inter;min-width:220px;">
+        <option value="">Semua Status</option>
+        <option value="expired">Sudah Expired</option>
+        <option value="7">Expired dalam 7 Hari</option>
+        <option value="30">Expired dalam 30 Hari</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table id="sv-t-expired">
+        <thead><tr><th style="width:36px;">#</th><th>Produk</th><th style="width:90px;">Kategori</th><th style="width:50px;">Stok</th><th style="width:105px;">Tgl Expired</th><th style="width:75px;">Sisa Hari</th><th style="width:125px;">Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- LAPORAN SHIFT -->
 <div id="s-laporan" class="kamar">
   <div class="page-header">
@@ -401,21 +419,21 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   <div class="card">
     <div class="card-title"><span>✅</span> Checklist Operasional</div>
     <div class="cl-section">🌅 Pembukaan Toko</div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-kas-awal"><input type="checkbox" data-key="cl-kas-awal"><div><div class="cl-text">Pengecekan Kas Awal</div><div class="cl-sub">Verifikasi jumlah kas awal sesuai SOP</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-buka"><input type="checkbox" data-key="cl-buka"><div><div class="cl-text">Toko Sudah Dibuka</div><div class="cl-sub">Lampu, AC, dan perangkat kasir aktif</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-display"><input type="checkbox" data-key="cl-display"><div><div class="cl-text">Pengecekan Display Produk</div><div class="cl-sub">Semua produk tersusun rapi di rak</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-label"><input type="checkbox" data-key="cl-label"><div><div class="cl-text">Label Harga Lengkap</div><div class="cl-sub">Semua produk memiliki label harga yang benar</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-kas-awal"><input type="checkbox"><div><div class="cl-text">Pengecekan Kas Awal</div><div class="cl-sub">Verifikasi jumlah kas awal sesuai SOP</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-buka"><input type="checkbox"><div><div class="cl-text">Toko Sudah Dibuka</div><div class="cl-sub">Lampu, AC, dan perangkat kasir aktif</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-display"><input type="checkbox"><div><div class="cl-text">Pengecekan Display Produk</div><div class="cl-sub">Semua produk tersusun rapi di rak</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-label"><input type="checkbox"><div><div class="cl-text">Label Harga Lengkap</div><div class="cl-sub">Semua produk memiliki label harga yang benar</div></div></div>
     <div class="cl-section">🌡️ Operasional Harian</div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-chiller"><input type="checkbox" data-key="cl-chiller"><div><div class="cl-text">Cek Suhu Chiller & Freezer</div><div class="cl-sub">Chiller 2-8°C, Freezer di bawah -18°C</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-clean"><input type="checkbox" data-key="cl-clean"><div><div class="cl-text">Kebersihan Area Toko</div><div class="cl-sub">Lantai, rak, dan area kasir bersih</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-expired"><input type="checkbox" data-key="cl-expired"><div><div class="cl-text">Pengecekan Produk Expired</div><div class="cl-sub">Semua produk diperiksa tanggal kedaluarsa</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-opname"><input type="checkbox" data-key="cl-opname"><div><div class="cl-text">Stock Opname Dilakukan</div><div class="cl-sub">Pengecekan stok fisik vs sistem</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-wastage"><input type="checkbox" data-key="cl-wastage"><div><div class="cl-text">Laporan Wastage Diinput</div><div class="cl-sub">Semua barang rusak sudah dilaporkan</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-promo"><input type="checkbox" data-key="cl-promo"><div><div class="cl-text">Pengecekan Promo & Diskon</div><div class="cl-sub">Semua promosi aktif sudah dipasang</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-chiller"><input type="checkbox"><div><div class="cl-text">Cek Suhu Chiller & Freezer</div><div class="cl-sub">Chiller 2-8°C, Freezer di bawah -18°C</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-clean"><input type="checkbox"><div><div class="cl-text">Kebersihan Area Toko</div><div class="cl-sub">Lantai, rak, dan area kasir bersih</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-expired"><input type="checkbox"><div><div class="cl-text">Pengecekan Produk Expired</div><div class="cl-sub">Semua produk diperiksa tanggal kedaluarsa</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-opname"><input type="checkbox"><div><div class="cl-text">Stock Opname Dilakukan</div><div class="cl-sub">Pengecekan stok fisik vs sistem</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-wastage"><input type="checkbox"><div><div class="cl-text">Laporan Wastage Diinput</div><div class="cl-sub">Semua barang rusak sudah dilaporkan</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-promo"><input type="checkbox"><div><div class="cl-text">Pengecekan Promo & Diskon</div><div class="cl-sub">Semua promosi aktif sudah dipasang</div></div></div>
     <div class="cl-section">🌆 Penutupan Toko</div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-rekap"><input type="checkbox" data-key="cl-rekap"><div><div class="cl-text">Rekap Penjualan Harian</div><div class="cl-sub">Laporan shift sudah dibuat</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-kas-tutup"><input type="checkbox" data-key="cl-kas-tutup"><div><div class="cl-text">Penghitungan Kas Akhir</div><div class="cl-sub">Kas fisik sesuai dengan total transaksi</div></div></div>
-    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-tutup"><input type="checkbox" data-key="cl-tutup"><div><div class="cl-text">Toko Sudah Ditutup</div><div class="cl-sub">Lampu, AC, dan semua perangkat dimatikan</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-rekap"><input type="checkbox"><div><div class="cl-text">Rekap Penjualan Harian</div><div class="cl-sub">Laporan shift sudah dibuat</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-kas-tutup"><input type="checkbox"><div><div class="cl-text">Penghitungan Kas Akhir</div><div class="cl-sub">Kas fisik sesuai dengan total transaksi</div></div></div>
+    <div class="checklist-item" onclick="toggleCL(this)" data-key="cl-tutup"><input type="checkbox"><div><div class="cl-text">Toko Sudah Ditutup</div><div class="cl-sub">Lampu, AC, dan semua perangkat dimatikan</div></div></div>
   </div>
 </div>
 
@@ -431,13 +449,10 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
-<!-- ========== MODAL PRINT BARCODE (Single) ========== -->
+<!-- MODAL PRINT BARCODE SINGLE -->
 <div class="modal-overlay" id="modal-barcode-sv">
   <div class="modal" style="width:560px;">
-    <div class="modal-header">
-      <h3>🏷️ Print Barcode</h3>
-      <button class="modal-close" onclick="closeModal('modal-barcode-sv')">✕</button>
-    </div>
+    <div class="modal-header"><h3>🏷️ Print Barcode</h3><button class="modal-close" onclick="closeModal('modal-barcode-sv')">✕</button></div>
     <div style="background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
       <div style="font-weight:700;font-size:15px;color:#0f172a;" id="sv-bc-modal-nama">-</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;">SKU: <span id="sv-bc-modal-sku" style="font-family:monospace;font-weight:600;">-</span> &nbsp;|&nbsp; Harga: <span id="sv-bc-modal-harga" style="font-weight:600;color:#059669;">-</span></div>
@@ -470,14 +485,8 @@ input[readonly]{background:#f8fafc;color:#64748b;}
       </div>
     </div>
     <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;">
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-        <input type="checkbox" id="sv-bc-show-name" checked onchange="updateSvBCPreview()" style="accent-color:var(--p);width:15px;height:15px;">
-        Tampilkan nama produk
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-        <input type="checkbox" id="sv-bc-show-price" checked onchange="updateSvBCPreview()" style="accent-color:var(--p);width:15px;height:15px;">
-        Tampilkan harga
-      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="sv-bc-show-name" checked onchange="updateSvBCPreview()" style="accent-color:var(--p);width:15px;height:15px;"> Tampilkan nama produk</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="sv-bc-show-price" checked onchange="updateSvBCPreview()" style="accent-color:var(--p);width:15px;height:15px;"> Tampilkan harga</label>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-barcode-sv')">Batal</button>
@@ -486,16 +495,11 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
-<!-- ========== MODAL PRINT BARCODE MASSAL ========== -->
+<!-- MODAL PRINT BARCODE MASSAL -->
 <div class="modal-overlay" id="modal-barcode-bulk">
   <div class="modal" style="width:600px;">
-    <div class="modal-header">
-      <h3>🏷️ Print Barcode Massal</h3>
-      <button class="modal-close" onclick="closeModal('modal-barcode-bulk')">✕</button>
-    </div>
-    <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e;">
-      ℹ️ Mode massal: cetak 1 label per produk untuk semua produk yang ditampilkan di tabel Stock Opname.
-    </div>
+    <div class="modal-header"><h3>🏷️ Print Barcode Massal</h3><button class="modal-close" onclick="closeModal('modal-barcode-bulk')">✕</button></div>
+    <div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e;">ℹ️ Mode massal: cetak 1 label per produk untuk semua produk yang ditampilkan di tabel Stock Opname.</div>
     <div style="margin-bottom:14px;">
       <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Ukuran Label</div>
       <div style="display:flex;gap:8px;">
@@ -505,14 +509,8 @@ input[readonly]{background:#f8fafc;color:#64748b;}
       </div>
     </div>
     <div style="margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;">
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-        <input type="checkbox" id="bulk-show-name" checked style="accent-color:var(--p);width:15px;height:15px;">
-        Tampilkan nama produk
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-        <input type="checkbox" id="bulk-show-price" checked style="accent-color:var(--p);width:15px;height:15px;">
-        Tampilkan harga
-      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="bulk-show-name" checked style="accent-color:var(--p);width:15px;height:15px;"> Tampilkan nama produk</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="bulk-show-price" checked style="accent-color:var(--p);width:15px;height:15px;"> Tampilkan harga</label>
     </div>
     <div style="background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
       <div style="font-size:13px;color:#475569;">Total produk yang akan dicetak: <strong id="bulk-total-count">0</strong> label</div>
@@ -524,209 +522,30 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
-<!-- AREA PRINT BARCODE -->
-
-<!-- MONITORING EXPIRED SV -->
-<div id="s-expired" class="kamar">
-  <div class="page-header">
-    <div><h1>Monitoring Expired</h1><p>Produk yang sudah atau mendekati tanggal kadaluarsa</p></div>
-    <div class="header-actions no-print">
-      <button class="btn btn-outline btn-sm" onclick="loadData()">&#x1F504; Refresh</button>
-      <button class="btn btn-outline btn-sm" onclick="window.print()">&#x1F5A8;&#xFE0F; Print</button>
-    </div>
-  </div>
-  <div class="grid-3">
-    <div class="stat-card danger"><div class="stat-label">Sudah Expired</div><div class="stat-value" id="sv-exp-sudah">0</div><div class="stat-sub">Harus segera disingkirkan</div></div>
-    <div class="stat-card warn"><div class="stat-label">Expired &le; 7 Hari</div><div class="stat-value" id="sv-exp-7hari">0</div><div class="stat-sub">Sangat mendesak</div></div>
-    <div class="stat-card purple"><div class="stat-label">Expired &le; 30 Hari</div><div class="stat-value" id="sv-exp-30hari">0</div><div class="stat-sub">Perlu perhatian</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title"><span>&#128197;</span> Daftar Produk Expired / Mendekati Expired</div>
-    <div class="filter-bar no-print">
-      <select id="sv-exp-filter" onchange="svFilterTableExpired()" style="padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-family:Inter;min-width:220px;">
-        <option value="">Semua Status</option>
-        <option value="expired">Sudah Expired</option>
-        <option value="7">Expired dalam 7 Hari</option>
-        <option value="30">Expired dalam 30 Hari</option>
-      </select>
-    </div>
-    <div class="table-wrap">
-      <table id="sv-t-expired">
-        <thead>
-          <tr>
-            <th style="width:36px;">#</th>
-            <th>Produk</th>
-            <th style="width:90px;">Kategori</th>
-            <th style="width:50px;">Stok</th>
-            <th style="width:105px;">Tgl Expired</th>
-            <th style="width:75px;">Sisa Hari</th>
-            <th style="width:125px;">Status</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
 <div id="barcode-print-area"></div>
-
-<!-- RT INDICATOR -->
 <div class="rt-indicator no-print" id="rt-indicator" style="display:none;">
   <span class="rt-dot" id="rt-dot"></span><span id="rt-text">Menghubungkan...</span>
 </div>
 
-<!-- JsBarcode CDN -->
 <script>
-/* ============================================================
-   BARCODE ENGINE — CODE128 Pure JS (No CDN needed)
-   ============================================================ */
+/* BARCODE ENGINE */
 (function(root){
-  var CODE128_CHARS = {
-    START_B: 104, STOP: 106,
-    lookup: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-  };
-  // Code128B patterns (11 bars each, 1=bar, 0=space)
-  var PATTERNS = [
-    "11011001100","11001101100","11001100110","10010011000","10010001100",
-    "10001001100","10011001000","10011000100","10001100100","11001001000",
-    "11001000100","11000100100","10110011100","10011011100","10011001110",
-    "10111001100","10011101100","10011100110","11001110010","11001011100",
-    "11001001110","11011100100","11001110100","11101101110","11101001100",
-    "11100101100","11100100110","11101100100","11100110100","11100110010",
-    "11011011000","11011000110","11000110110","10100011000","10001011000",
-    "10001000110","10110001000","10001101000","10001100010","11010001000",
-    "11000101000","11000100010","10110111000","10110001110","10001101110",
-    "10111011000","10111000110","10001110110","11101110110","11010001110",
-    "11000101110","11011101000","11011100010","11011101110","11101011000",
-    "11101000110","11100010110","11101101000","11101100010","11100011010",
-    "11101111010","11001000010","11110001010","10100110000","10100001100",
-    "10010110000","10010000110","10000101100","10000100110","10110010000",
-    "10110000100","10011010000","10011000010","10000110100","10000110010",
-    "11000010010","11001010000","11110111010","11000010100","10001111010",
-    "10100111100","10010111100","10010011110","10111100100","10011110100",
-    "10011110010","11110100100","11110010100","11110010010","11011011110",
-    "11011110110","11110110110","10101111000","10100011110","10001011110",
-    "10111101000","10111100010","11110101000","11110100010","10111011110",
-    "10111101110","11101011110","11110101110","11010000100","11010010000",
-    "11010011100","1100011101011"
-  ];
-
-  function encode(text) {
-    var codes = [104]; // START B
-    var checksum = 104;
-    for (var i = 0; i < text.length; i++) {
-      var idx = CODE128_CHARS.lookup.indexOf(text[i]);
-      if (idx === -1) idx = 0;
-      codes.push(idx);
-      checksum += idx * (i + 1);
-    }
-    codes.push(checksum % 103);
-    codes.push(106); // STOP
-    return codes;
+  var L=" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+  var P=["11011001100","11001101100","11001100110","10010011000","10010001100","10001001100","10011001000","10011000100","10001100100","11001001000","11001000100","11000100100","10110011100","10011011100","10011001110","10111001100","10011101100","10011100110","11001110010","11001011100","11001001110","11011100100","11001110100","11101101110","11101001100","11100101100","11100100110","11101100100","11100110100","11100110010","11011011000","11011000110","11000110110","10100011000","10001011000","10001000110","10110001000","10001101000","10001100010","11010001000","11000101000","11000100010","10110111000","10110001110","10001101110","10111011000","10111000110","10001110110","11101110110","11010001110","11000101110","11011101000","11011100010","11011101110","11101011000","11101000110","11100010110","11101101000","11101100010","11100011010","11101111010","11001000010","11110001010","10100110000","10100001100","10010110000","10010000110","10000101100","10000100110","10110010000","10110000100","10011010000","10011000010","10000110100","10000110010","11000010010","11001010000","11110111010","11000010100","10001111010","10100111100","10010111100","10010011110","10111100100","10011110100","10011110010","11110100100","11110010100","11110010010","11011011110","11011110110","11110110110","10101111000","10100011110","10001011110","10111101000","10111100010","11110101000","11110100010","10111011110","10111101110","11101011110","11110101110","11010000100","11010010000","11010011100","1100011101011"];
+  function enc(t){var c=[104],s=104;for(var i=0;i<t.length;i++){var x=L.indexOf(t[i]);if(x<0)x=0;c.push(x);s+=x*(i+1);}c.push(s%103);c.push(106);return c;}
+  function bars(c){var b=[];for(var i=0;i<c.length;i++){var p=P[c[i]];if(!p)continue;for(var j=0;j<p.length;j++)b.push(parseInt(p[j]));}return b;}
+  function drawSVG(el,text,o){
+    o=o||{};var bw=o.width||2,bh=o.height||60,m=o.margin!==undefined?o.margin:6,fs=o.fontSize||10,dv=o.displayValue!==false,bg=o.background||'white';
+    var b=bars(enc(text)),tw=b.length*bw+m*2,th=bh+m*2+(dv?fs+4:0),ns='http://www.w3.org/2000/svg';
+    while(el.firstChild)el.removeChild(el.firstChild);
+    el.setAttribute('width',tw);el.setAttribute('height',th);el.setAttribute('viewBox','0 0 '+tw+' '+th);
+    var r=document.createElementNS(ns,'rect');r.setAttribute('width',tw);r.setAttribute('height',th);r.setAttribute('fill',bg);el.appendChild(r);
+    for(var i=0;i<b.length;i++){if(b[i]===1){var rr=document.createElementNS(ns,'rect');rr.setAttribute('x',m+i*bw);rr.setAttribute('y',m);rr.setAttribute('width',bw);rr.setAttribute('height',bh);rr.setAttribute('fill','black');el.appendChild(rr);}}
+    if(dv){var t=document.createElementNS(ns,'text');t.setAttribute('x',tw/2);t.setAttribute('y',m+bh+fs+2);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',fs);t.setAttribute('font-family','monospace');t.setAttribute('fill','black');t.textContent=text;el.appendChild(t);}
   }
-
-  function codesToBars(codes) {
-    var bars = [];
-    for (var i = 0; i < codes.length; i++) {
-      var p = PATTERNS[codes[i]];
-      if (!p) continue;
-      for (var j = 0; j < p.length; j++) {
-        bars.push(parseInt(p[j]));
-      }
-    }
-    return bars;
-  }
-
-  function drawToCanvas(canvas, text, opts) {
-    opts = opts || {};
-    var barWidth = opts.width || 2;
-    var barHeight = opts.height || 60;
-    var margin = opts.margin !== undefined ? opts.margin : 10;
-    var fontSize = opts.fontSize || 12;
-    var displayValue = opts.displayValue !== false;
-
-    var bars = codesToBars(encode(text));
-    var totalWidth = bars.length * barWidth + margin * 2;
-    var totalHeight = barHeight + margin * 2 + (displayValue ? fontSize + 4 : 0);
-
-    canvas.width = totalWidth;
-    canvas.height = totalHeight;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = opts.background || 'white';
-    ctx.fillRect(0, 0, totalWidth, totalHeight);
-
-    ctx.fillStyle = opts.lineColor || 'black';
-    for (var i = 0; i < bars.length; i++) {
-      if (bars[i] === 1) {
-        ctx.fillRect(margin + i * barWidth, margin, barWidth, barHeight);
-      }
-    }
-    if (displayValue) {
-      ctx.font = fontSize + 'px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = 'black';
-      ctx.fillText(text, totalWidth / 2, margin + barHeight + fontSize);
-    }
-  }
-
-  function drawToSVG(svgEl, text, opts) {
-    opts = opts || {};
-    var barWidth = opts.width || 2;
-    var barHeight = opts.height || 60;
-    var margin = opts.margin !== undefined ? opts.margin : 6;
-    var fontSize = opts.fontSize || 10;
-    var displayValue = opts.displayValue !== false;
-    var bg = opts.background || 'white';
-
-    var bars = codesToBars(encode(text));
-    var totalWidth = bars.length * barWidth + margin * 2;
-    var totalHeight = barHeight + margin * 2 + (displayValue ? fontSize + 4 : 0);
-
-    var svgNS = 'http://www.w3.org/2000/svg';
-    while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
-    svgEl.setAttribute('width', totalWidth);
-    svgEl.setAttribute('height', totalHeight);
-    svgEl.setAttribute('viewBox', '0 0 ' + totalWidth + ' ' + totalHeight);
-
-    var rect = document.createElementNS(svgNS, 'rect');
-    rect.setAttribute('width', totalWidth); rect.setAttribute('height', totalHeight);
-    rect.setAttribute('fill', bg);
-    svgEl.appendChild(rect);
-
-    for (var i = 0; i < bars.length; i++) {
-      if (bars[i] === 1) {
-        var r = document.createElementNS(svgNS, 'rect');
-        r.setAttribute('x', margin + i * barWidth);
-        r.setAttribute('y', margin);
-        r.setAttribute('width', barWidth);
-        r.setAttribute('height', barHeight);
-        r.setAttribute('fill', 'black');
-        svgEl.appendChild(r);
-      }
-    }
-    if (displayValue) {
-      var t = document.createElementNS(svgNS, 'text');
-      t.setAttribute('x', totalWidth / 2);
-      t.setAttribute('y', margin + barHeight + fontSize + 2);
-      t.setAttribute('text-anchor', 'middle');
-      t.setAttribute('font-size', fontSize);
-      t.setAttribute('font-family', 'monospace');
-      t.setAttribute('fill', 'black');
-      t.textContent = text;
-      svgEl.appendChild(t);
-    }
-  }
-
-  root.BarcodeEngine = { drawToSVG: drawToSVG, drawToCanvas: drawToCanvas };
+  root.BarcodeEngine={drawToSVG:drawSVG};
 })(window);
-
-// Compat shim
-function JsBarcode(el, text, opts) {
-  var svgEl = (typeof el === 'string') ? document.querySelector(el) : el;
-  if (!svgEl) return;
-  BarcodeEngine.drawToSVG(svgEl, text, opts);
-}
+function JsBarcode(el,text,opts){var s=(typeof el==='string')?document.querySelector(el):el;if(!s)return;BarcodeEngine.drawToSVG(s,text,opts);}
 </script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -734,641 +553,132 @@ const API="https://pos-server-fitun.onrender.com/api";
 let cacheProducts=[],cacheTransactions=[],filteredOpname=[],filteredTrxAll=[];
 let svBcCurrentBarcode="",svBcCurrentSize="small",bulkCurrentSize="small";
 
-/* ===== LOGIN ===== */
 async function doLogin(){
-  const u=document.getElementById('sv-user').value.trim();
-  const p=document.getElementById('sv-pass').value;
-  const err=document.getElementById('sv-error');
+  const u=document.getElementById('sv-user').value.trim(),p=document.getElementById('sv-pass').value,err=document.getElementById('sv-error');
   if(!u||!p){err.innerText="Username & password wajib diisi";return;}
   err.innerText="⏳ Memeriksa...";
   try{
     const res=await fetch(`${API}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
     const data=await res.json();
     if(!res.ok){err.innerText="❌ "+(data.message||"Username atau password salah");document.getElementById('sv-pass').value='';return;}
-    sessionStorage.setItem('fitun_sv',data.username);
-    sessionStorage.setItem('fitun_role',data.role||'');
-    document.getElementById('loginPage').style.display='none';
-    document.getElementById('appLayout').style.display='flex';
-    document.getElementById('lbl-user').innerText='👤 '+data.username;
-    document.getElementById('rt-indicator').style.display='flex';
+    sessionStorage.setItem('fitun_sv',data.username);sessionStorage.setItem('fitun_role',data.role||'');
+    document.getElementById('loginPage').style.display='none';document.getElementById('appLayout').style.display='flex';
+    document.getElementById('lbl-user').innerText='👤 '+data.username;document.getElementById('rt-indicator').style.display='flex';
     loadData();initSocket();
   }catch(e){err.innerText="❌ Gagal konek ke server";document.getElementById('sv-pass').value='';}
 }
 document.getElementById('sv-btn').onclick=doLogin;
 document.getElementById('sv-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('sv-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('sv-pass').focus();});
-
 function logout(){if(!confirm("Yakin mau logout?"))return;sessionStorage.removeItem('fitun_sv');sessionStorage.removeItem('fitun_role');location.reload();}
+(function(){const s=sessionStorage.getItem('fitun_sv');if(s){document.getElementById('loginPage').style.display='none';document.getElementById('appLayout').style.display='flex';document.getElementById('lbl-user').innerText='👤 '+s;document.getElementById('rt-indicator').style.display='flex';loadData();initSocket();}})();
 
-(function checkSession(){
-  const saved=sessionStorage.getItem('fitun_sv');
-  if(saved){
-    document.getElementById('loginPage').style.display='none';
-    document.getElementById('appLayout').style.display='flex';
-    document.getElementById('lbl-user').innerText='👤 '+saved;
-    document.getElementById('rt-indicator').style.display='flex';
-    loadData();initSocket();
-  }
-})();
-
-/* ===== CLOCK ===== */
-function updateClock(){const now=new Date();const cl=document.getElementById('sv-clock'),cd=document.getElementById('sv-date');if(cl)cl.innerText=now.toLocaleTimeString('id-ID');if(cd)cd.innerText=now.toLocaleDateString('id-ID',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}
+function updateClock(){const n=new Date(),cl=document.getElementById('sv-clock'),cd=document.getElementById('sv-date');if(cl)cl.innerText=n.toLocaleTimeString('id-ID');if(cd)cd.innerText=n.toLocaleDateString('id-ID',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}
 setInterval(updateClock,1000);updateClock();
 
-/* ===== TOAST ===== */
 function toast(msg,type='info'){const el=document.createElement('div');el.className=`toast ${type}`;el.innerHTML=`<span>${type==='success'?'✅':type==='error'?'❌':'ℹ️'}</span><span>${msg}</span>`;document.getElementById('toastContainer').appendChild(el);setTimeout(()=>el.remove(),3500);}
-
-/* ===== MODAL ===== */
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-
-/* ===== TAB ===== */
 function tab(id,el){document.querySelectorAll('.kamar').forEach(k=>k.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById(id).classList.add('active');if(el)el.classList.add('active');}
-
-/* ===== FORMAT ===== */
 function fmt(n){return"$"+Number(n||0).toLocaleString("id-ID",{minimumFractionDigits:2});}
 function fmtS(n){n=Number(n||0);if(n>=1000000)return"$"+(n/1000000).toFixed(1)+"M";if(n>=1000)return"$"+(n/1000).toFixed(1)+"K";return"$"+n.toFixed(0);}
 
-/* ===== LOAD DATA ===== */
 async function loadData(){
   try{
     const pRes=await fetch(`${API}/products`);cacheProducts=await pRes.json();
     try{const tRes=await fetch(`${API}/transactions`);if(tRes.ok)cacheTransactions=await tRes.json();}catch{}
-    renderDashboard();renderOpname(cacheProducts);renderKritis(cacheProducts);renderWastage(cacheProducts);renderTrxAll(cacheTransactions);initChecklist();
+    renderDashboard();renderOpname(cacheProducts);renderKritis(cacheProducts);renderWastage(cacheProducts);renderTrxAll(cacheTransactions);initChecklist();svRenderExpired(cacheProducts);
   }catch(e){toast("Gagal memuat data dari server","error");}
 }
 
-/* ===== DASHBOARD ===== */
 function renderDashboard(){
   const today=new Date().toLocaleDateString('id-ID');
   let omzetHari=0,labaHari=0,trxHari=0;
-  cacheTransactions.forEach(t=>{
-    const tgl=new Date(t.waktu).toLocaleDateString('id-ID');if(tgl!==today)return;
-    trxHari++;omzetHari+=Number(t.total||0);
-    (t.items||[]).forEach(i=>{const r=cacheProducts.find(p=>p.barcode===i.barcode);if(r)labaHari+=(Number(i.harga||0)-Number(r.costPrice||0))*Number(i.qty||0);});
-  });
-  const kritis=cacheProducts.filter(p=>p.stock<=5);
-  const wastageTotal=cacheProducts.reduce((s,p)=>s+(p.wastage||0),0);
-  document.getElementById('sv-trx-hari').innerText=trxHari;
-  document.getElementById('sv-omzet-hari').innerText=fmtS(omzetHari);
-  document.getElementById('sv-laba-sub').innerText='Laba: '+fmtS(labaHari);
-  document.getElementById('s-crit').innerText=kritis.length;
-  document.getElementById('sv-wastage').innerText=wastageTotal;
-
-  const tbody=document.querySelector("#t-trx tbody");tbody.innerHTML="";
-  const last5=cacheTransactions.slice(-5).reverse();
-  if(!last5.length){tbody.innerHTML='<tr><td colspan="4"><div class="empty-state" style="padding:20px;"><div class="empty-icon">🧾</div><p>Belum ada transaksi</p></div></td></tr>';}
-  else{last5.forEach(t=>{const items=(t.items||[]).reduce((s,i)=>s+Number(i.qty||0),0);tbody.innerHTML+=`<tr><td>${new Date(t.waktu).toLocaleTimeString('id-ID')}</td><td>${t.kasir||'-'}</td><td>${items}</td><td>${fmt(t.total)}</td></tr>`;});}
-
+  cacheTransactions.forEach(t=>{const tgl=new Date(t.waktu).toLocaleDateString('id-ID');if(tgl!==today)return;trxHari++;omzetHari+=Number(t.total||0);(t.items||[]).forEach(i=>{const r=cacheProducts.find(p=>p.barcode===i.barcode);if(r)labaHari+=(Number(i.harga||0)-Number(r.costPrice||0))*Number(i.qty||0);});});
+  const kritis=cacheProducts.filter(p=>p.stock<=5);const wastageTotal=cacheProducts.reduce((s,p)=>s+(p.wastage||0),0);
+  document.getElementById('sv-trx-hari').innerText=trxHari;document.getElementById('sv-omzet-hari').innerText=fmtS(omzetHari);document.getElementById('sv-laba-sub').innerText='Laba: '+fmtS(labaHari);document.getElementById('s-crit').innerText=kritis.length;document.getElementById('sv-wastage').innerText=wastageTotal;
+  const tbody=document.querySelector("#t-trx tbody");tbody.innerHTML="";const last5=cacheTransactions.slice(-5).reverse();
+  if(!last5.length)tbody.innerHTML='<tr><td colspan="4"><div class="empty-state" style="padding:20px;"><div class="empty-icon">🧾</div><p>Belum ada transaksi</p></div></td></tr>';
+  else last5.forEach(t=>{const items=(t.items||[]).reduce((s,i)=>s+Number(i.qty||0),0);tbody.innerHTML+=`<tr><td>${new Date(t.waktu).toLocaleTimeString('id-ID')}</td><td>${t.kasir||'-'}</td><td>${items}</td><td>${fmt(t.total)}</td></tr>`;});
   const tbodyK=document.querySelector("#t-kritis-dash tbody");tbodyK.innerHTML="";
-  if(!kritis.length){tbodyK.innerHTML='<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">✅ Tidak ada stok kritis</td></tr>';}
-  else{kritis.sort((a,b)=>a.stock-b.stock).slice(0,5).forEach(p=>{const badge=p.stock===0?'<span class="badge badge-red">Habis</span>':'<span class="badge badge-yellow">Kritis</span>';tbodyK.innerHTML+=`<tr><td>${p.name}</td><td><strong>${p.stock}</strong></td><td>${badge}</td></tr>`;});}
-
-  const katMap={};
-  cacheProducts.forEach(p=>{const k=p.category||'Lainnya';if(!katMap[k])katMap[k]={sku:0,stok:0,kritis:0,habis:0};katMap[k].sku++;katMap[k].stok+=p.stock||0;if(p.stock===0)katMap[k].habis++;else if(p.stock<=5)katMap[k].kritis++;});
+  if(!kritis.length)tbodyK.innerHTML='<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">✅ Tidak ada stok kritis</td></tr>';
+  else kritis.sort((a,b)=>a.stock-b.stock).slice(0,5).forEach(p=>{const badge=p.stock===0?'<span class="badge badge-red">Habis</span>':'<span class="badge badge-yellow">Kritis</span>';tbodyK.innerHTML+=`<tr><td>${p.name}</td><td><strong>${p.stock}</strong></td><td>${badge}</td></tr>`;});
+  const katMap={};cacheProducts.forEach(p=>{const k=p.category||'Lainnya';if(!katMap[k])katMap[k]={sku:0,stok:0,kritis:0,habis:0};katMap[k].sku++;katMap[k].stok+=p.stock||0;if(p.stock===0)katMap[k].habis++;else if(p.stock<=5)katMap[k].kritis++;});
   const tbodyKat=document.querySelector("#t-kategori-stok tbody");tbodyKat.innerHTML="";
   Object.entries(katMap).forEach(([k,v])=>{tbodyKat.innerHTML+=`<tr><td><span class="badge badge-blue">${k}</span></td><td>${v.sku}</td><td>${v.stok}</td><td>${v.kritis>0?`<span class="badge badge-yellow">${v.kritis}</span>`:'<span class="badge badge-green">0</span>'}</td><td>${v.habis>0?`<span class="badge badge-red">${v.habis}</span>`:'<span class="badge badge-green">0</span>'}</td></tr>`;});
 }
 
-/* ===== MONITORING TRANSAKSI ===== */
 function renderTrxAll(transactions){filteredTrxAll=[...transactions].reverse();renderTabelTrx(filteredTrxAll);}
 function renderTabelTrx(list){
   const tbody=document.querySelector("#t-trx-all tbody");tbody.innerHTML="";
   if(!list.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🧾</div><p>Tidak ada transaksi</p></div></td></tr>';return;}
-  list.forEach((t,i)=>{
-    let laba=0;const items=(t.items||[]).reduce((s,ii)=>s+Number(ii.qty||0),0);
-    (t.items||[]).forEach(ii=>{const r=cacheProducts.find(p=>p.barcode===ii.barcode);if(r)laba+=(Number(ii.harga||0)-Number(r.costPrice||0))*Number(ii.qty||0);});
-    tbody.innerHTML+=`<tr><td>${i+1}</td><td>${new Date(t.waktu).toLocaleString('id-ID')}</td><td>${t.kasir||'-'}</td><td>${items}</td><td>${fmt(t.total)}</td><td>${fmt(laba)}</td><td><button class="btn btn-outline btn-sm" onclick="lihatDetailTrx(${i})">👁️</button></td></tr>`;
-  });
+  list.forEach((t,i)=>{let laba=0;const items=(t.items||[]).reduce((s,ii)=>s+Number(ii.qty||0),0);(t.items||[]).forEach(ii=>{const r=cacheProducts.find(p=>p.barcode===ii.barcode);if(r)laba+=(Number(ii.harga||0)-Number(r.costPrice||0))*Number(ii.qty||0);});tbody.innerHTML+=`<tr><td>${i+1}</td><td>${new Date(t.waktu).toLocaleString('id-ID')}</td><td>${t.kasir||'-'}</td><td>${items}</td><td>${fmt(t.total)}</td><td>${fmt(laba)}</td><td><button class="btn btn-outline btn-sm" onclick="lihatDetailTrx(${i})">👁️</button></td></tr>`;});
 }
-function filterTrx(){
-  const key=document.getElementById('trx-search').value.toLowerCase(),tgl=document.getElementById('trx-tanggal').value;
-  filteredTrxAll=[...cacheTransactions].reverse().filter(t=>{
-    const mk=!key||(t.kasir||'').toLowerCase().includes(key);
-    const mt=!tgl||new Date(t.waktu).toLocaleDateString('sv-SE')===tgl;
-    return mk&&mt;
-  });renderTabelTrx(filteredTrxAll);
-}
-function lihatDetailTrx(idx){
-  const t=filteredTrxAll[idx];if(!t)return;
-  let html=`<div class="shift-box"><div class="info-row"><span class="label">Waktu</span><span class="value">${new Date(t.waktu).toLocaleString('id-ID')}</span></div><div class="info-row"><span class="label">Kasir</span><span class="value">${t.kasir||'-'}</span></div><div class="info-row"><span class="label">Total</span><span class="value">${fmt(t.total)}</span></div></div>`;
-  html+=`<table><thead><tr><th>Produk</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead><tbody>`;
-  (t.items||[]).forEach(i=>{html+=`<tr><td>${i.nama||i.name||i.barcode}</td><td>${i.qty}</td><td>${fmt(i.harga)}</td><td>${fmt(Number(i.harga)*Number(i.qty))}</td></tr>`;});
-  html+='</tbody></table>';
-  document.getElementById('modal-trx-content').innerHTML=html;
-  openModal('modal-trx');
-}
+function filterTrx(){const key=document.getElementById('trx-search').value.toLowerCase(),tgl=document.getElementById('trx-tanggal').value;filteredTrxAll=[...cacheTransactions].reverse().filter(t=>{const mk=!key||(t.kasir||'').toLowerCase().includes(key);const mt=!tgl||new Date(t.waktu).toLocaleDateString('sv-SE')===tgl;return mk&&mt;});renderTabelTrx(filteredTrxAll);}
+function lihatDetailTrx(idx){const t=filteredTrxAll[idx];if(!t)return;let html=`<div class="shift-box"><div class="info-row"><span class="label">Waktu</span><span class="value">${new Date(t.waktu).toLocaleString('id-ID')}</span></div><div class="info-row"><span class="label">Kasir</span><span class="value">${t.kasir||'-'}</span></div><div class="info-row"><span class="label">Total</span><span class="value">${fmt(t.total)}</span></div></div><table><thead><tr><th>Produk</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead><tbody>`;(t.items||[]).forEach(i=>{html+=`<tr><td>${i.nama||i.name||i.barcode}</td><td>${i.qty}</td><td>${fmt(i.harga)}</td><td>${fmt(Number(i.harga)*Number(i.qty))}</td></tr>`;});html+='</tbody></table>';document.getElementById('modal-trx-content').innerHTML=html;openModal('modal-trx');}
 
-/* ===== STOCK OPNAME ===== */
-function renderOpname(products){
-  filteredOpname=[...products];
-  renderTabelOpname(filteredOpname);
-  document.getElementById('opname-count').innerText=`(${products.length} produk)`;
-}
-function renderTabelOpname(list){
-  const tbody=document.querySelector("#t-opname tbody");tbody.innerHTML="";
-  if(!list.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><p>Tidak ada produk</p></div></td></tr>';return;}
-  list.forEach((p,i)=>{
-    const cls=p.stock===0?'low':p.stock<=5?'warn-row':'';
-    tbody.innerHTML+=`<tr class="${cls}">
-      <td>${i+1}</td>
-      <td>${p.name}</td>
-      <td><span class="badge badge-blue">${p.category||'-'}</span></td>
-      <td style="font-family:monospace;font-size:12px;">${p.barcode}</td>
-      <td><strong>${p.stock}</strong></td>
-      <td><input type="number" class="input-inline" id="fis-${p.barcode}" placeholder="-" min="0" onchange="hitungSelisih('${p.barcode}',${p.stock})"></td>
-      <td id="selisih-${p.barcode}" style="font-weight:600;color:#94a3b8;">-</td>
-      <td class="no-print" style="white-space:nowrap;">
-        <button class="btn btn-purple btn-sm" onclick="openSvPrintBarcode('${p.barcode}')" title="Print Barcode">🏷️</button>
-        <button class="btn btn-green btn-sm" onclick="simpanFisik('${p.barcode}',${p.stock})">✅</button>
-      </td>
-    </tr>`;
-  });
-}
-function filterOpname(){
-  const key=document.getElementById('opname-search').value.toLowerCase(),cat=document.getElementById('opname-cat').value,filter=document.getElementById('opname-filter').value;
-  filteredOpname=cacheProducts.filter(p=>{const mk=p.name.toLowerCase().includes(key)||p.barcode.toLowerCase().includes(key);const mc=!cat||p.category===cat;const mf=!filter||(filter==='kritis'&&p.stock<=5)||(filter==='normal'&&p.stock>5);return mk&&mc&&mf;});
-  renderTabelOpname(filteredOpname);document.getElementById('opname-count').innerText=`(${filteredOpname.length} produk)`;
-}
-function hitungSelisih(barcode,stokSistem){
-  const inp=document.getElementById(`fis-${barcode}`),el=document.getElementById(`selisih-${barcode}`);
-  if(!inp||!el)return;
-  if(inp.value===''){el.innerText='-';el.style.color='#94a3b8';return;}
-  const diff=Number(inp.value)-stokSistem;
-  el.innerText=(diff>0?'+':'')+diff;el.style.color=diff<0?'#ef4444':diff>0?'#059669':'#94a3b8';
-}
-async function simpanFisik(barcode,stokSistem){
-  const inp=document.getElementById(`fis-${barcode}`);const qty=Number(inp.value);
-  if(inp.value===''||isNaN(qty)||qty<0){toast("Masukkan stok fisik yang valid","error");return;}
-  if(!confirm(`Update stok ${barcode} menjadi ${qty} unit?`))return;
-  const p=cacheProducts.find(x=>x.barcode===barcode);if(!p)return;
-  try{const res=await fetch(`${API}/products/update-stock`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({barcode,name:p.name,category:p.category,supplier:p.supplier,costPrice:p.costPrice,price:p.price,tax:p.tax||11,qty,isFullUpdate:true})});
-    if(res.ok){toast(`✅ Stok ${p.name} diupdate ke ${qty} unit`,"success");loadData();}else{toast("Gagal update stok","error");}
-  }catch{toast("Error koneksi","error");}
-}
-async function simpanSemuaOpname(){
-  const updates=[];
-  filteredOpname.forEach(p=>{const inp=document.getElementById(`fis-${p.barcode}`);if(inp&&inp.value!=='')updates.push({...p,qty:Number(inp.value),isFullUpdate:true});});
-  if(!updates.length){toast("Tidak ada data fisik yang diinput","error");return;}
-  if(!confirm(`Simpan ${updates.length} perubahan stok?`))return;
-  let berhasil=0;
-  for(const data of updates){
-    try{const res=await fetch(`${API}/products/update-stock`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({barcode:data.barcode,name:data.name,category:data.category,supplier:data.supplier,costPrice:data.costPrice,price:data.price,tax:data.tax||11,qty:data.qty,isFullUpdate:true})});if(res.ok)berhasil++;}catch{}
-  }
-  toast(`${berhasil}/${updates.length} produk berhasil diupdate`,"success");loadData();
-}
+function renderOpname(products){filteredOpname=[...products];renderTabelOpname(filteredOpname);document.getElementById('opname-count').innerText=`(${products.length} produk)`;}
+function renderTabelOpname(list){const tbody=document.querySelector("#t-opname tbody");tbody.innerHTML="";if(!list.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><p>Tidak ada produk</p></div></td></tr>';return;}list.forEach((p,i)=>{const cls=p.stock===0?'low':p.stock<=5?'warn-row':'';tbody.innerHTML+=`<tr class="${cls}"><td>${i+1}</td><td>${p.name}</td><td><span class="badge badge-blue">${p.category||'-'}</span></td><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td><strong>${p.stock}</strong></td><td><input type="number" class="input-inline" id="fis-${p.barcode}" placeholder="-" min="0" onchange="hitungSelisih('${p.barcode}',${p.stock})"></td><td id="selisih-${p.barcode}" style="font-weight:600;color:#94a3b8;">-</td><td class="no-print" style="white-space:nowrap;"><button class="btn btn-purple btn-sm" onclick="openSvPrintBarcode('${p.barcode}')">🏷️</button><button class="btn btn-green btn-sm" onclick="simpanFisik('${p.barcode}',${p.stock})">✅</button></td></tr>`;});}
+function filterOpname(){const key=document.getElementById('opname-search').value.toLowerCase(),cat=document.getElementById('opname-cat').value,filter=document.getElementById('opname-filter').value;filteredOpname=cacheProducts.filter(p=>{const mk=p.name.toLowerCase().includes(key)||p.barcode.toLowerCase().includes(key);const mc=!cat||p.category===cat;const mf=!filter||(filter==='kritis'&&p.stock<=5)||(filter==='normal'&&p.stock>5);return mk&&mc&&mf;});renderTabelOpname(filteredOpname);document.getElementById('opname-count').innerText=`(${filteredOpname.length} produk)`;}
+function hitungSelisih(barcode,stokSistem){const inp=document.getElementById(`fis-${barcode}`),el=document.getElementById(`selisih-${barcode}`);if(!inp||!el)return;if(inp.value===''){el.innerText='-';el.style.color='#94a3b8';return;}const diff=Number(inp.value)-stokSistem;el.innerText=(diff>0?'+':'')+diff;el.style.color=diff<0?'#ef4444':diff>0?'#059669':'#94a3b8';}
+async function simpanFisik(barcode,stokSistem){const inp=document.getElementById(`fis-${barcode}`);const qty=Number(inp.value);if(inp.value===''||isNaN(qty)||qty<0){toast("Masukkan stok fisik yang valid","error");return;}if(!confirm(`Update stok ${barcode} menjadi ${qty} unit?`))return;const p=cacheProducts.find(x=>x.barcode===barcode);if(!p)return;try{const res=await fetch(`${API}/products/update-stock`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({barcode,name:p.name,category:p.category,supplier:p.supplier,costPrice:p.costPrice,price:p.price,tax:p.tax||11,qty,isFullUpdate:true})});if(res.ok){toast(`✅ Stok ${p.name} diupdate ke ${qty} unit`,"success");loadData();}else toast("Gagal update stok","error");}catch{toast("Error koneksi","error");}}
+async function simpanSemuaOpname(){const updates=[];filteredOpname.forEach(p=>{const inp=document.getElementById(`fis-${p.barcode}`);if(inp&&inp.value!=='')updates.push({...p,qty:Number(inp.value),isFullUpdate:true});});if(!updates.length){toast("Tidak ada data fisik yang diinput","error");return;}if(!confirm(`Simpan ${updates.length} perubahan stok?`))return;let berhasil=0;for(const data of updates){try{const res=await fetch(`${API}/products/update-stock`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({barcode:data.barcode,name:data.name,category:data.category,supplier:data.supplier,costPrice:data.costPrice,price:data.price,tax:data.tax||11,qty:data.qty,isFullUpdate:true})});if(res.ok)berhasil++;}catch{}}toast(`${berhasil}/${updates.length} produk berhasil diupdate`,"success");loadData();}
 
-/* ===== STOK KRITIS ===== */
-function renderKritis(products){
-  const habis=products.filter(p=>p.stock===0),kritis=products.filter(p=>p.stock>0&&p.stock<=5),warn=products.filter(p=>p.stock>5&&p.stock<=10);
-  document.getElementById('sk-habis').innerText=habis.length;document.getElementById('sk-kritis').innerText=kritis.length;document.getElementById('sk-warn').innerText=warn.length;
-  const tbody=document.querySelector("#t-stok-kritis tbody");tbody.innerHTML="";
-  const list=[...habis,...kritis,...warn];
-  if(!list.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua stok aman!</p></div></td></tr>';return;}
-  list.forEach((p,i)=>{
-    const badge=p.stock===0?'<span class="badge badge-red">Habis</span>':p.stock<=5?'<span class="badge badge-yellow">Kritis</span>':'<span class="badge badge-purple">Perhatian</span>';
-    tbody.innerHTML+=`<tr>
-      <td>${i+1}</td>
-      <td style="font-family:monospace;font-size:12px;">${p.barcode}</td>
-      <td>${p.name}</td>
-      <td><span class="badge badge-blue">${p.category||'-'}</span></td>
-      <td>${p.supplier||'-'}</td>
-      <td><strong>${p.stock}</strong></td>
-      <td>${badge}</td>
-      <td class="no-print"><button class="btn btn-purple btn-sm" onclick="openSvPrintBarcode('${p.barcode}')">🏷️</button></td>
-    </tr>`;
-  });
-}
+function renderKritis(products){const habis=products.filter(p=>p.stock<=0),kritis=products.filter(p=>p.stock>0&&p.stock<=5),warn=products.filter(p=>p.stock>5&&p.stock<=10);document.getElementById('sk-habis').innerText=habis.length;document.getElementById('sk-kritis').innerText=kritis.length;document.getElementById('sk-warn').innerText=warn.length;const tbody=document.querySelector("#t-stok-kritis tbody");tbody.innerHTML="";const list=[...habis,...kritis,...warn];if(!list.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua stok aman!</p></div></td></tr>';return;}list.forEach((p,i)=>{const badge=p.stock<=0?'<span class="badge badge-red">Habis</span>':p.stock<=5?'<span class="badge badge-yellow">Kritis</span>':'<span class="badge badge-purple">Perhatian</span>';tbody.innerHTML+=`<tr><td>${i+1}</td><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td>${p.name}</td><td><span class="badge badge-blue">${p.category||'-'}</span></td><td>${p.supplier||'-'}</td><td><strong>${p.stock}</strong></td><td>${badge}</td><td class="no-print"><button class="btn btn-purple btn-sm" onclick="openSvPrintBarcode('${p.barcode}')">🏷️</button></td></tr>`;});}
 
-/* ===== WASTAGE ===== */
-function cariWastage(){
-  const bc=document.getElementById('w-bc').value.trim(),p=cacheProducts.find(x=>x.barcode===bc);
-  if(p){document.getElementById('w-nama').value=p.name;document.getElementById('w-stok').value=p.stock;}
-  else{document.getElementById('w-nama').value='';document.getElementById('w-stok').value='';}
-}
-async function laporkanRusak(){
-  const bc=document.getElementById("w-bc").value.trim(),qty=Number(document.getElementById("w-qty").value);
-  const found=cacheProducts.find(p=>p.barcode===bc);
-  if(!bc||qty<=0){toast("Data tidak valid","error");return;}
-  if(!found){toast("Barcode tidak ditemukan","error");return;}
-  if(qty>found.stock){toast(`Stok hanya ${found.stock} unit, tidak bisa wastage ${qty}!`,"error");return;}
-  if(!confirm(`Lapor ${qty} unit "${found.name}" sebagai wastage?`))return;
-  try{const res=await fetch(`${API}/products/wastage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({barcode:bc,qty})});
-    if(res.ok){toast(`✅ Wastage ${found.name}: ${qty} unit dilaporkan`,"success");['w-bc','w-qty','w-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('w-nama').value='';document.getElementById('w-stok').value='';loadData();}
-    else{toast("Gagal melaporkan wastage","error");}
-  }catch{toast("Error koneksi","error");}
-}
-function renderWastage(products){
-  const list=products.filter(p=>p.wastage>0);let tQty=0,tNilai=0;list.forEach(p=>{tQty+=p.wastage;tNilai+=p.wastage*(p.costPrice||0);});
-  document.getElementById('w-sum-qty').innerText=tQty;document.getElementById('w-sum-nilai').innerText=fmtS(tNilai);document.getElementById('w-sum-prod').innerText=list.length;
-  const tbody=document.querySelector("#t-wastage-sv tbody");tbody.innerHTML="";
-  if(!list.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">✅</div><p>Tidak ada wastage</p></div></td></tr>';return;}
-  list.sort((a,b)=>b.wastage-a.wastage).forEach((p,i)=>{tbody.innerHTML+=`<tr><td>${i+1}</td><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td>${p.name}</td><td><span class="badge badge-blue">${p.category||'-'}</span></td><td><strong>${p.wastage}</strong></td><td>${fmt(p.wastage*(p.costPrice||0))}</td></tr>`;});
-}
+function cariWastage(){const bc=document.getElementById('w-bc').value.trim(),p=cacheProducts.find(x=>x.barcode===bc);if(p){document.getElementById('w-nama').value=p.name;document.getElementById('w-stok').value=p.stock;}else{document.getElementById('w-nama').value='';document.getElementById('w-stok').value='';}}
+async function laporkanRusak(){const bc=document.getElementById("w-bc").value.trim(),qty=Number(document.getElementById("w-qty").value);const found=cacheProducts.find(p=>p.barcode===bc);if(!bc||qty<=0){toast("Data tidak valid","error");return;}if(!found){toast("Barcode tidak ditemukan","error");return;}if(qty>found.stock){toast(`Stok hanya ${found.stock} unit!`,"error");return;}if(!confirm(`Lapor ${qty} unit "${found.name}" sebagai wastage?`))return;try{const res=await fetch(`${API}/products/wastage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({barcode:bc,qty})});if(res.ok){toast(`✅ Wastage ${found.name}: ${qty} unit dilaporkan`,"success");['w-bc','w-qty','w-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('w-nama').value='';document.getElementById('w-stok').value='';loadData();}else toast("Gagal melaporkan wastage","error");}catch{toast("Error koneksi","error");}}
+function renderWastage(products){const list=products.filter(p=>p.wastage>0);let tQty=0,tNilai=0;list.forEach(p=>{tQty+=p.wastage;tNilai+=p.wastage*(p.costPrice||0);});document.getElementById('w-sum-qty').innerText=tQty;document.getElementById('w-sum-nilai').innerText=fmtS(tNilai);document.getElementById('w-sum-prod').innerText=list.length;const tbody=document.querySelector("#t-wastage-sv tbody");tbody.innerHTML="";if(!list.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">✅</div><p>Tidak ada wastage</p></div></td></tr>';return;}list.sort((a,b)=>b.wastage-a.wastage).forEach((p,i)=>{tbody.innerHTML+=`<tr><td>${i+1}</td><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td>${p.name}</td><td><span class="badge badge-blue">${p.category||'-'}</span></td><td><strong>${p.wastage}</strong></td><td>${fmt(p.wastage*(p.costPrice||0))}</td></tr>`;});}
 
-/* ===== LAPORAN SHIFT ===== */
-function generateLaporan(){
-  const tglInput=document.getElementById('lap-tanggal').value;
-  const tgl=tglInput?new Date(tglInput):new Date();
-  const tglStr=tgl.toLocaleDateString('id-ID'),tglSv=tgl.toLocaleDateString('sv-SE');
-  const trxHari=cacheTransactions.filter(t=>new Date(t.waktu).toLocaleDateString('sv-SE')===tglSv);
-  let omzet=0,laba=0,totalItems=0;const kasirMap={};
-  trxHari.forEach(t=>{
-    omzet+=Number(t.total||0);const k=t.kasir||'Unknown';
-    if(!kasirMap[k])kasirMap[k]={trx:0,omzet:0};kasirMap[k].trx++;kasirMap[k].omzet+=Number(t.total||0);
-    (t.items||[]).forEach(i=>{totalItems+=Number(i.qty||0);const r=cacheProducts.find(p=>p.barcode===i.barcode);if(r)laba+=(Number(i.harga||0)-Number(r.costPrice||0))*Number(i.qty||0);});
-  });
-  let kasirRows=Object.entries(kasirMap).map(([k,v])=>`<tr><td>${k}</td><td>${v.trx}</td><td>${fmt(v.omzet)}</td></tr>`).join('');
-  if(!kasirRows)kasirRows='<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">Tidak ada data</td></tr>';
-  document.getElementById('laporan-content').innerHTML=`
-    <div class="shift-box" style="margin-bottom:16px;"><h4>📊 Laporan Shift — ${tglStr}</h4>
-      <div class="info-row"><span class="label">Total Transaksi</span><span class="value">${trxHari.length}</span></div>
-      <div class="info-row"><span class="label">Total Items</span><span class="value">${totalItems} item</span></div>
-      <div class="info-row"><span class="label">Total Pendapatan</span><span class="value">${fmt(omzet)}</span></div>
-      <div class="info-row"><span class="label">Total Laba</span><span class="value">${fmt(laba)}</span></div>
-      <div class="info-row"><span class="label">Margin</span><span class="value">${omzet>0?(laba/omzet*100).toFixed(1)+'%':'0%'}</span></div>
-      <div class="info-row"><span class="label">Rata-rata per Transaksi</span><span class="value">${fmt(trxHari.length>0?omzet/trxHari.length:0)}</span></div>
-    </div>
-    <div class="card" style="margin-bottom:16px;"><div class="card-title"><span>👤</span> Performa per Kasir</div>
-      <div class="table-wrap"><table><thead><tr><th>Kasir</th><th>Transaksi</th><th>Omzet</th></tr></thead><tbody>${kasirRows}</tbody></table></div>
-    </div>
-    <div class="card"><div class="card-title"><span>🧾</span> Transaksi Hari Ini (${trxHari.length})</div>
-      <div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Kasir</th><th>Items</th><th>Total</th></tr></thead>
-      <tbody>${trxHari.length===0?'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:16px;">Tidak ada transaksi</td></tr>':trxHari.map(t=>`<tr><td>${new Date(t.waktu).toLocaleTimeString('id-ID')}</td><td>${t.kasir||'-'}</td><td>${(t.items||[]).reduce((s,i)=>s+Number(i.qty||0),0)}</td><td>${fmt(t.total)}</td></tr>`).join('')}</tbody></table></div>
-    </div>`;
-}
+function generateLaporan(){const tglInput=document.getElementById('lap-tanggal').value;const tgl=tglInput?new Date(tglInput):new Date();const tglStr=tgl.toLocaleDateString('id-ID'),tglSv=tgl.toLocaleDateString('sv-SE');const trxHari=cacheTransactions.filter(t=>new Date(t.waktu).toLocaleDateString('sv-SE')===tglSv);let omzet=0,laba=0,totalItems=0;const kasirMap={};trxHari.forEach(t=>{omzet+=Number(t.total||0);const k=t.kasir||'Unknown';if(!kasirMap[k])kasirMap[k]={trx:0,omzet:0};kasirMap[k].trx++;kasirMap[k].omzet+=Number(t.total||0);(t.items||[]).forEach(i=>{totalItems+=Number(i.qty||0);const r=cacheProducts.find(p=>p.barcode===i.barcode);if(r)laba+=(Number(i.harga||0)-Number(r.costPrice||0))*Number(i.qty||0);});});let kasirRows=Object.entries(kasirMap).map(([k,v])=>`<tr><td>${k}</td><td>${v.trx}</td><td>${fmt(v.omzet)}</td></tr>`).join('');if(!kasirRows)kasirRows='<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">Tidak ada data</td></tr>';document.getElementById('laporan-content').innerHTML=`<div class="shift-box" style="margin-bottom:16px;"><h4>📊 Laporan Shift — ${tglStr}</h4><div class="info-row"><span class="label">Total Transaksi</span><span class="value">${trxHari.length}</span></div><div class="info-row"><span class="label">Total Items</span><span class="value">${totalItems} item</span></div><div class="info-row"><span class="label">Total Pendapatan</span><span class="value">${fmt(omzet)}</span></div><div class="info-row"><span class="label">Total Laba</span><span class="value">${fmt(laba)}</span></div><div class="info-row"><span class="label">Margin</span><span class="value">${omzet>0?(laba/omzet*100).toFixed(1)+'%':'0%'}</span></div><div class="info-row"><span class="label">Rata-rata per Transaksi</span><span class="value">${fmt(trxHari.length>0?omzet/trxHari.length:0)}</span></div></div><div class="card" style="margin-bottom:16px;"><div class="card-title"><span>👤</span> Performa per Kasir</div><div class="table-wrap"><table><thead><tr><th>Kasir</th><th>Transaksi</th><th>Omzet</th></tr></thead><tbody>${kasirRows}</tbody></table></div></div><div class="card"><div class="card-title"><span>🧾</span> Transaksi Hari Ini (${trxHari.length})</div><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Kasir</th><th>Items</th><th>Total</th></tr></thead><tbody>${trxHari.length===0?'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:16px;">Tidak ada transaksi</td></tr>':trxHari.map(t=>`<tr><td>${new Date(t.waktu).toLocaleTimeString('id-ID')}</td><td>${t.kasir||'-'}</td><td>${(t.items||[]).reduce((s,i)=>s+Number(i.qty||0),0)}</td><td>${fmt(t.total)}</td></tr>`).join('')}</tbody></table></div></div>`;}
 
-/* ===== CHECKLIST ===== */
-function initChecklist(){
-  document.querySelectorAll('.checklist-item').forEach(item=>{
-    const key=item.dataset.key,cb=item.querySelector('input[type=checkbox]');
-    cb.checked=localStorage.getItem(key)==="1";
-    if(cb.checked)item.classList.add('done');
-  });updateProgress();
-}
-function toggleCL(item){
-  const cb=item.querySelector('input[type=checkbox]');cb.checked=!cb.checked;
-  localStorage.setItem(item.dataset.key,cb.checked?"1":"0");item.classList.toggle('done',cb.checked);updateProgress();
-}
-function updateProgress(){
-  const items=document.querySelectorAll('.checklist-item');const total=items.length;
-  const done=[...items].filter(i=>i.classList.contains('done')).length;
-  const pct=total>0?Math.round(done/total*100):0;
-  document.getElementById('cl-done').innerText=done;document.getElementById('cl-total').innerText=total;
-  document.getElementById('cl-pct').innerText=pct+'%';document.getElementById('cl-bar').style.width=pct+'%';
-  const st=document.getElementById('cl-status');
-  if(pct===100)st.innerHTML='<span style="color:var(--p);font-weight:600;">🎉 Semua checklist selesai!</span>';
-  else if(pct>=70)st.innerHTML='<span style="color:var(--p);">✅ Hampir selesai!</span>';
-  else if(pct>=30)st.innerHTML='<span style="color:var(--yellow);">⏳ Sedang berlangsung...</span>';
-  else st.innerHTML='<span style="color:#94a3b8;">Mulai kerjakan checklist hari ini</span>';
-}
-function resetChecklist(){
-  if(!confirm("Reset semua checklist hari ini?"))return;
-  document.querySelectorAll('.checklist-item').forEach(item=>{localStorage.removeItem(item.dataset.key);item.classList.remove('done');item.querySelector('input[type=checkbox]').checked=false;});
-  updateProgress();toast("Checklist direset","info");
-}
+function initChecklist(){document.querySelectorAll('.checklist-item').forEach(item=>{const key=item.dataset.key,cb=item.querySelector('input[type=checkbox]');cb.checked=localStorage.getItem(key)==="1";if(cb.checked)item.classList.add('done');});updateProgress();}
+function toggleCL(item){const cb=item.querySelector('input[type=checkbox]');cb.checked=!cb.checked;localStorage.setItem(item.dataset.key,cb.checked?"1":"0");item.classList.toggle('done',cb.checked);updateProgress();}
+function updateProgress(){const items=document.querySelectorAll('.checklist-item');const total=items.length;const done=[...items].filter(i=>i.classList.contains('done')).length;const pct=total>0?Math.round(done/total*100):0;document.getElementById('cl-done').innerText=done;document.getElementById('cl-total').innerText=total;document.getElementById('cl-pct').innerText=pct+'%';document.getElementById('cl-bar').style.width=pct+'%';const st=document.getElementById('cl-status');if(pct===100)st.innerHTML='<span style="color:var(--p);font-weight:600;">🎉 Semua checklist selesai!</span>';else if(pct>=70)st.innerHTML='<span style="color:var(--p);">✅ Hampir selesai!</span>';else if(pct>=30)st.innerHTML='<span style="color:var(--yellow);">⏳ Sedang berlangsung...</span>';else st.innerHTML='<span style="color:#94a3b8;">Mulai kerjakan checklist hari ini</span>';}
+function resetChecklist(){if(!confirm("Reset semua checklist hari ini?"))return;document.querySelectorAll('.checklist-item').forEach(item=>{localStorage.removeItem(item.dataset.key);item.classList.remove('done');item.querySelector('input[type=checkbox]').checked=false;});updateProgress();toast("Checklist direset","info");}
 
-/* ============================================================
-   FITUR PRINT BARCODE — SUPERVISOR
-   ============================================================ */
+/* BARCODE */
+function generateBarcodeToSvg(svgEl,barcode,width,height){try{JsBarcode(svgEl,barcode,{format:"CODE128",width,height,displayValue:true,fontSize:8,margin:2,background:"white"});return true;}catch(e){return false;}}
+function openSvPrintBarcode(barcode){const p=cacheProducts.find(x=>x.barcode===barcode);if(!p){toast("Produk tidak ditemukan","error");return;}svBcCurrentBarcode=barcode;svBcCurrentSize='small';document.getElementById('sv-bc-modal-nama').innerText=p.name;document.getElementById('sv-bc-modal-sku').innerText=barcode;document.getElementById('sv-bc-modal-harga').innerText=fmt(p.price);document.getElementById('sv-bc-preview-nama').innerText=p.name;document.getElementById('sv-bc-preview-harga').innerText=fmt(p.price);document.getElementById('sv-bc-jumlah').value=1;document.getElementById('sv-bc-show-name').checked=true;document.getElementById('sv-bc-show-price').checked=true;document.querySelectorAll('[id^="sv-size-"]').forEach(b=>b.classList.remove('active'));document.getElementById('sv-size-small').classList.add('active');openModal('modal-barcode-sv');updateSvBCPreview();}
+function updateSvBCPreview(){const svgEl=document.getElementById('sv-bc-preview-svg');const showName=document.getElementById('sv-bc-show-name').checked,showPrice=document.getElementById('sv-bc-show-price').checked;document.getElementById('sv-bc-preview-nama').style.display=showName?'block':'none';document.getElementById('sv-bc-preview-harga').style.display=showPrice?'block':'none';const wm={small:1.2,medium:1.6,large:2.0},hm={small:40,medium:55,large:70};try{JsBarcode(svgEl,svBcCurrentBarcode,{format:"CODE128",width:wm[svBcCurrentSize],height:hm[svBcCurrentSize],displayValue:true,fontSize:10,margin:4,background:"transparent"});}catch(e){}}
+function setSvBarcodeSize(size){svBcCurrentSize=size;document.querySelectorAll('[id^="sv-size-"]').forEach(b=>b.classList.remove('active'));document.getElementById('sv-size-'+size).classList.add('active');updateSvBCPreview();}
+function ubahJumlahSvBC(delta){const inp=document.getElementById('sv-bc-jumlah');let val=parseInt(inp.value)+delta;if(val<1)val=1;if(val>100)val=100;inp.value=val;}
+function clampSvJumlahBC(){const inp=document.getElementById('sv-bc-jumlah');let val=parseInt(inp.value)||1;if(val<1)val=1;if(val>100)val=100;inp.value=val;}
+function printSvBarcode(){const p=cacheProducts.find(x=>x.barcode===svBcCurrentBarcode);if(!p)return;const jumlah=parseInt(document.getElementById('sv-bc-jumlah').value)||1,showName=document.getElementById('sv-bc-show-name').checked,showPrice=document.getElementById('sv-bc-show-price').checked,size=svBcCurrentSize,wm={small:1.0,medium:1.4,large:1.8},hm={small:35,medium:50,large:65};doBuildAndPrint([{product:p,jumlah}],size,wm[size],hm[size],showName,showPrice);closeModal('modal-barcode-sv');}
+function openBulkPrintBarcode(){bulkCurrentSize='small';document.getElementById('bulk-total-count').innerText=filteredOpname.length;document.querySelectorAll('[id^="bulk-size-"]').forEach(b=>b.classList.remove('active'));document.getElementById('bulk-size-small').classList.add('active');openModal('modal-barcode-bulk');}
+function setBulkSize(size){bulkCurrentSize=size;document.querySelectorAll('[id^="bulk-size-"]').forEach(b=>b.classList.remove('active'));document.getElementById('bulk-size-'+size).classList.add('active');}
+function printBulkBarcode(){if(!filteredOpname.length){toast("Tidak ada produk untuk dicetak","error");return;}const showName=document.getElementById('bulk-show-name').checked,showPrice=document.getElementById('bulk-show-price').checked,size=bulkCurrentSize,wm={small:1.0,medium:1.4,large:1.8},hm={small:35,medium:50,large:65};doBuildAndPrint(filteredOpname.map(p=>({product:p,jumlah:1})),size,wm[size],hm[size],showName,showPrice);closeModal('modal-barcode-bulk');}
+function doBuildAndPrint(items,size,bw,bh,showName,showPrice){const area=document.getElementById('barcode-print-area');area.innerHTML='';const grid=document.createElement('div');grid.style.cssText='display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:white;';items.forEach(({product:p,jumlah})=>{for(let i=0;i<jumlah;i++){const label=document.createElement('div'),labelW=size==='small'?'100px':size==='medium'?'140px':'180px';label.style.cssText=`width:${labelW};border:1px solid #ccc;padding:5px 6px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;`;if(showName){const nameEl=document.createElement('div');nameEl.innerText=p.name;nameEl.style.cssText=`font-size:${size==='small'?'8':'10'}px;font-weight:700;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;font-family:Arial,sans-serif;`;label.appendChild(nameEl);}const svgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');label.appendChild(svgEl);generateBarcodeToSvg(svgEl,p.barcode,bw,bh);if(showPrice){const priceEl=document.createElement('div');priceEl.innerText=fmt(p.price);priceEl.style.cssText=`font-size:${size==='small'?'8':'10'}px;font-weight:700;color:#059669;margin-top:2px;font-family:Arial,sans-serif;`;label.appendChild(priceEl);}grid.appendChild(label);}});area.appendChild(grid);const ps=document.createElement('style');ps.id='bc-print-style';ps.innerHTML=`@media print{body>*:not(#barcode-print-area):not(#barcode-print-area *){display:none !important;}#barcode-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;z-index:99999;}}`;document.head.appendChild(ps);setTimeout(()=>{window.print();setTimeout(()=>{const s=document.getElementById('bc-print-style');if(s)s.remove();area.innerHTML='';},1500);},300);}
 
-// Helper generate barcode ke SVG element
-function generateBarcodeToSvg(svgEl, barcode, width, height) {
-  try {
-    JsBarcode(svgEl, barcode, {
-      format: "CODE128",
-      width: width,
-      height: height,
-      displayValue: true,
-      fontSize: 8,
-      margin: 2,
-      background: "white"
-    });
-    return true;
-  } catch(e) {
-    try {
-      JsBarcode(svgEl, barcode, {
-        format: "CODE39",
-        width: width,
-        height: height,
-        displayValue: true,
-        fontSize: 8,
-        margin: 2,
-        background: "white"
-      });
-      return true;
-    } catch(e2) {
-      return false;
-    }
-  }
-}
-
-// Buka modal print barcode single produk (dari tabel)
-function openSvPrintBarcode(barcode) {
-  const p = cacheProducts.find(x => x.barcode === barcode);
-  if (!p) { toast("Produk tidak ditemukan", "error"); return; }
-  svBcCurrentBarcode = barcode;
-  svBcCurrentSize = 'small';
-
-  document.getElementById('sv-bc-modal-nama').innerText = p.name;
-  document.getElementById('sv-bc-modal-sku').innerText = barcode;
-  document.getElementById('sv-bc-modal-harga').innerText = fmt(p.price);
-  document.getElementById('sv-bc-preview-nama').innerText = p.name;
-  document.getElementById('sv-bc-preview-harga').innerText = fmt(p.price);
-  document.getElementById('sv-bc-jumlah').value = 1;
-  document.getElementById('sv-bc-show-name').checked = true;
-  document.getElementById('sv-bc-show-price').checked = true;
-  document.querySelectorAll('[id^="sv-size-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById('sv-size-small').classList.add('active');
-
-  openModal('modal-barcode-sv');
-  updateSvBCPreview();
-}
-
-function updateSvBCPreview() {
-  const svgEl = document.getElementById('sv-bc-preview-svg');
-  const showName = document.getElementById('sv-bc-show-name').checked;
-  const showPrice = document.getElementById('sv-bc-show-price').checked;
-  document.getElementById('sv-bc-preview-nama').style.display = showName ? 'block' : 'none';
-  document.getElementById('sv-bc-preview-harga').style.display = showPrice ? 'block' : 'none';
-  const widthMap = { small: 1.2, medium: 1.6, large: 2.0 };
-  const heightMap = { small: 40, medium: 55, large: 70 };
-  try {
-    JsBarcode(svgEl, svBcCurrentBarcode, {
-      format: "CODE128",
-      width: widthMap[svBcCurrentSize],
-      height: heightMap[svBcCurrentSize],
-      displayValue: true,
-      fontSize: 10,
-      margin: 4,
-      background: "transparent"
-    });
-  } catch(e) {}
-}
-
-function setSvBarcodeSize(size) {
-  svBcCurrentSize = size;
-  document.querySelectorAll('[id^="sv-size-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById('sv-size-' + size).classList.add('active');
-  updateSvBCPreview();
-}
-
-function ubahJumlahSvBC(delta) {
-  const inp = document.getElementById('sv-bc-jumlah');
-  let val = parseInt(inp.value) + delta;
-  if (val < 1) val = 1;
-  if (val > 100) val = 100;
-  inp.value = val;
-}
-
-function clampSvJumlahBC() {
-  const inp = document.getElementById('sv-bc-jumlah');
-  let val = parseInt(inp.value) || 1;
-  if (val < 1) val = 1;
-  if (val > 100) val = 100;
-  inp.value = val;
-}
-
-function printSvBarcode() {
-  const p = cacheProducts.find(x => x.barcode === svBcCurrentBarcode);
-  if (!p) { toast("Produk tidak ditemukan", "error"); return; }
-  const jumlah = parseInt(document.getElementById('sv-bc-jumlah').value) || 1;
-  const showName = document.getElementById('sv-bc-show-name').checked;
-  const showPrice = document.getElementById('sv-bc-show-price').checked;
-  const size = svBcCurrentSize;
-  const widthMap = { small: 1.0, medium: 1.4, large: 1.8 };
-  const heightMap = { small: 35, medium: 50, large: 65 };
-
-  doBuildAndPrint([{ product: p, jumlah }], size, widthMap[size], heightMap[size], showName, showPrice);
-  closeModal('modal-barcode-sv');
-}
-
-// Modal print barcode massal
-function openBulkPrintBarcode() {
-  bulkCurrentSize = 'small';
-  document.getElementById('bulk-total-count').innerText = filteredOpname.length;
-  document.querySelectorAll('[id^="bulk-size-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById('bulk-size-small').classList.add('active');
-  openModal('modal-barcode-bulk');
-}
-
-function setBulkSize(size) {
-  bulkCurrentSize = size;
-  document.querySelectorAll('[id^="bulk-size-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById('bulk-size-' + size).classList.add('active');
-}
-
-function printBulkBarcode() {
-  if (!filteredOpname.length) { toast("Tidak ada produk untuk dicetak", "error"); return; }
-  const showName = document.getElementById('bulk-show-name').checked;
-  const showPrice = document.getElementById('bulk-show-price').checked;
-  const size = bulkCurrentSize;
-  const widthMap = { small: 1.0, medium: 1.4, large: 1.8 };
-  const heightMap = { small: 35, medium: 50, large: 65 };
-
-  const items = filteredOpname.map(p => ({ product: p, jumlah: 1 }));
-  doBuildAndPrint(items, size, widthMap[size], heightMap[size], showName, showPrice);
-  closeModal('modal-barcode-bulk');
-}
-
-// Fungsi utama: bangun label & print
-function doBuildAndPrint(items, size, bw, bh, showName, showPrice) {
-  const area = document.getElementById('barcode-print-area');
-  area.innerHTML = '';
-
-  const grid = document.createElement('div');
-  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:white;';
-
-  items.forEach(({ product: p, jumlah }) => {
-    for (let i = 0; i < jumlah; i++) {
-      const label = document.createElement('div');
-      const labelW = size === 'small' ? '100px' : size === 'medium' ? '140px' : '180px';
-      label.style.cssText = `width:${labelW};border:1px solid #ccc;padding:5px 6px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;`;
-
-      if (showName) {
-        const nameEl = document.createElement('div');
-        nameEl.innerText = p.name;
-        nameEl.style.cssText = `font-size:${size==='small'?'8':'10'}px;font-weight:700;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;font-family:Arial,sans-serif;`;
-        label.appendChild(nameEl);
-      }
-
-      const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      label.appendChild(svgEl);
-      generateBarcodeToSvg(svgEl, p.barcode, bw, bh);
-
-      if (showPrice) {
-        const priceEl = document.createElement('div');
-        priceEl.innerText = fmt(p.price);
-        priceEl.style.cssText = `font-size:${size==='small'?'8':'10'}px;font-weight:700;color:#059669;margin-top:2px;font-family:Arial,sans-serif;`;
-        label.appendChild(priceEl);
-      }
-
-      grid.appendChild(label);
-    }
-  });
-
-  area.appendChild(grid);
-
-  const printStyle = document.createElement('style');
-  printStyle.id = 'bc-print-style';
-  printStyle.innerHTML = `
-    @media print {
-      body > *:not(#barcode-print-area) { display: none !important; }
-      #barcode-print-area {
-        display: block !important;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%;
-        background: white;
-        z-index: 99999;
-      }
-    }
-  `;
-  document.head.appendChild(printStyle);
-
-  setTimeout(() => {
-    window.print();
-    setTimeout(() => {
-      const ps = document.getElementById('bc-print-style');
-      if (ps) ps.remove();
-      area.innerHTML = '';
-    }, 1500);
-  }, 300);
-}
-
-/* ===== SOCKET.IO ===== */
-function initSocket(){
-  const socket=io();
-  const dot=document.getElementById('rt-dot'),txt=document.getElementById('rt-text'),ind=document.getElementById('rt-indicator');
-  socket.on('connect',()=>{dot.style.cssText='background:#059669;animation:pulse 1.5s infinite;';txt.innerText='Real-time Aktif';ind.style.background='#ecfdf5';});
-  socket.on('disconnect',()=>{dot.style.cssText='background:#ef4444;';txt.innerText='Terputus...';ind.style.background='#fff5f5';});
-  socket.on('transaksi_baru',trx=>{cacheTransactions.push(trx);renderDashboard();renderTrxAll(cacheTransactions);toast(`🧾 TRANSAKSI BARU — Kasir: ${trx.kasir||'-'} | Total: ${fmt(trx.total)}`,'success');});
-  socket.on('stok_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderDashboard();renderOpname(cacheProducts);renderKritis(cacheProducts);renderWastage(cacheProducts);}catch{}});
-  socket.on('produk_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderDashboard();renderOpname(cacheProducts);renderKritis(cacheProducts);}catch{}});
-  socket.on('wastage_update',data=>{toast(`🗑️ Wastage: ${data.nama} — ${data.qty} unit`,'info');loadData();});
-}
-
-// Auto refresh 60 detik
-setInterval(loadData,60000);
-
-/* ============================================================
-   FITUR EXPIRED - SUPERVISOR
-   ============================================================ */
-function svSisaHari(d) {
-  if (!d) return null;
-  var t = new Date(); t.setHours(0,0,0,0);
-  var e = new Date(d); e.setHours(0,0,0,0);
-  return Math.ceil((e - t) / 864e5);
-}
-function svFmtTgl(d) {
-  if (!d) return '-';
-  return new Date(d).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
-}
-function svExpBadge(s) {
-  if (s === null) return '<span style="color:#94a3b8;font-size:12px;">-</span>';
-  if (s < 0)  return '<span class="badge badge-red">Expired ' + Math.abs(s) + ' hari lalu</span>';
-  if (s === 0) return '<span class="badge badge-red">Expired Hari Ini!</span>';
-  if (s <= 7)  return '<span class="badge badge-red">' + s + ' hari lagi</span>';
-  if (s <= 30) return '<span class="badge badge-yellow">' + s + ' hari lagi</span>';
-  return '<span class="badge badge-green">' + s + ' hari lagi</span>';
-}
-var svExpList = [];
-function svRenderExpired(products) {
-  svExpList = products
-    .filter(function(p) { return p.expiredDate; })
-    .map(function(p) { return Object.assign({}, p, {sisa: svSisaHari(p.expiredDate)}); })
-    .sort(function(a, b) { return a.sisa - b.sisa; });
-  var sudah = svExpList.filter(function(p) { return p.sisa < 0; }).length;
-  var h7    = svExpList.filter(function(p) { return p.sisa >= 0 && p.sisa <= 7; }).length;
-  var h30   = svExpList.filter(function(p) { return p.sisa >= 0 && p.sisa <= 30; }).length;
-
-  // Update stat cards halaman expired
-  var es = document.getElementById('sv-exp-sudah');
-  var e7 = document.getElementById('sv-exp-7hari');
-  var e30 = document.getElementById('sv-exp-30hari');
-  if (es) es.innerText = sudah;
-  if (e7) e7.innerText = h7;
-  if (e30) e30.innerText = h30;
-
-  // Update stat dashboard
-  var ds = document.getElementById('sv-d-expired');
-  var dn = document.getElementById('sv-d-near-expired');
-  if (ds) ds.innerText = sudah;
-  if (dn) dn.innerText = h30;
-
-  // Alert banner dashboard
-  var ae = document.getElementById('sv-alert-expired');
-  var an = document.getElementById('sv-alert-near-expired');
-  if (ae) {
-    if (sudah > 0) {
-      ae.style.display = 'flex';
-      document.getElementById('sv-alert-expired-text').innerText =
-        'Perhatian! ' + sudah + ' produk sudah EXPIRED! Segera singkirkan dari rak!';
-    } else { ae.style.display = 'none'; }
-  }
-  if (an) {
-    if (h30 > 0) {
-      an.style.display = 'flex';
-      document.getElementById('sv-alert-near-expired-text').innerText =
-        'Peringatan! ' + h30 + ' produk akan expired dalam 30 hari ke depan. Segera cek rak!';
-    } else { an.style.display = 'none'; }
-  }
+/* EXPIRED */
+function svSisaHari(d){if(!d)return null;var t=new Date();t.setHours(0,0,0,0);var e=new Date(d);e.setHours(0,0,0,0);return Math.ceil((e-t)/864e5);}
+function svFmtTgl(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
+function svExpBadge(s){if(s===null)return'<span style="color:#94a3b8;font-size:12px;">-</span>';if(s<0)return'<span class="badge badge-red">Expired '+Math.abs(s)+' hari lalu</span>';if(s===0)return'<span class="badge badge-red">Expired Hari Ini!</span>';if(s<=7)return'<span class="badge badge-red">'+s+' hari lagi</span>';if(s<=30)return'<span class="badge badge-yellow">'+s+' hari lagi</span>';return'<span class="badge badge-green">'+s+' hari lagi</span>';}
+var svExpList=[];
+function svRenderExpired(products){
+  svExpList=products.filter(p=>p.expiredDate).map(p=>Object.assign({},p,{sisa:svSisaHari(p.expiredDate)})).sort((a,b)=>a.sisa-b.sisa);
+  var sudah=svExpList.filter(p=>p.sisa<0).length,h7=svExpList.filter(p=>p.sisa>=0&&p.sisa<=7).length,h30=svExpList.filter(p=>p.sisa>=0&&p.sisa<=30).length;
+  var es=document.getElementById('sv-exp-sudah'),e7=document.getElementById('sv-exp-7hari'),e30=document.getElementById('sv-exp-30hari');
+  if(es)es.innerText=sudah;if(e7)e7.innerText=h7;if(e30)e30.innerText=h30;
+  var ds=document.getElementById('sv-d-expired'),dn=document.getElementById('sv-d-near-expired');
+  if(ds)ds.innerText=sudah;if(dn)dn.innerText=h30;
+  var ae=document.getElementById('sv-alert-expired'),an=document.getElementById('sv-alert-near-expired');
+  if(ae){if(sudah>0){ae.style.display='flex';document.getElementById('sv-alert-expired-text').innerText='Perhatian! '+sudah+' produk sudah EXPIRED! Segera singkirkan dari rak!';}else ae.style.display='none';}
+  if(an){if(h30>0){an.style.display='flex';document.getElementById('sv-alert-near-expired-text').innerText='Peringatan! '+h30+' produk akan expired dalam 30 hari ke depan. Segera cek rak!';}else an.style.display='none';}
   svRenderTblExpired(svExpList);
 }
-function svRenderTblExpired(list) {
-  var tbody = document.querySelector('#sv-t-expired tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#94a3b8;">&#10003; Tidak ada produk expired yang terdaftar</td></tr>';
-    return;
-  }
-  list.forEach(function(p, i) {
-    var s = p.sisa;
-    var rowCls = s < 0 ? 'expired-row' : s <= 30 ? 'near-expired-row' : '';
-    var sTxt = s < 0
-      ? '<span style="color:#ef4444;font-weight:700;">' + Math.abs(s) + ' hari lalu</span>'
-      : s === 0
-        ? '<span style="color:#ef4444;font-weight:700;">Hari ini!</span>'
-        : '<strong>' + s + '</strong> hari';
-    var stk = p.stock === 0
-      ? '<span class="badge badge-red">Habis</span>'
-      : p.stock <= 5
-        ? '<span class="badge badge-yellow">' + p.stock + '</span>'
-        : '<span class="badge badge-green">' + p.stock + '</span>';
-    tbody.innerHTML +=
-      '<tr class="' + rowCls + '">' +
-      '<td>' + (i+1) + '</td>' +
-      '<td><strong>' + p.name + '</strong>' +
-        '<br><span style="font-size:11px;color:#94a3b8;font-family:monospace;">' + p.barcode + '</span>' +
-        (p.expiredNote ? '<br><span style="font-size:11px;color:#94a3b8;">' + p.expiredNote + '</span>' : '') +
-      '</td>' +
-      '<td><span class="badge badge-blue">' + (p.category || '-') + '</span></td>' +
-      '<td>' + stk + '</td>' +
-      '<td style="white-space:nowrap;">' + svFmtTgl(p.expiredDate) + '</td>' +
-      '<td style="white-space:nowrap;">' + sTxt + '</td>' +
-      '<td>' + svExpBadge(s) + '</td>' +
-      '</tr>';
-  });
+function svRenderTblExpired(list){
+  var tbody=document.querySelector('#sv-t-expired tbody');if(!tbody)return;tbody.innerHTML='';
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:#94a3b8;">✓ Tidak ada produk expired yang terdaftar</td></tr>';return;}
+  list.forEach((p,i)=>{var s=p.sisa,rowCls=s<0?'expired-row':s<=30?'near-expired-row':'';var sTxt=s<0?'<span style="color:#ef4444;font-weight:700;">'+Math.abs(s)+' hari lalu</span>':s===0?'<span style="color:#ef4444;font-weight:700;">Hari ini!</span>':'<strong>'+s+'</strong> hari';var stk=p.stock===0?'<span class="badge badge-red">Habis</span>':p.stock<=5?'<span class="badge badge-yellow">'+p.stock+'</span>':'<span class="badge badge-green">'+p.stock+'</span>';tbody.innerHTML+='<tr class="'+rowCls+'"><td>'+(i+1)+'</td><td><strong>'+p.name+'</strong><br><span style="font-size:11px;color:#94a3b8;font-family:monospace;">'+p.barcode+'</span>'+(p.expiredNote?'<br><span style="font-size:11px;color:#94a3b8;">'+p.expiredNote+'</span>':'')+'</td><td><span class="badge badge-blue">'+(p.category||'-')+'</span></td><td>'+stk+'</td><td style="white-space:nowrap;">'+svFmtTgl(p.expiredDate)+'</td><td style="white-space:nowrap;">'+sTxt+'</td><td>'+svExpBadge(s)+'</td></tr>';});
 }
-function svFilterTableExpired() {
-  var f = document.getElementById('sv-exp-filter').value;
-  var list = svExpList;
-  if (f === 'expired') list = svExpList.filter(function(p) { return p.sisa < 0; });
-  else if (f === '7')  list = svExpList.filter(function(p) { return p.sisa >= 0 && p.sisa <= 7; });
-  else if (f === '30') list = svExpList.filter(function(p) { return p.sisa >= 0 && p.sisa <= 30; });
-  svRenderTblExpired(list);
-}
-/* Override loadData dan tab untuk expired */
-var _svLdOri = loadData;
-loadData = async function() { await _svLdOri(); svRenderExpired(cacheProducts); };
-var _svTabOri = tab;
-tab = function(id, el) {
-  _svTabOri(id, el);
-  if (id === 's-expired') svRenderExpired(cacheProducts);
-};
+function svFilterTableExpired(){var f=document.getElementById('sv-exp-filter').value,list=svExpList;if(f==='expired')list=svExpList.filter(p=>p.sisa<0);else if(f==='7')list=svExpList.filter(p=>p.sisa>=0&&p.sisa<=7);else if(f==='30')list=svExpList.filter(p=>p.sisa>=0&&p.sisa<=30);svRenderTblExpired(list);}
 
+/* SOCKET */
+function initSocket(){const socket=io(),dot=document.getElementById('rt-dot'),txt=document.getElementById('rt-text'),ind=document.getElementById('rt-indicator');socket.on('connect',()=>{dot.style.cssText='background:#059669;animation:pulse 1.5s infinite;';txt.innerText='Real-time Aktif';ind.style.background='#ecfdf5';});socket.on('disconnect',()=>{dot.style.cssText='background:#ef4444;';txt.innerText='Terputus...';ind.style.background='#fff5f5';});socket.on('transaksi_baru',trx=>{cacheTransactions.push(trx);renderDashboard();renderTrxAll(cacheTransactions);toast(`🧾 TRANSAKSI BARU — Kasir: ${trx.kasir||'-'} | Total: ${fmt(trx.total)}`,'success');});socket.on('stok_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderDashboard();renderOpname(cacheProducts);renderKritis(cacheProducts);renderWastage(cacheProducts);svRenderExpired(cacheProducts);}catch{}});socket.on('produk_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderDashboard();renderOpname(cacheProducts);renderKritis(cacheProducts);}catch{}});socket.on('wastage_update',data=>{toast(`🗑️ Wastage: ${data.nama} — ${data.qty} unit`,'info');loadData();});}
+
+setInterval(loadData,60000);
 </script>
 </body>
 </html>
