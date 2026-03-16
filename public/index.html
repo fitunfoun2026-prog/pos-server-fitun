@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kasir Fitun Foun</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ===== OFFLINE BANNER ===== */
+    #offlineBanner {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #7c2d12;
+      color: #fed7aa;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 9990;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-bottom: 2px solid #ff4444;
+    }
+
+    /* ===== STATUS BAR ===== */
+    #statusBar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      padding: 4px 12px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      flex-wrap: wrap;
+    }
+    #statusDot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #94a3b8;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    #statusTeks { font-weight: 700; font-size: 12px; color: #94a3b8; }
+    #queueInfo { margin-left: auto; font-size: 12px; color: #ffaa00; font-weight: 600; }
+    #lastSync { font-size: 11px; color: #475569; }
+  </style>
+</head>
+<body>
+
+<!-- OFFLINE BANNER (tampil saat internet mati) -->
+<div id="offlineBanner">
+  <span>📴</span>
+  <span>MODE OFFLINE — Transaksi tetap bisa jalan, akan tersync otomatis saat internet kembali</span>
+</div>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-bg">
+  <h1 class="logo">FITUN FOUN</h1>
+  <div class="login-box">
+    <h2>LOGIN</h2>
+    <input id="username" placeholder="Username" autocomplete="off">
+    <input id="password" type="password" placeholder="Password">
+    <button id="btnLogin">MASUK</button>
+    <p id="loginError"></p>
+  </div>
+</div>
+
+<!-- KASIR -->
+<div id="kasirPage" class="container hidden">
+
+  <!-- STATUS BAR (online/offline indicator) -->
+  <div id="statusBar">
+    <span id="statusDot"></span>
+    <span id="statusTeks">Cek koneksi...</span>
+    <span id="lastSync"></span>
+    <span id="queueInfo"></span>
+  </div>
+
+  <!-- MODAL HISTORY -->
+  <div id="modalHistory" class="modal hidden">
+    <div class="modal-box">
+      <h3>Riwayat Transaksi</h3>
+      <div id="historyContent"></div>
+      <button id="btnCloseHistory">Tutup</button>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>FITUN FOUN</h1>
+    <span>Kasir: <b id="namaKasir"></b></span>
+    <button id="btnLogout">Logout</button>
+  </div>
+
+  <!-- INPUT -->
+  <div class="card input-row">
+    <input id="barcode" placeholder="Barcode / Nama" class="w-barcode" oninput="cariHarga()">
+    <input id="harga" placeholder="Harga" class="w-harga" readonly>
+    <input id="qty" value="1" class="w-qty">
+    <button id="btnTambah">Tambah</button>
+  </div>
+
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th>Barang</th>
+        <th>Harga</th>
+        <th>Qty</th>
+        <th>Subtotal</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="listBarang"></tbody>
+  </table>
+
+  <!-- TOTAL -->
+  <div class="total">Total: <span id="totalBayar">$0.00</span></div>
+
+  <!-- BAYAR -->
+  <div class="card">
+    <input id="uangBayar" placeholder="Uang Bayar">
+    <button id="btnBayar">Bayar</button>
+    <button id="btnOK">OK (BENAR)</button>
+    <p id="kembalian"></p>
+  </div>
+
+  <!-- ACTION -->
+  <div class="action">
+    <button id="btnTransaksiBaru">Transaksi Baru</button>
+    <button id="btnHistory">History</button>
+    <button id="btnPrint">Print</button>
+  </div>
+
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmBox" class="confirm-box hidden">
+  <div class="confirm-content">
+    <h3>Konfirmasi Transaksi</h3>
+    <p>Transaksi sudah benar?</p>
+    <div class="confirm-actions">
+      <button id="btnConfirmYes">YA</button>
+      <button id="btnConfirmNo">TIDAK</button>
+    </div>
+  </div>
+</div>
+
+<div class="print-footer">
+  Obrigado 🙏<br>
+  sasan ne'ebe mau hola ona<br>
+  labele fo fila fali
+</div>
+
+<!-- Muat storage.js DULU sebelum script.js -->
+<script src="storage.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
