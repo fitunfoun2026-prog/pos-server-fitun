@@ -199,26 +199,35 @@ td { border-bottom: 1px solid #1a3020; }
   gap: 0;
 }
 
+/* Wrapper yang lebarnya pas sejajar tombol-tombol */
+.bayar-group {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .bayar-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-bottom: 0;
 }
 
 #uangBayar { width: 150px; margin-bottom: 0; }
 
-/* Kotak kembalian — di bawah tombol, ukuran compact */
+/* Kotak kembalian — lebar mengikuti bayar-group (sejajar ujung tombol OK) */
 #kembalianBox {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
   background: #0a1f0e;
   border: 2px solid #2e6b3a;
   border-radius: 6px;
   padding: 8px 14px;
-  margin-top: 10px;
+  margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #kembalianLabel {
@@ -483,15 +492,17 @@ td { border-bottom: 1px solid #1a3020; }
 
   <!-- BAYAR -->
   <div class="card bayar-wrap">
-    <div class="bayar-row">
-      <input id="uangBayar" placeholder="Uang Bayar" style="width:150px;margin-bottom:0;">
-      <button id="btnBayar">Bayar</button>
-      <button id="btnOK">OK (BENAR)</button>
-    </div>
-    <!-- Kotak kembalian — di bawah tombol, ukuran kecil/compact -->
-    <div id="kembalianBox">
-      <span id="kembalianLabel">Kembalian:</span>
-      <span id="kembalian">—</span>
+    <div class="bayar-group">
+      <div class="bayar-row">
+        <input id="uangBayar" placeholder="Uang Bayar" style="width:150px;margin-bottom:0;">
+        <button id="btnBayar">Bayar</button>
+        <button id="btnOK">OK (BENAR)</button>
+      </div>
+      <!-- Kotak kembalian — lebar pas sejajar ujung tombol OK -->
+      <div id="kembalianBox">
+        <span id="kembalianLabel">Kembalian:</span>
+        <span id="kembalian">—</span>
+      </div>
     </div>
   </div>
 
