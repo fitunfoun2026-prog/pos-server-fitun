@@ -216,9 +216,9 @@ td { border-bottom: 1px solid #1a3020; }
 
 #uangBayar { width: 150px; margin-bottom: 0; }
 
-/* Kotak kembalian — lebar mengikuti bayar-group (sejajar ujung tombol OK) */
+/* Kotak kembalian — lebar mengikuti bayar-group, auto expand kalau teks panjang */
 #kembalianBox {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   background: #0a1f0e;
@@ -226,7 +226,8 @@ td { border-bottom: 1px solid #1a3020; }
   border-radius: 6px;
   padding: 8px 14px;
   margin-top: 8px;
-  width: 100%;
+  min-width: 100%;
+  width: max-content;
   box-sizing: border-box;
 }
 
