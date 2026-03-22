@@ -213,7 +213,6 @@ input[readonly]{background:#f8fafc;color:#64748b;}
     <div class="menu-label">Pengaturan</div>
     <div class="nav-item" onclick="tab('k-setting',this)"><span class="nav-icon">🔐</span> Setting Password</div>
     <div class="nav-item" onclick="tab('k-nota',this)"><span class="nav-icon">🧾</span> Setting Nota</div>
-    <!-- TAMBAHAN: Cetak Barcode -->
     <div class="nav-item" onclick="window.open('/cetak-barcode','_blank')"><span class="nav-icon">🏷️</span> Cetak Barcode</div>
   </div>
   <div class="sidebar-footer">
@@ -276,7 +275,13 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   <div class="card no-print" style="padding:16px 20px;">
     <div class="filter-bar">
       <div class="search-box" style="flex:2;"><input type="text" id="search" placeholder="Cari nama produk atau barcode..." oninput="filterProduk()"></div>
-      <select id="filter-cat" onchange="filterProduk()" style="flex:0 0 150px;"><option value="">Semua Kategori</option><option>Food</option><option>Non-Food</option><option>Fresh</option><option>Beverages</option><option>Household</option></select>
+      <!-- ✅ KATEGORI DIUBAH: Sembako, Officina, Kontrusaun -->
+      <select id="filter-cat" onchange="filterProduk()" style="flex:0 0 160px;">
+        <option value="">Semua Kategori</option>
+        <option>Sembako</option>
+        <option>Officina</option>
+        <option>Kontrusaun</option>
+      </select>
       <select id="filter-stok" onchange="filterProduk()" style="flex:0 0 150px;"><option value="">Semua Stok</option><option value="kritis">Stok Kritis (≤5)</option><option value="normal">Stok Normal (>5)</option><option value="habis">Habis (0)</option></select>
     </div>
   </div>
@@ -478,19 +483,25 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 
 <div id="barcode-print-area"></div>
 
-<!-- ===== MODAL TAMBAH PRODUK (PPN dihapus, Berat+Asal ditambah) ===== -->
+<!-- ===== MODAL TAMBAH PRODUK ===== -->
 <div class="modal-overlay" id="modal-tambah">
   <div class="modal">
     <div class="modal-header"><h3>➕ Tambah Produk Baru</h3><button class="modal-close" onclick="closeModal('modal-tambah')">✕</button></div>
     <div class="form-grid-2">
       <div class="form-group"><label>Barcode / SKU *</label><input type="text" id="bc" placeholder="Contoh: 8991234567890"></div>
       <div class="form-group"><label>Nama Produk *</label><input type="text" id="nm" placeholder="Nama lengkap produk"></div>
-      <div class="form-group"><label>Kategori</label><select id="cat"><option>Food</option><option>Non-Food</option><option>Fresh</option><option>Beverages</option><option>Household</option></select></div>
+      <!-- ✅ KATEGORI DIUBAH: Sembako, Officina, Kontrusaun -->
+      <div class="form-group"><label>Kategori</label>
+        <select id="cat">
+          <option>Sembako</option>
+          <option>Officina</option>
+          <option>Kontrusaun</option>
+        </select>
+      </div>
       <div class="form-group"><label>Supplier</label><input type="text" id="sup" placeholder="Nama supplier"></div>
       <div class="form-group"><label>Harga Modal (HPP)</label><input type="number" id="hm" placeholder="0.00" min="0"></div>
       <div class="form-group"><label>Harga Jual</label><input type="number" id="hj" placeholder="0.00" min="0"></div>
       <div class="form-group"><label>Stok Awal</label><input type="number" id="stok-awal" value="0" min="0"></div>
-      <!-- PERUBAHAN: Berat + Asal menggantikan PPN -->
       <div class="form-group"><label>Berat / Isi</label><input type="text" id="berat" placeholder="Contoh: 500g, 1kg, 1L"></div>
       <div class="form-group"><label>Asal Barang</label><input type="text" id="asalBarang" placeholder="Contoh: Indonesia, Australia"></div>
       <div class="form-group"><label>Tanggal Expired</label><input type="date" id="exp-date"></div>
@@ -500,19 +511,25 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
-<!-- ===== MODAL EDIT PRODUK (PPN dihapus, Berat+Asal ditambah) ===== -->
+<!-- ===== MODAL EDIT PRODUK ===== -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
     <div class="modal-header"><h3>✏️ Edit Produk</h3><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
     <div class="form-grid-2">
       <div class="form-group"><label>Barcode / SKU</label><input type="text" id="e-bc" readonly></div>
       <div class="form-group"><label>Nama Produk *</label><input type="text" id="e-nm"></div>
-      <div class="form-group"><label>Kategori</label><select id="e-cat"><option>Food</option><option>Non-Food</option><option>Fresh</option><option>Beverages</option><option>Household</option></select></div>
+      <!-- ✅ KATEGORI DIUBAH: Sembako, Officina, Kontrusaun -->
+      <div class="form-group"><label>Kategori</label>
+        <select id="e-cat">
+          <option>Sembako</option>
+          <option>Officina</option>
+          <option>Kontrusaun</option>
+        </select>
+      </div>
       <div class="form-group"><label>Supplier</label><input type="text" id="e-sup"></div>
       <div class="form-group"><label>Harga Modal</label><input type="number" id="e-hm" min="0"></div>
       <div class="form-group"><label>Harga Jual</label><input type="number" id="e-hj" min="0"></div>
       <div class="form-group"><label>Stok Saat Ini</label><input type="number" id="e-stok" min="0"></div>
-      <!-- PERUBAHAN: Berat + Asal menggantikan PPN -->
       <div class="form-group"><label>Berat / Isi</label><input type="text" id="e-berat" placeholder="Contoh: 500g, 1kg, 1L"></div>
       <div class="form-group"><label>Asal Barang</label><input type="text" id="e-asalBarang" placeholder="Contoh: Indonesia, Australia"></div>
       <div class="form-group"><label>Tanggal Expired</label><input type="date" id="e-exp-date"></div>
@@ -531,7 +548,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   </div>
 </div>
 
-<!-- ===== MODAL PRINT BARCODE (dengan info lengkap) ===== -->
+<!-- MODAL PRINT BARCODE -->
 <div class="modal-overlay" id="modal-barcode">
   <div class="modal" style="width:600px;">
     <div class="modal-header"><h3>🏷️ Print Label Barcode</h3><button class="modal-close" onclick="closeModal('modal-barcode')">✕</button></div>
@@ -544,13 +561,11 @@ input[readonly]{background:#f8fafc;color:#64748b;}
         Asal: <span id="bc-modal-asal" style="font-weight:600;">-</span>
       </div>
     </div>
-    <!-- Preview label -->
     <div class="barcode-preview-box" style="margin-bottom:16px;" id="bc-preview-box">
       <div class="bc-prod-name" id="bc-preview-nama">-</div>
       <svg id="bc-preview-svg"></svg>
       <div class="bc-extra" id="bc-preview-info"></div>
     </div>
-    <!-- Ukuran -->
     <div style="margin-bottom:14px;">
       <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Ukuran Label</div>
       <div class="barcode-size-wrap">
@@ -559,7 +574,6 @@ input[readonly]{background:#f8fafc;color:#64748b;}
         <button class="barcode-size-btn" id="size-large" onclick="setBarcodeSize('large')">Besar</button>
       </div>
     </div>
-    <!-- Jumlah -->
     <div style="margin-bottom:16px;">
       <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Jumlah Label</div>
       <div class="barcode-count-wrap">
@@ -574,7 +588,6 @@ input[readonly]{background:#f8fafc;color:#64748b;}
         </div>
       </div>
     </div>
-    <!-- Opsi tampilan -->
     <div style="margin-bottom:16px;">
       <div style="font-size:12px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Informasi yang Ditampilkan</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
@@ -757,7 +770,7 @@ function filterProduk(){
   prodPage=1;renderHalamanProduk();
 }
 
-/* TAMBAH PRODUK — field berat + asalBarang, tanpa tax */
+/* TAMBAH PRODUK */
 async function simpan(){
   const data={
     barcode:document.getElementById('bc').value.trim(),
@@ -787,7 +800,10 @@ function openEdit(barcode){
   editBarcode=barcode;
   document.getElementById('e-bc').value=p.barcode;
   document.getElementById('e-nm').value=p.name;
-  document.getElementById('e-cat').value=p.category||'Food';
+  // Set kategori — cek apakah ada di list baru, kalau tidak set ke Sembako
+  const catEl=document.getElementById('e-cat');
+  const validCats=['Sembako','Officina','Kontrusaun'];
+  catEl.value=validCats.includes(p.category)?p.category:'Sembako';
   document.getElementById('e-sup').value=p.supplier||'';
   document.getElementById('e-hm').value=p.costPrice||0;
   document.getElementById('e-hj').value=p.price||0;
@@ -898,9 +914,7 @@ function renderPagination(cId,total,perPage,current,onPage){
   const next=document.createElement('button');next.className='page-btn';next.innerText='→';next.disabled=current===pages;next.onclick=()=>onPage(current+1);el.appendChild(next);
 }
 
-/* ============================================================
-   PRINT BARCODE — dengan Nama, Berat, Harga, Asal, Expired
-   ============================================================ */
+/* PRINT BARCODE */
 function openPrintBarcode(barcode){
   const p=cacheProducts.find(x=>x.barcode===barcode);if(!p){toast("Produk tidak ditemukan","error");return;}
   bcCurrentBarcode=barcode;bcCurrentSize='small';
@@ -929,13 +943,9 @@ function updateBCPreview(){
   const showPrice=document.getElementById('bc-show-price').checked;
   const showAsal=document.getElementById('bc-show-asal').checked;
   const showExpired=document.getElementById('bc-show-expired').checked;
-
-  // Update nama di preview
   const namaEl=document.getElementById('bc-preview-nama');
   namaEl.style.display=showName?'block':'none';
   namaEl.innerText=p.name;
-
-  // Update info baris di preview — selalu tampil, tanpa emoji
   const infoEl=document.getElementById('bc-preview-info');
   const infoParts=[];
   if(showBerat)infoParts.push('Berat: '+(p.berat||'-'));
@@ -944,7 +954,6 @@ function updateBCPreview(){
   if(showExpired&&p.expiredDate)infoParts.push('Exp: '+new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}));
   infoEl.style.display=infoParts.length?'block':'none';
   infoEl.innerHTML=infoParts.join(' &nbsp;|&nbsp; ');
-
   const wm={small:1.2,medium:1.6,large:2.0},hm={small:40,medium:55,large:70};
   try{JsBarcode(svgEl,bcCurrentBarcode,{format:"CODE128",width:wm[bcCurrentSize],height:hm[bcCurrentSize],displayValue:true,fontSize:10,margin:4,background:"transparent"});}catch(e){}
 }
@@ -972,63 +981,20 @@ function printBarcode(){
   const labelW={small:'110px',medium:'155px',large:'200px'}[size];
   const fsSm={small:'8px',medium:'9px',large:'10px'}[size];
   const fsMd={small:'9px',medium:'10px',large:'11px'}[size];
-
   const area=document.getElementById('barcode-print-area');area.innerHTML='';
   const grid=document.createElement('div');grid.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:white;';
-
   for(let i=0;i<jumlah;i++){
     const label=document.createElement('div');
     label.style.cssText=`width:${labelW};border:1px solid #ccc;padding:5px 6px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;font-family:Arial,sans-serif;`;
-
-    // Nama produk
-    if(showName){
-      const el=document.createElement('div');
-      el.innerText=p.name;
-      el.style.cssText=`font-size:${fsMd};font-weight:700;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;color:#0f172a;`;
-      label.appendChild(el);
-    }
-
-    // Barcode SVG
-    const svgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    label.appendChild(svgEl);
+    if(showName){const el=document.createElement('div');el.innerText=p.name;el.style.cssText=`font-size:${fsMd};font-weight:700;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;color:#0f172a;`;label.appendChild(el);}
+    const svgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');label.appendChild(svgEl);
     try{JsBarcode(svgEl,bcCurrentBarcode,{format:"CODE128",width:wm[size],height:hm[size],displayValue:true,fontSize:8,margin:2,background:"white"});}catch(e){}
-
-    // Berat — selalu tampil jika checkbox aktif
-    if(showBerat){
-      const el=document.createElement('div');
-      el.innerText='Berat: '+(p.berat||'-');
-      el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:2px;text-align:center;`;
-      label.appendChild(el);
-    }
-
-    // Harga — tanpa emoji
-    if(showPrice){
-      const el=document.createElement('div');
-      el.innerText='Harga: '+fmt(p.price);
-      el.style.cssText=`font-size:${fsMd};font-weight:700;color:#1e40af;margin-top:2px;text-align:center;`;
-      label.appendChild(el);
-    }
-
-    // Asal Barang — selalu tampil jika checkbox aktif
-    if(showAsal){
-      const el=document.createElement('div');
-      el.innerText='Asal: '+(p.asalBarang||'-');
-      el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:1px;text-align:center;`;
-      label.appendChild(el);
-    }
-
-    // Tanggal Expired — tanpa emoji
-    if(showExpired&&p.expiredDate){
-      const tgl=new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
-      const el=document.createElement('div');
-      el.innerText='Exp: '+tgl;
-      el.style.cssText=`font-size:${fsSm};color:#dc2626;margin-top:1px;text-align:center;font-weight:600;`;
-      label.appendChild(el);
-    }
-
+    if(showBerat){const el=document.createElement('div');el.innerText='Berat: '+(p.berat||'-');el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:2px;text-align:center;`;label.appendChild(el);}
+    if(showPrice){const el=document.createElement('div');el.innerText='Harga: '+fmt(p.price);el.style.cssText=`font-size:${fsMd};font-weight:700;color:#1e40af;margin-top:2px;text-align:center;`;label.appendChild(el);}
+    if(showAsal){const el=document.createElement('div');el.innerText='Asal: '+(p.asalBarang||'-');el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:1px;text-align:center;`;label.appendChild(el);}
+    if(showExpired&&p.expiredDate){const tgl=new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});const el=document.createElement('div');el.innerText='Exp: '+tgl;el.style.cssText=`font-size:${fsSm};color:#dc2626;margin-top:1px;text-align:center;font-weight:600;`;label.appendChild(el);}
     grid.appendChild(label);
   }
-
   area.appendChild(grid);
   const ps=document.createElement('style');ps.id='bc-print-style';
   ps.innerHTML=`@media print{body>*:not(#barcode-print-area):not(#barcode-print-area *){display:none !important;}#barcode-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;z-index:99999;}}`;
