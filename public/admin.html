@@ -159,6 +159,54 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 .barcode-size-wrap{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
 .barcode-size-btn{padding:7px 14px;border:1.5px solid #e2e8f0;background:white;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:#475569;transition:all 0.2s;font-family:'Inter',sans-serif;}
 .barcode-size-btn:hover,.barcode-size-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+/* ===== BARCODE SCANNER INDICATOR ===== */
+#scan-indicator{
+  position:fixed;bottom:58px;right:16px;z-index:9997;
+  display:flex;align-items:center;gap:10px;
+  background:#0f172a;color:white;
+  padding:10px 16px;border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.35);
+  font-size:13px;border-left:4px solid #38bdf8;
+  transform:translateX(140%);
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  max-width:280px;
+}
+#scan-indicator.visible{transform:translateX(0);}
+#scan-indicator .scan-icon{font-size:18px;flex-shrink:0;}
+#scan-indicator .scan-code{font-family:monospace;font-weight:700;font-size:13px;color:#38bdf8;letter-spacing:0.5px;}
+#scan-indicator .scan-label{font-size:11px;color:#94a3b8;margin-top:1px;}
+#scan-indicator .scan-action{font-size:10px;color:#64748b;margin-top:2px;font-style:italic;}
+
+/* Scanner mode banner di dalam tab */
+.scanner-hint{
+  display:flex;align-items:center;gap:10px;
+  background:#eff6ff;border:1.5px solid #bfdbfe;
+  border-radius:10px;padding:10px 16px;margin-bottom:16px;
+  font-size:13px;color:#1e40af;
+}
+.scanner-hint.active-scan{
+  background:#ecfdf5;border-color:#6ee7b7;color:#065f46;
+  animation:scanFlash 0.5s ease;
+}
+@keyframes scanFlash{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.01);box-shadow:0 0 0 4px rgba(16,185,129,0.2);}
+  100%{transform:scale(1);}
+}
+
+/* Input barcode visual feedback */
+input.scan-detected{
+  border-color:#10b981 !important;
+  box-shadow:0 0 0 3px rgba(16,185,129,0.2) !important;
+  animation:inputFlash 0.4s ease;
+}
+@keyframes inputFlash{
+  0%{background:white;}
+  30%{background:#ecfdf5;}
+  100%{background:white;}
+}
+
 @media print{
   .sidebar,.no-print{display:none !important;}
   .main-content{margin:0;padding:0;width:100%;}
@@ -233,6 +281,11 @@ input[readonly]{background:#f8fafc;color:#64748b;}
       <button class="btn btn-outline btn-sm no-print" onclick="window.print()">🖨️ Print</button>
     </div>
   </div>
+  <!-- Scanner hint di dashboard -->
+  <div class="scanner-hint no-print" id="scan-hint-dash">
+    <span>🏷️</span>
+    <span>Scan barcode produk untuk melihat info stok secara cepat</span>
+  </div>
   <div id="alert-kritis" class="alert-banner" style="display:none;"><span style="font-size:20px;">🚨</span><p id="alert-kritis-text"></p></div>
   <div id="alert-expired" class="alert-expired" style="display:none;"><span style="font-size:20px;">⛔</span><p id="alert-expired-text"></p></div>
   <div id="alert-near-expired" class="alert-near-expired" style="display:none;"><span style="font-size:20px;">⚠️</span><p id="alert-near-expired-text"></p></div>
@@ -272,10 +325,14 @@ input[readonly]{background:#f8fafc;color:#64748b;}
       <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Print</button>
     </div>
   </div>
+  <!-- Scanner hint Katalog -->
+  <div class="scanner-hint no-print" id="scan-hint-katalog">
+    <span>🏷️</span>
+    <span>Scan barcode → otomatis cari produk di tabel</span>
+  </div>
   <div class="card no-print" style="padding:16px 20px;">
     <div class="filter-bar">
-      <div class="search-box" style="flex:2;"><input type="text" id="search" placeholder="Cari nama produk atau barcode..." oninput="filterProduk()"></div>
-      <!-- ✅ KATEGORI DIUBAH: Sembako, Officina, Kontrusaun -->
+      <div class="search-box" style="flex:2;"><input type="text" id="search" placeholder="Cari nama produk atau barcode... (atau scan langsung)" oninput="filterProduk()"></div>
       <select id="filter-cat" onchange="filterProduk()" style="flex:0 0 160px;">
         <option value="">Semua Kategori</option>
         <option>Sembako</option>
@@ -295,10 +352,18 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 <!-- RESTOCK -->
 <div id="k-restock" class="kamar">
   <div class="page-header"><div><h1>Restock / Pembelian Barang</h1><p>Tambah stok produk yang sudah ada</p></div></div>
+  <!-- Scanner hint Restock -->
+  <div class="scanner-hint no-print" id="scan-hint-restock">
+    <span>🏷️</span>
+    <span>Scan barcode produk → otomatis isi form restock di bawah</span>
+  </div>
   <div class="card no-print">
     <div class="card-title"><span>🔄</span> Form Tambah Stok</div>
     <div class="form-grid-2" style="margin-bottom:12px;">
-      <div class="form-group"><label>Barcode / SKU</label><input type="text" id="rs-bc" placeholder="Scan atau ketik barcode..." oninput="cariProdukRestock()"></div>
+      <div class="form-group">
+        <label>Barcode / SKU</label>
+        <input type="text" id="rs-bc" placeholder="Scan atau ketik barcode..." oninput="cariProdukRestock()" autocomplete="off">
+      </div>
       <div class="form-group"><label>Nama Produk</label><input type="text" id="rs-nama" readonly></div>
       <div class="form-group"><label>Stok Saat Ini</label><input type="number" id="rs-stok-skrg" readonly></div>
       <div class="form-group"><label>Jumlah Tambah Stok</label><input type="number" id="rs-qty" placeholder="Masukkan jumlah" min="1"></div>
@@ -483,6 +548,16 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 
 <div id="barcode-print-area"></div>
 
+<!-- ===== SCAN INDICATOR (pojok kanan bawah) ===== -->
+<div id="scan-indicator">
+  <span class="scan-icon">🏷️</span>
+  <div>
+    <div class="scan-code" id="scan-code">-</div>
+    <div class="scan-label" id="scan-label">Produk ditemukan</div>
+    <div class="scan-action" id="scan-action"></div>
+  </div>
+</div>
+
 <!-- ===== MODAL TAMBAH PRODUK ===== -->
 <div class="modal-overlay" id="modal-tambah">
   <div class="modal">
@@ -490,7 +565,6 @@ input[readonly]{background:#f8fafc;color:#64748b;}
     <div class="form-grid-2">
       <div class="form-group"><label>Barcode / SKU *</label><input type="text" id="bc" placeholder="Contoh: 8991234567890"></div>
       <div class="form-group"><label>Nama Produk *</label><input type="text" id="nm" placeholder="Nama lengkap produk"></div>
-      <!-- ✅ KATEGORI DIUBAH: Sembako, Officina, Kontrusaun -->
       <div class="form-group"><label>Kategori</label>
         <select id="cat">
           <option>Sembako</option>
@@ -518,7 +592,6 @@ input[readonly]{background:#f8fafc;color:#64748b;}
     <div class="form-grid-2">
       <div class="form-group"><label>Barcode / SKU</label><input type="text" id="e-bc" readonly></div>
       <div class="form-group"><label>Nama Produk *</label><input type="text" id="e-nm"></div>
-      <!-- ✅ KATEGORI DIUBAH: Sembako, Officina, Kontrusaun -->
       <div class="form-group"><label>Kategori</label>
         <select id="e-cat">
           <option>Sembako</option>
@@ -593,7 +666,7 @@ input[readonly]{background:#f8fafc;color:#64748b;}
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="bc-show-name" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;"> Nama Produk</label>
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="bc-show-berat" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;"> Berat / Isi</label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="bc-show-price" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;"> Harga</label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;"><input type="checkbox" id="bc-show-price" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;"> Harga</label>
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="bc-show-asal" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;"> Asal Barang</label>
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" id="bc-show-expired" checked onchange="updateBCPreview()" style="accent-color:var(--primary);width:15px;height:15px;"> Tgl Expired</label>
       </div>
@@ -644,8 +717,10 @@ input[readonly]{background:#f8fafc;color:#64748b;}
   <span class="rt-dot" id="rt-dot"></span><span id="rt-text">Menghubungkan...</span>
 </div>
 
+<!-- ===================================================
+     BARCODE ENGINE (JsBarcode minimal, Code128)
+     =================================================== -->
 <script>
-/* BARCODE ENGINE */
 (function(root){
   var L=" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
   var P=["11011001100","11001101100","11001100110","10010011000","10010001100","10001001100","10011001000","10011000100","10001100100","11001001000","11001000100","11000100100","10110011100","10011011100","10011001110","10111001100","10011101100","10011100110","11001110010","11001011100","11001001110","11011100100","11001110100","11101101110","11101001100","11100101100","11100100110","11101100100","11100110100","11100110010","11011011000","11011000110","11000110110","10100011000","10001011000","10001000110","10110001000","10001101000","10001100010","11010001000","11000101000","11000100010","10110111000","10110001110","10001101110","10111011000","10111000110","10001110110","11101110110","11010001110","11000101110","11011101000","11011100010","11011101110","11101011000","11101000110","11100010110","11101101000","11101100010","11100011010","11101111010","11001000010","11110001010","10100110000","10100001100","10010110000","10010000110","10000101100","10000100110","10110010000","10110000100","10011010000","10011000010","10000110100","10000110010","11000010010","11001010000","11110111010","11000010100","10001111010","10100111100","10010111100","10010011110","10111100100","10011110100","10011110010","11110100100","11110010100","11110010010","11011011110","11011110110","11110110110","10101111000","10100011110","10001011110","10111101000","10111100010","11110101000","11110100010","10111011110","10111101110","11101011110","11110101110","11010000100","11010010000","11010011100","1100011101011"];
@@ -664,7 +739,12 @@ input[readonly]{background:#f8fafc;color:#64748b;}
 })(window);
 function JsBarcode(el,text,opts){var s=(typeof el==='string')?document.querySelector(el):el;if(!s)return;BarcodeEngine.drawToSVG(s,text,opts);}
 </script>
+
 <script src="/socket.io/socket.io.js"></script>
+
+<!-- ===================================================
+     MAIN APP SCRIPT
+     =================================================== -->
 <script>
 const API="https://pos-server-fitun.onrender.com/api";
 let cacheProducts=[],cacheTransactions=[],editBarcode="",hapusBarcode="";
@@ -712,6 +792,13 @@ function tab(id,el){
   if(id==='k-setting')muatUsers();
   if(id==='k-nota')muatSettingNota();
   if(id==='k-expired')renderExpired(cacheProducts);
+  // Auto-focus input barcode saat pindah ke tab restock
+  if(id==='k-restock'){
+    setTimeout(()=>{
+      const el=document.getElementById('rs-bc');
+      if(el)el.focus();
+    },200);
+  }
 }
 
 function fmt(n){return"$"+Number(n||0).toLocaleString("id-ID",{minimumFractionDigits:2});}
@@ -800,7 +887,6 @@ function openEdit(barcode){
   editBarcode=barcode;
   document.getElementById('e-bc').value=p.barcode;
   document.getElementById('e-nm').value=p.name;
-  // Set kategori — cek apakah ada di list baru, kalau tidak set ke Sembako
   const catEl=document.getElementById('e-cat');
   const validCats=['Sembako','Officina','Kontrusaun'];
   catEl.value=validCats.includes(p.category)?p.category:'Sembako';
@@ -851,13 +937,28 @@ function renderRestock(products){
   if(!list.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua stok aman!</p></div></td></tr>';return;}
   list.forEach(p=>{tbody.innerHTML+=`<tr class="${p.stock===0?'low-stock':''}"><td style="font-family:monospace;font-size:12px;">${p.barcode}</td><td>${p.name}</td><td>${p.category||'-'}</td><td>${p.stock===0?'<span class="badge badge-red">Habis</span>':'<span class="badge badge-yellow">'+p.stock+'</span>'}</td><td class="no-print"><button class="btn btn-success btn-sm" onclick="isiRestock('${p.barcode}')">🔄 Restock</button></td></tr>`;});
 }
-function isiRestock(barcode){document.getElementById('rs-bc').value=barcode;cariProdukRestock();}
-function cariProdukRestock(){const bc=document.getElementById('rs-bc').value.trim(),p=cacheProducts.find(x=>x.barcode===bc);if(p){document.getElementById('rs-nama').value=p.name;document.getElementById('rs-stok-skrg').value=p.stock;document.getElementById('rs-modal').value=p.costPrice||'';}else{document.getElementById('rs-nama').value='';document.getElementById('rs-stok-skrg').value='';}}
+function isiRestock(barcode){document.getElementById('rs-bc').value=barcode;cariProdukRestock();document.getElementById('rs-qty').focus();}
+function cariProdukRestock(){
+  const bc=document.getElementById('rs-bc').value.trim(),p=cacheProducts.find(x=>x.barcode===bc);
+  if(p){
+    document.getElementById('rs-nama').value=p.name;
+    document.getElementById('rs-stok-skrg').value=p.stock;
+    document.getElementById('rs-modal').value=p.costPrice||'';
+    // Visual feedback
+    const inp=document.getElementById('rs-bc');
+    inp.classList.add('scan-detected');
+    setTimeout(()=>inp.classList.remove('scan-detected'),600);
+  }else{
+    document.getElementById('rs-nama').value='';
+    document.getElementById('rs-stok-skrg').value='';
+  }
+}
 async function simpanRestock(){
   const bc=document.getElementById('rs-bc').value.trim(),qty=Number(document.getElementById('rs-qty').value),modal=document.getElementById('rs-modal').value;
   const p=cacheProducts.find(x=>x.barcode===bc);if(!p){toast("Produk tidak ditemukan","error");return;}if(!qty||qty<=0){toast("Jumlah harus > 0","error");return;}
   const data={barcode:bc,name:p.name,category:p.category,supplier:p.supplier,costPrice:modal?Number(modal):p.costPrice,price:p.price,qty:(p.stock||0)+qty,berat:p.berat||null,asalBarang:p.asalBarang||null,isFullUpdate:true};
-  try{const res=await fetch(`${API}/products/update-stock`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(res.ok){toast(`Restock ${p.name}: +${qty} unit berhasil!`,"success");['rs-bc','rs-nama','rs-stok-skrg','rs-qty','rs-modal','rs-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});muatData();}else toast("Gagal restock","error");}catch{toast("Error koneksi","error");}
+  try{const res=await fetch(`${API}/products/update-stock`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(res.ok){toast(`Restock ${p.name}: +${qty} unit berhasil!`,"success");['rs-bc','rs-nama','rs-stok-skrg','rs-qty','rs-modal','rs-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});// Auto-focus balik ke input barcode
+  setTimeout(()=>{const el=document.getElementById('rs-bc');if(el)el.focus();},200);muatData();}else toast("Gagal restock","error");}catch{toast("Error koneksi","error");}
 }
 
 /* LOW STOCK */
@@ -918,113 +1019,47 @@ function renderPagination(cId,total,perPage,current,onPage){
 function openPrintBarcode(barcode){
   const p=cacheProducts.find(x=>x.barcode===barcode);if(!p){toast("Produk tidak ditemukan","error");return;}
   bcCurrentBarcode=barcode;bcCurrentSize='small';
-  document.getElementById('bc-modal-nama').innerText=p.name;
-  document.getElementById('bc-modal-sku').innerText=barcode;
-  document.getElementById('bc-modal-harga').innerText=fmt(p.price);
-  document.getElementById('bc-modal-berat').innerText=p.berat||'-';
-  document.getElementById('bc-modal-asal').innerText=p.asalBarang||'-';
-  document.getElementById('bc-jumlah').value=1;
-  document.getElementById('bc-show-name').checked=true;
-  document.getElementById('bc-show-berat').checked=true;
-  document.getElementById('bc-show-price').checked=true;
-  document.getElementById('bc-show-asal').checked=true;
-  document.getElementById('bc-show-expired').checked=true;
-  document.querySelectorAll('.barcode-size-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('size-small').classList.add('active');
-  openModal('modal-barcode');
-  updateBCPreview();
+  document.getElementById('bc-modal-nama').innerText=p.name;document.getElementById('bc-modal-sku').innerText=barcode;document.getElementById('bc-modal-harga').innerText=fmt(p.price);document.getElementById('bc-modal-berat').innerText=p.berat||'-';document.getElementById('bc-modal-asal').innerText=p.asalBarang||'-';document.getElementById('bc-jumlah').value=1;document.getElementById('bc-show-name').checked=true;document.getElementById('bc-show-berat').checked=true;document.getElementById('bc-show-price').checked=true;document.getElementById('bc-show-asal').checked=true;document.getElementById('bc-show-expired').checked=true;
+  document.querySelectorAll('.barcode-size-btn').forEach(b=>b.classList.remove('active'));document.getElementById('size-small').classList.add('active');
+  openModal('modal-barcode');updateBCPreview();
 }
-
 function updateBCPreview(){
   const p=cacheProducts.find(x=>x.barcode===bcCurrentBarcode);if(!p)return;
   const svgEl=document.getElementById('bc-preview-svg');
-  const showName=document.getElementById('bc-show-name').checked;
-  const showBerat=document.getElementById('bc-show-berat').checked;
-  const showPrice=document.getElementById('bc-show-price').checked;
-  const showAsal=document.getElementById('bc-show-asal').checked;
-  const showExpired=document.getElementById('bc-show-expired').checked;
-  const namaEl=document.getElementById('bc-preview-nama');
-  namaEl.style.display=showName?'block':'none';
-  namaEl.innerText=p.name;
-  const infoEl=document.getElementById('bc-preview-info');
-  const infoParts=[];
-  if(showBerat)infoParts.push('Berat: '+(p.berat||'-'));
-  if(showPrice)infoParts.push('Harga: '+fmt(p.price));
-  if(showAsal)infoParts.push('Asal: '+(p.asalBarang||'-'));
-  if(showExpired&&p.expiredDate)infoParts.push('Exp: '+new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}));
-  infoEl.style.display=infoParts.length?'block':'none';
-  infoEl.innerHTML=infoParts.join(' &nbsp;|&nbsp; ');
+  const showName=document.getElementById('bc-show-name').checked,showBerat=document.getElementById('bc-show-berat').checked,showPrice=document.getElementById('bc-show-price').checked,showAsal=document.getElementById('bc-show-asal').checked,showExpired=document.getElementById('bc-show-expired').checked;
+  const namaEl=document.getElementById('bc-preview-nama');namaEl.style.display=showName?'block':'none';namaEl.innerText=p.name;
+  const infoEl=document.getElementById('bc-preview-info');const infoParts=[];
+  if(showBerat)infoParts.push('Berat: '+(p.berat||'-'));if(showPrice)infoParts.push('Harga: '+fmt(p.price));if(showAsal)infoParts.push('Asal: '+(p.asalBarang||'-'));if(showExpired&&p.expiredDate)infoParts.push('Exp: '+new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}));
+  infoEl.style.display=infoParts.length?'block':'none';infoEl.innerHTML=infoParts.join(' &nbsp;|&nbsp; ');
   const wm={small:1.2,medium:1.6,large:2.0},hm={small:40,medium:55,large:70};
   try{JsBarcode(svgEl,bcCurrentBarcode,{format:"CODE128",width:wm[bcCurrentSize],height:hm[bcCurrentSize],displayValue:true,fontSize:10,margin:4,background:"transparent"});}catch(e){}
 }
-
-function setBarcodeSize(size){
-  bcCurrentSize=size;
-  document.querySelectorAll('.barcode-size-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('size-'+size).classList.add('active');
-  updateBCPreview();
-}
+function setBarcodeSize(size){bcCurrentSize=size;document.querySelectorAll('.barcode-size-btn').forEach(b=>b.classList.remove('active'));document.getElementById('size-'+size).classList.add('active');updateBCPreview();}
 function ubahJumlahBC(delta){const inp=document.getElementById('bc-jumlah');let val=parseInt(inp.value)+delta;if(val<1)val=1;if(val>100)val=100;inp.value=val;}
 function clampJumlahBC(){const inp=document.getElementById('bc-jumlah');let val=parseInt(inp.value)||1;if(val<1)val=1;if(val>100)val=100;inp.value=val;}
 function setBatchCount(n){document.getElementById('bc-jumlah').value=n;}
-
 function printBarcode(){
   const p=cacheProducts.find(x=>x.barcode===bcCurrentBarcode);if(!p){toast("Produk tidak ditemukan","error");return;}
   const jumlah=parseInt(document.getElementById('bc-jumlah').value)||1;
-  const showName=document.getElementById('bc-show-name').checked;
-  const showBerat=document.getElementById('bc-show-berat').checked;
-  const showPrice=document.getElementById('bc-show-price').checked;
-  const showAsal=document.getElementById('bc-show-asal').checked;
-  const showExpired=document.getElementById('bc-show-expired').checked;
-  const size=bcCurrentSize;
-  const wm={small:1.0,medium:1.4,large:1.8},hm={small:35,medium:50,large:65};
-  const labelW={small:'110px',medium:'155px',large:'200px'}[size];
-  const fsSm={small:'8px',medium:'9px',large:'10px'}[size];
-  const fsMd={small:'9px',medium:'10px',large:'11px'}[size];
-  const area=document.getElementById('barcode-print-area');area.innerHTML='';
-  const grid=document.createElement('div');grid.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:white;';
-  for(let i=0;i<jumlah;i++){
-    const label=document.createElement('div');
-    label.style.cssText=`width:${labelW};border:1px solid #ccc;padding:5px 6px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;font-family:Arial,sans-serif;`;
-    if(showName){const el=document.createElement('div');el.innerText=p.name;el.style.cssText=`font-size:${fsMd};font-weight:700;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;color:#0f172a;`;label.appendChild(el);}
-    const svgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');label.appendChild(svgEl);
-    try{JsBarcode(svgEl,bcCurrentBarcode,{format:"CODE128",width:wm[size],height:hm[size],displayValue:true,fontSize:8,margin:2,background:"white"});}catch(e){}
-    if(showBerat){const el=document.createElement('div');el.innerText='Berat: '+(p.berat||'-');el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:2px;text-align:center;`;label.appendChild(el);}
-    if(showPrice){const el=document.createElement('div');el.innerText='Harga: '+fmt(p.price);el.style.cssText=`font-size:${fsMd};font-weight:700;color:#1e40af;margin-top:2px;text-align:center;`;label.appendChild(el);}
-    if(showAsal){const el=document.createElement('div');el.innerText='Asal: '+(p.asalBarang||'-');el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:1px;text-align:center;`;label.appendChild(el);}
-    if(showExpired&&p.expiredDate){const tgl=new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});const el=document.createElement('div');el.innerText='Exp: '+tgl;el.style.cssText=`font-size:${fsSm};color:#dc2626;margin-top:1px;text-align:center;font-weight:600;`;label.appendChild(el);}
-    grid.appendChild(label);
-  }
-  area.appendChild(grid);
-  const ps=document.createElement('style');ps.id='bc-print-style';
-  ps.innerHTML=`@media print{body>*:not(#barcode-print-area):not(#barcode-print-area *){display:none !important;}#barcode-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;z-index:99999;}}`;
-  document.head.appendChild(ps);
-  closeModal('modal-barcode');
-  setTimeout(()=>{window.print();setTimeout(()=>{const s=document.getElementById('bc-print-style');if(s)s.remove();area.innerHTML='';},1500);},300);
+  const showName=document.getElementById('bc-show-name').checked,showBerat=document.getElementById('bc-show-berat').checked,showPrice=document.getElementById('bc-show-price').checked,showAsal=document.getElementById('bc-show-asal').checked,showExpired=document.getElementById('bc-show-expired').checked;
+  const size=bcCurrentSize;const wm={small:1.0,medium:1.4,large:1.8},hm={small:35,medium:50,large:65};const labelW={small:'110px',medium:'155px',large:'200px'}[size];const fsSm={small:'8px',medium:'9px',large:'10px'}[size];const fsMd={small:'9px',medium:'10px',large:'11px'}[size];
+  const area=document.getElementById('barcode-print-area');area.innerHTML='';const grid=document.createElement('div');grid.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:white;';
+  for(let i=0;i<jumlah;i++){const label=document.createElement('div');label.style.cssText=`width:${labelW};border:1px solid #ccc;padding:5px 6px;display:flex;flex-direction:column;align-items:center;background:white;page-break-inside:avoid;font-family:Arial,sans-serif;`;if(showName){const el=document.createElement('div');el.innerText=p.name;el.style.cssText=`font-size:${fsMd};font-weight:700;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;color:#0f172a;`;label.appendChild(el);}const svgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');label.appendChild(svgEl);try{JsBarcode(svgEl,bcCurrentBarcode,{format:"CODE128",width:wm[size],height:hm[size],displayValue:true,fontSize:8,margin:2,background:"white"});}catch(e){}if(showBerat){const el=document.createElement('div');el.innerText='Berat: '+(p.berat||'-');el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:2px;text-align:center;`;label.appendChild(el);}if(showPrice){const el=document.createElement('div');el.innerText='Harga: '+fmt(p.price);el.style.cssText=`font-size:${fsMd};font-weight:700;color:#1e40af;margin-top:2px;text-align:center;`;label.appendChild(el);}if(showAsal){const el=document.createElement('div');el.innerText='Asal: '+(p.asalBarang||'-');el.style.cssText=`font-size:${fsSm};color:#475569;margin-top:1px;text-align:center;`;label.appendChild(el);}if(showExpired&&p.expiredDate){const tgl=new Date(p.expiredDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});const el=document.createElement('div');el.innerText='Exp: '+tgl;el.style.cssText=`font-size:${fsSm};color:#dc2626;margin-top:1px;text-align:center;font-weight:600;`;label.appendChild(el);}grid.appendChild(label);}
+  area.appendChild(grid);const ps=document.createElement('style');ps.id='bc-print-style';ps.innerHTML=`@media print{body>*:not(#barcode-print-area):not(#barcode-print-area *){display:none !important;}#barcode-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;z-index:99999;}}`;document.head.appendChild(ps);closeModal('modal-barcode');setTimeout(()=>{window.print();setTimeout(()=>{const s=document.getElementById('bc-print-style');if(s)s.remove();area.innerHTML='';},1500);},300);
 }
 
 /* SETTING PASSWORD */
 function cekKekuatan(inputId,barId,labelId){const pw=document.getElementById(inputId).value,bar=document.getElementById(barId),label=document.getElementById(labelId);if(!pw){bar.className='pw-strength';label.innerText='';return;}const hasUpper=/[A-Z]/.test(pw),hasNum=/[0-9]/.test(pw),hasSpecial=/[^A-Za-z0-9]/.test(pw),score=(pw.length>=8?1:0)+(hasUpper?1:0)+(hasNum?1:0)+(hasSpecial?1:0);if(pw.length<6){bar.className='pw-strength weak';label.innerText='❌ Terlalu pendek';label.style.color='#ef4444';}else if(score<=1){bar.className='pw-strength weak';label.innerText='⚠️ Lemah';label.style.color='#ef4444';}else if(score<=2){bar.className='pw-strength medium';label.innerText='🔶 Sedang';label.style.color='#f59e0b';}else{bar.className='pw-strength strong';label.innerText='✅ Kuat';label.style.color='#10b981';}}
-
-async function muatUsers(){
-  const container=document.getElementById('user-list-container');container.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data user...</p></div>';
-  try{const res=await fetch(`${API}/users`),users=await res.json();document.getElementById('stat-admin').innerText=users.filter(u=>u.role==='admin').length;document.getElementById('stat-supervisor').innerText=users.filter(u=>u.role==='supervisor').length;document.getElementById('stat-kasir').innerText=users.filter(u=>u.role==='kasir').length;const currentUser=sessionStorage.getItem('fitun_admin');if(!users.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div><p>Belum ada user terdaftar</p></div>';return;}container.innerHTML=users.map(u=>{const isSelf=u.username===currentUser,avatar=u.role==='admin'?'👑':u.role==='supervisor'?'🧑‍💼':'🧑‍💻',roleBadge=u.role==='admin'?'<span class="badge badge-red">Admin</span>':u.role==='supervisor'?'<span class="badge badge-purple">Supervisor</span>':'<span class="badge badge-blue">Kasir</span>';return`<div class="user-card"><div class="user-card-info"><div class="user-avatar">${avatar}</div><div><div class="user-name">${u.username} ${isSelf?'<span class="badge badge-green" style="font-size:10px;">Saya</span>':''}</div><div class="user-meta">${roleBadge}</div></div></div><div class="user-actions"><button class="btn btn-warning btn-sm" onclick="openResetPassword('${u.username}')">🔐 Reset PW</button>${!isSelf?`<button class="btn btn-danger btn-sm" onclick="openHapusUser('${u.username}')">🗑️</button>`:''}</div></div>`;}).join('');}catch(e){container.innerHTML='<div class="empty-state"><div class="empty-icon">❌</div><p>Gagal memuat data user</p></div>';toast("Gagal memuat daftar user","error");}
-}
-
+async function muatUsers(){const container=document.getElementById('user-list-container');container.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data user...</p></div>';try{const res=await fetch(`${API}/users`),users=await res.json();document.getElementById('stat-admin').innerText=users.filter(u=>u.role==='admin').length;document.getElementById('stat-supervisor').innerText=users.filter(u=>u.role==='supervisor').length;document.getElementById('stat-kasir').innerText=users.filter(u=>u.role==='kasir').length;const currentUser=sessionStorage.getItem('fitun_admin');if(!users.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div><p>Belum ada user terdaftar</p></div>';return;}container.innerHTML=users.map(u=>{const isSelf=u.username===currentUser,avatar=u.role==='admin'?'👑':u.role==='supervisor'?'🧑‍💼':'🧑‍💻',roleBadge=u.role==='admin'?'<span class="badge badge-red">Admin</span>':u.role==='supervisor'?'<span class="badge badge-purple">Supervisor</span>':'<span class="badge badge-blue">Kasir</span>';return`<div class="user-card"><div class="user-card-info"><div class="user-avatar">${avatar}</div><div><div class="user-name">${u.username} ${isSelf?'<span class="badge badge-green" style="font-size:10px;">Saya</span>':''}</div><div class="user-meta">${roleBadge}</div></div></div><div class="user-actions"><button class="btn btn-warning btn-sm" onclick="openResetPassword('${u.username}')">🔐 Reset PW</button>${!isSelf?`<button class="btn btn-danger btn-sm" onclick="openHapusUser('${u.username}')">🗑️</button>`:''}</div></div>`;}).join('');}catch(e){container.innerHTML='<div class="empty-state"><div class="empty-icon">❌</div><p>Gagal memuat data user</p></div>';toast("Gagal memuat daftar user","error");}}
 async function gantiPasswordSaya(){const username=sessionStorage.getItem('fitun_admin'),passwordLama=document.getElementById('cp-lama').value,passwordBaru=document.getElementById('cp-baru').value,konfirmasi=document.getElementById('cp-konfirm').value;if(!passwordLama||!passwordBaru||!konfirmasi){toast("Semua field wajib diisi","error");return;}if(passwordBaru!==konfirmasi){toast("Konfirmasi password tidak cocok","error");return;}if(passwordBaru.length<6){toast("Password baru minimal 6 karakter","error");return;}try{const res=await fetch(`${API}/change-password`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,passwordLama,passwordBaru,konfirmasi})});const data=await res.json();if(res.ok){toast(data.message||"Password berhasil diubah","success");document.getElementById('cp-lama').value='';document.getElementById('cp-baru').value='';document.getElementById('cp-konfirm').value='';document.getElementById('cp-strength').className='pw-strength';document.getElementById('cp-strength-label').innerText='';}else toast(data.message||"Gagal mengubah password","error");}catch(e){toast("Error koneksi","error");}}
-
 function openResetPassword(username){resetTargetUsername=username;document.getElementById('reset-username-label').innerText=username;document.getElementById('reset-pw-baru').value='';document.getElementById('reset-pw-konfirm').value='';document.getElementById('reset-strength').className='pw-strength';document.getElementById('reset-strength-label').innerText='';openModal('modal-reset-pw');}
 async function simpanResetPassword(){const passwordBaru=document.getElementById('reset-pw-baru').value,konfirmasi=document.getElementById('reset-pw-konfirm').value;if(!passwordBaru||!konfirmasi){toast("Semua field wajib diisi","error");return;}if(passwordBaru!==konfirmasi){toast("Konfirmasi tidak cocok","error");return;}if(passwordBaru.length<6){toast("Password minimal 6 karakter","error");return;}try{const res=await fetch(`${API}/admin/reset-password`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:resetTargetUsername,passwordBaru})});const data=await res.json();if(res.ok){toast(data.message||"Password berhasil direset","success");closeModal('modal-reset-pw');}else toast(data.message||"Gagal reset password","error");}catch(e){toast("Error koneksi","error");}}
-
 async function simpanUserBaru(){const username=document.getElementById('nu-username').value.trim(),password=document.getElementById('nu-password').value,role=document.getElementById('nu-role').value;if(!username||!password){toast("Username & password wajib diisi","error");return;}if(username.includes(' ')){toast("Username tidak boleh mengandung spasi","error");return;}if(password.length<6){toast("Password minimal 6 karakter","error");return;}try{const res=await fetch(`${API}/admin/create-user`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,role})});const data=await res.json();if(res.ok){toast(data.message||"User berhasil dibuat","success");closeModal('modal-user-baru');document.getElementById('nu-username').value='';document.getElementById('nu-password').value='';document.getElementById('nu-strength').className='pw-strength';document.getElementById('nu-strength-label').innerText='';muatUsers();}else toast(data.message||"Gagal membuat user","error");}catch(e){toast("Error koneksi","error");}}
-
 function openHapusUser(username){hapusTargetUsername=username;document.getElementById('hapus-user-label').innerText=username;openModal('modal-hapus-user');}
 async function konfirmasiHapusUser(){try{const res=await fetch(`${API}/admin/delete-user/${hapusTargetUsername}`,{method:'DELETE'});const data=await res.json();if(res.ok){toast(data.message||"User berhasil dihapus","success");closeModal('modal-hapus-user');muatUsers();}else toast(data.message||"Gagal hapus user","error");}catch(e){toast("Error koneksi","error");}}
 
 /* SETTING NOTA */
-async function muatSettingNota(){
-  try{const res=await fetch(`${API}/setting-nota`),s=await res.json();document.getElementById('sn-namaToko').value=s.namaToko||'';document.getElementById('sn-alamat').value=s.alamat||'';document.getElementById('sn-telepon').value=s.telepon||'';document.getElementById('sn-headerTambahan').value=s.headerTambahan||'';document.getElementById('sn-footer1').value=s.footerLine1||'';document.getElementById('sn-footer2').value=s.footerLine2||'';document.getElementById('sn-footer3').value=s.footerLine3||'';document.getElementById('sn-tampilKasir').checked=s.tampilkanKasir!==false;document.getElementById('sn-tampilTanggal').checked=s.tampilkanTanggal!==false;document.getElementById('sn-tampilNomor').checked=s.tampilkanNomor===true;updatePreviewNota();}catch(e){toast("Gagal memuat setting nota","error");}
-}
+async function muatSettingNota(){try{const res=await fetch(`${API}/setting-nota`),s=await res.json();document.getElementById('sn-namaToko').value=s.namaToko||'';document.getElementById('sn-alamat').value=s.alamat||'';document.getElementById('sn-telepon').value=s.telepon||'';document.getElementById('sn-headerTambahan').value=s.headerTambahan||'';document.getElementById('sn-footer1').value=s.footerLine1||'';document.getElementById('sn-footer2').value=s.footerLine2||'';document.getElementById('sn-footer3').value=s.footerLine3||'';document.getElementById('sn-tampilKasir').checked=s.tampilkanKasir!==false;document.getElementById('sn-tampilTanggal').checked=s.tampilkanTanggal!==false;document.getElementById('sn-tampilNomor').checked=s.tampilkanNomor===true;updatePreviewNota();}catch(e){toast("Gagal memuat setting nota","error");}}
 async function simpanSettingNota(){const body={namaToko:document.getElementById('sn-namaToko').value.trim(),alamat:document.getElementById('sn-alamat').value.trim(),telepon:document.getElementById('sn-telepon').value.trim(),headerTambahan:document.getElementById('sn-headerTambahan').value.trim(),footerLine1:document.getElementById('sn-footer1').value.trim(),footerLine2:document.getElementById('sn-footer2').value.trim(),footerLine3:document.getElementById('sn-footer3').value.trim(),tampilkanKasir:document.getElementById('sn-tampilKasir').checked,tampilkanTanggal:document.getElementById('sn-tampilTanggal').checked,tampilkanNomor:document.getElementById('sn-tampilNomor').checked};if(!body.namaToko){toast("Nama toko wajib diisi","error");return;}try{const res=await fetch(`${API}/setting-nota`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await res.json();if(res.ok){toast(data.message||"Setting nota berhasil disimpan","success");updatePreviewNota();}else toast(data.message||"Gagal menyimpan","error");}catch(e){toast("Error koneksi","error");}}
 function updatePreviewNota(){const namaToko=document.getElementById('sn-namaToko').value||'NAMA TOKO',alamat=document.getElementById('sn-alamat').value,telepon=document.getElementById('sn-telepon').value,header=document.getElementById('sn-headerTambahan').value,f1=document.getElementById('sn-footer1').value,f2=document.getElementById('sn-footer2').value,f3=document.getElementById('sn-footer3').value,kasir=document.getElementById('sn-tampilKasir').checked,tanggal=document.getElementById('sn-tampilTanggal').checked,nomor=document.getElementById('sn-tampilNomor').checked;const garis='--------------------------------',now=new Date();let html=`<div style="text-align:center;"><div style="font-size:15px;font-weight:700;letter-spacing:1px;">${namaToko}</div>`;if(alamat)html+=`<div>${alamat}</div>`;if(telepon)html+=`<div>Tel: ${telepon}</div>`;if(header)html+=`<div>${header}</div>`;html+=`</div><div>${garis}</div>`;if(nomor)html+=`<div>No: TRX-${Math.floor(Math.random()*9000)+1000}</div>`;if(tanggal)html+=`<div>Tgl: ${now.toLocaleDateString('id-ID')} ${now.toLocaleTimeString('id-ID')}</div>`;if(kasir)html+=`<div>Kasir: ani</div>`;html+=`<div>${garis}</div><div style="display:flex;justify-content:space-between;"><span>Beras 5kg x1</span><span>$3.50</span></div><div style="display:flex;justify-content:space-between;"><span>Minyak 1L x2</span><span>$4.00</span></div><div>${garis}</div><div style="display:flex;justify-content:space-between;font-weight:700;"><span>TOTAL</span><span>$7.50</span></div><div style="display:flex;justify-content:space-between;"><span>Bayar</span><span>$10.00</span></div><div style="display:flex;justify-content:space-between;"><span>Kembali</span><span>$2.50</span></div><div>${garis}</div><div style="text-align:center;">`;if(f1)html+=`<div>${f1}</div>`;if(f2)html+=`<div>${f2}</div>`;if(f3)html+=`<div>${f3}</div>`;html+=`</div>`;document.getElementById('nota-preview').innerHTML=html;}
 ['sn-namaToko','sn-alamat','sn-telepon','sn-headerTambahan','sn-footer1','sn-footer2','sn-footer3'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',updatePreviewNota);});
@@ -1055,5 +1090,190 @@ function filterTableExpired(){var f=document.getElementById("exp-filter").value,
 /* SOCKET */
 function initSocket(){const socket=io(),dot=document.getElementById('rt-dot'),txt=document.getElementById('rt-text'),ind=document.getElementById('rt-indicator');socket.on('connect',()=>{dot.style.cssText='background:#10b981;animation:pulse 1.5s infinite;';txt.innerText='Real-time Aktif';ind.style.background='#ecfdf5';});socket.on('disconnect',()=>{dot.style.cssText='background:#ef4444;';txt.innerText='Terputus...';ind.style.background='#fff5f5';});socket.on('transaksi_baru',trx=>{cacheTransactions.push(trx);renderDashboard();renderFin(cacheTransactions,cacheProducts);renderTerlaris(cacheTransactions,cacheProducts);toast(`🧾 Transaksi baru — Kasir: ${trx.kasir||'-'} | ${fmt(trx.total)}`,'info');});socket.on('stok_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderProduk(cacheProducts);renderRestock(cacheProducts);renderLowStock(cacheProducts);renderWastage(cacheProducts);renderDashboard();renderExpired(cacheProducts);}catch{}});socket.on('produk_update',async()=>{try{const r=await fetch(`${API}/products`);cacheProducts=await r.json();renderProduk(cacheProducts);}catch{}});socket.on('wastage_update',data=>{toast(`🗑️ Wastage: ${data.nama} — ${data.qty} unit`,'info');muatData();});}
 </script>
+
+<!-- ===================================================
+  ✅ GLOBAL BARCODE SCANNER ENGINE
+  Mendeteksi scan barcode dari USB scanner (HID keyboard mode)
+  dan melakukan aksi otomatis sesuai tab yang aktif
+  =================================================== -->
+<script>
+(function(){
+  'use strict';
+
+  // ─── Konfigurasi ───────────────────────────────────────────────
+  const CFG = {
+    maxInterChar : 80,   // ms maks antar karakter (scanner jauh lebih cepat dari manusia)
+    minLength    : 3,    // panjang minimum barcode agar diproses
+    endTimeout   : 150,  // ms tunggu sebelum proses jika scanner tidak kirim Enter
+  };
+
+  let buffer    = '';
+  let lastTime  = 0;
+  let endTimer  = null;
+
+  // ─── Tampilkan popup scan indicator ───────────────────────────
+  function showScanPopup(code, produkNama, action) {
+    const el     = document.getElementById('scan-indicator');
+    const elCode = document.getElementById('scan-code');
+    const elLbl  = document.getElementById('scan-label');
+    const elAct  = document.getElementById('scan-action');
+    if (!el) return;
+    elCode.innerText = code;
+    elLbl.innerText  = produkNama || '— Produk tidak ditemukan —';
+    elAct.innerText  = action || '';
+    el.classList.add('visible');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('visible'), 3500);
+  }
+
+  // ─── Flash hint banner di tab aktif ────────────────────────────
+  function flashHint(tabId) {
+    const id  = { 'k-dash':'scan-hint-dash','k-katalog':'scan-hint-katalog','k-restock':'scan-hint-restock' }[tabId];
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('active-scan');
+    setTimeout(() => el.classList.remove('active-scan'), 600);
+  }
+
+  // ─── Flash visual pada input field ─────────────────────────────
+  function flashInput(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('scan-detected');
+    setTimeout(() => el.classList.remove('scan-detected'), 600);
+  }
+
+  // ─── Routing aksi berdasarkan tab aktif ────────────────────────
+  function routeScan(code) {
+    code = code.trim().replace(/\r?\n/g, '');
+    if (code.length < CFG.minLength) return;
+
+    const activeTab = document.querySelector('.kamar.active');
+    const tabId     = activeTab ? activeTab.id : '';
+
+    flashHint(tabId);
+
+    // Cari produk di cache
+    const produk = (typeof cacheProducts !== 'undefined')
+      ? cacheProducts.find(p => p.barcode === code)
+      : null;
+
+    // ── Tab KATALOG → isi search & filter ──────────────────────
+    if (tabId === 'k-katalog') {
+      const searchEl = document.getElementById('search');
+      if (searchEl) {
+        searchEl.value = code;
+        if (typeof filterProduk === 'function') filterProduk();
+        flashInput('search');
+      }
+      if (produk) {
+        showScanPopup(code, produk.name, '→ Mencari di katalog...');
+      } else {
+        showScanPopup(code, null, '→ Tidak ada di katalog');
+        toast('⚠️ Barcode ' + code + ' tidak ditemukan', 'error');
+      }
+      return;
+    }
+
+    // ── Tab RESTOCK → isi form restock ─────────────────────────
+    if (tabId === 'k-restock') {
+      const rsEl = document.getElementById('rs-bc');
+      if (rsEl) {
+        rsEl.value = code;
+        if (typeof cariProdukRestock === 'function') cariProdukRestock();
+        flashInput('rs-bc');
+        // Pindahkan fokus ke field qty supaya kasir bisa langsung ketik jumlah
+        setTimeout(() => {
+          const qtyEl = document.getElementById('rs-qty');
+          if (qtyEl) qtyEl.focus();
+        }, 200);
+      }
+      if (produk) {
+        showScanPopup(code, produk.name, '→ Form restock terisi otomatis');
+      } else {
+        showScanPopup(code, null, '→ Produk belum terdaftar');
+        toast('⚠️ Barcode ' + code + ' tidak terdaftar', 'error');
+      }
+      return;
+    }
+
+    // ── Tab DASHBOARD / tab lain → tampilkan info produk ───────
+    if (produk) {
+      const stokTxt = produk.stock === 0 ? 'Stok HABIS' : produk.stock + ' unit';
+      showScanPopup(code, produk.name, '→ Stok: ' + stokTxt + ' | Harga: $' + Number(produk.price || 0).toLocaleString('id-ID', {minimumFractionDigits: 2}));
+      toast('🏷️ ' + produk.name + ' — Stok: ' + stokTxt, 'info');
+    } else {
+      showScanPopup(code, null, '→ Produk tidak ditemukan di database');
+      toast('⚠️ Barcode ' + code + ' tidak ditemukan', 'error');
+    }
+  }
+
+  // ─── Proses buffer saat Enter diterima atau timeout ─────────
+  function processBuffer() {
+    clearTimeout(endTimer);
+    const code = buffer.trim();
+    buffer = '';
+    if (code.length >= CFG.minLength) {
+      routeScan(code);
+    }
+  }
+
+  // ─── Global keydown listener ─────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+
+    // ── Jika modal terbuka → abaikan scan global ──────────────
+    if (document.querySelector('.modal-overlay.open')) return;
+
+    // ── Cek element yang sedang aktif ────────────────────────
+    const tag      = (document.activeElement || {}).tagName || '';
+    const activeId = (document.activeElement || {}).id || '';
+
+    // ID input yang boleh menangani scan sendiri (tidak perlu global scanner)
+    const selfHandled = ['rs-bc', 'bc', 'search'];
+
+    // Kalau fokus di input yang sudah punya handler sendiri → lewati
+    if (selfHandled.includes(activeId)) return;
+
+    // Kalau fokus di input/textarea/select LAIN → abaikan (user lagi ngetik)
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    // ── Abaikan modifier keys dan tombol sistem ───────────────
+    const ignoreKeys = ['Control','Shift','Alt','Meta','CapsLock','Tab',
+                        'Escape','F1','F2','F3','F4','F5','F6','F7','F8',
+                        'F9','F10','F11','F12','Insert','Delete','Home',
+                        'End','PageUp','PageDown','ArrowUp','ArrowDown',
+                        'ArrowLeft','ArrowRight','Backspace'];
+    if (ignoreKeys.includes(e.key)) return;
+
+    const now  = Date.now();
+    const diff = now - lastTime;
+    lastTime   = now;
+
+    // ── Enter → proses buffer sekarang ───────────────────────
+    if (e.key === 'Enter') {
+      processBuffer();
+      return;
+    }
+
+    // ── Jeda terlalu lama → reset buffer (bukan scan) ────────
+    if (diff > CFG.maxInterChar && buffer.length > 0) {
+      buffer = '';
+    }
+
+    // Tambahkan karakter ke buffer (hanya printable char)
+    if (e.key.length === 1) {
+      buffer += e.key;
+    }
+
+    // ── Auto-process jika scanner tidak kirim Enter ───────────
+    clearTimeout(endTimer);
+    endTimer = setTimeout(processBuffer, CFG.endTimeout);
+
+  }, true); // capture phase agar tidak terblok event lain
+
+})();
+</script>
+
 </body>
 </html>
