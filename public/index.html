@@ -1458,11 +1458,20 @@ $("btnPrint").onclick = () => {
   if (s.footerLine3) konten += `<div>${s.footerLine3}</div>`;
   konten += `</div></div>`;
 
-  const win = window.open('', '_blank', 'width=400,height=600');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Nota</title>
+  if (items.length === 0) { showNotif("⚠️ Belum ada barang untuk dicetak", "warning"); return; }
+  const htmlNota = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Nota</title>
     <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Courier New',monospace;font-size:12px;padding:10px;width:280px;}@media print{body{width:80mm;}}</style>
-    </head><body>${konten}<script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script></body></html>`);
-  win.document.close();
+    </head><body>${konten}</body></html>`;
+  const lama = document.getElementById('printFrame');
+  if (lama) lama.remove();
+  const f = document.createElement('iframe');
+  f.id = 'printFrame';
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+  document.body.appendChild(f);
+  f.contentDocument.open();
+  f.contentDocument.write(htmlNota);
+  f.contentDocument.close();
+  setTimeout(() => { f.contentWindow.focus(); f.contentWindow.print(); }, 300);
 };
 
 /* ================================================
